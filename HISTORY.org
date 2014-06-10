@@ -1,0 +1,21 @@
+* HISTORY
+
+** angular or not
+Originally I thought it would be easiest to just create a REST api
+using liberator and use angular on the client. This can be achieved
+dead-easy by just using the [[https://github.com/ShaneKilkelly/lein-angular-template][lein angular template]]. This introduces a
+whole slew of new dependencies such as grunt for building,
+coffescript, etc. However at the moment it doesn't seem clear to me
+that the current requirements warrant this complexity. I think we
+should go with the mantra that /simplicity always trumps complexity/
+and just go with a dead-simple web app for now. We can always
+introduce more advanced technologies later. That's the nice thing
+about this approach. Nothing is fixed, all the technologies can be
+used at your own convenience.
+
+Here's a few pertinent links:
+- http://sritchie.github.io/2014/01/17/api-authentication-with-liberator-and-friend/
+- https://docs.angularjs.org/tutorial/step_11
+- https://github.com/ShaneKilkelly/lein-angular-template
+
+
