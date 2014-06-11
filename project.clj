@@ -8,6 +8,7 @@
                  [org.xerial/sqlite-jdbc "3.7.2"]]
   :plugins [[lein-ring "0.8.10"]]
   :ring {:handler mdr2.web/app}
+  :immutant {:context-path "/"}
   :profiles
   {:dev {:dependencies [[javax.servlet/servlet-api "2.5"]
                         [ring-mock "0.1.5"]]}})
