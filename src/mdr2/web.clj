@@ -1,4 +1,4 @@
-(ns mdr2.handler
+(ns mdr2.web
   (:use compojure.core)
   (:require [compojure.handler :as handler]
             [compojure.route :as route]

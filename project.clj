@@ -7,7 +7,7 @@
                  [com.gfredericks/java.jdbc "0.2.3-p3"]
                  [org.xerial/sqlite-jdbc "3.7.2"]]
   :plugins [[lein-ring "0.8.10"]]
-  :ring {:handler mdr2.handler/app}
+  :ring {:handler mdr2.web/app}
   :profiles
   {:dev {:dependencies [[javax.servlet/servlet-api "2.5"]
                         [ring-mock "0.1.5"]]}})
