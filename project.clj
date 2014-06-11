@@ -5,7 +5,8 @@
                  [hiccup "1.0.5"]
                  [compojure "1.1.6"]
                  [com.gfredericks/java.jdbc "0.2.3-p3"]
-                 [org.xerial/sqlite-jdbc "3.7.2"]]
+                 [org.xerial/sqlite-jdbc "3.7.2"]
+                 [com.github.kyleburton/clj-xpath "1.4.3"]]
   :plugins [[lein-ring "0.8.10"]]
   :ring {:handler mdr2.web/app}
   :immutant {:context-path "/"}
