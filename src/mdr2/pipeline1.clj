@@ -11,13 +11,13 @@
       ;; make sure files with a missing DOCTYPE declaration do not validate
       "--validatorInputDelegates=org.daisy.util.fileset.validation.delegate.impl.NoDocTypeDeclarationDelegate"))
 
-(defn audio-encoder [dtb output-dir bitrate]
+(defn audio-encoder [args]
   (apply sh "daisy-pipeline"
          "/usr/lib/daisy-pipeline/scripts/modify_improve/dtb/DTBAudioEncoder.taskScript"
-         (map (fn [[k v]] (format "--%s=%s" (name k) v))
-              {:input dtb :output output-dir :bitrate bitrate})))
+         (map (fn [[k v]] (format "--%s=%s" (name k) v)) args)))
 
 (defn filter-output [lines]
   (map #(s/trim (s/replace % "[ERROR, Validator]" ""))
        (filter #(re-matches #"^\[ERROR, Validator\].*" %)
                (s/split-lines lines))))
+
