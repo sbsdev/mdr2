@@ -19,3 +19,11 @@ Here's a few pertinent links:
 - https://github.com/ShaneKilkelly/lein-angular-template
 
 
+** File system utils
+- [[https://github.com/Raynes/fs][fs]] seems quite complete and is on clojars. However ~with-tempdir~ is
+  not in there. Maybe it can be used as follows:
+
+#+BEGIN_SRC clojure
+  (with-open [tmpdir (java.nio.file.Files/createTempDirectory "/path" "prefix")]
+    (println tmpdir))
+#+END_SRC
