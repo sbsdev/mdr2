@@ -2,19 +2,16 @@
   (:use compojure.core)
   (:require [compojure.handler :as handler]
             [compojure.route :as route]
+            [clojure.string :as str]
             [mdr2.layout :as layout]
-            [clojure.string :as str]))
-
-(def productions [{:id 1 :title "foo" :state "New"}
-                  {:id 2 :title "bar" :state "Recording"}
-                  {:id 3 :title "baz" :state "Finished"}])
+            [mdr2.db :as db]))
 
 (defn home []
   (layout/common [:h1 "Productions"]
                  [:table.table.table-striped
                   [:thead [:tr [:th "Title"] [:th "State"] [:th "Action"]]]
                   [:tbody
-                   (for [p productions]
+                   (for [p (db/get-productions)]
                      [:tr 
                       [:td (:title p)]
                       [:td (:state p)]
