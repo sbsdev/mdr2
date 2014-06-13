@@ -1,5 +1,7 @@
 (ns mdr2.abacus
-  (:require [clj-xpath.core :refer [xml->doc $x:text]])
+  (:require [clj-xpath.core :refer [xml->doc $x:text]]
+            [clojure.java.io :as io]
+            [immutant.messaging :as msg])
   (:import javax.xml.XMLConstants
            org.xml.sax.SAXException
            javax.xml.validation.SchemaFactory
@@ -8,6 +10,7 @@
 
 (def root "/AbaConnectContainer/Task/Transaction/DocumentData/")
 (def schema "resources/schema/abacus_export.xsd")
+(def import-dir "/var/spool/mdr2")
 
 (def param-mapping
   {:product-number "artikel_nr"
@@ -36,3 +39,9 @@
       (.validate validator (StreamSource. (File. file)))
       true
       (catch SAXException e false))))
+
+(defn import-file []
+  (doseq [f (file-seq (io/file import-dir))] 
+    (if (valid? f)
+      (msg/publish "queue.create" (read-file f))
+      (io/delete-file f))))
