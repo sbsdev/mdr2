@@ -10,3 +10,5 @@
 (defn get-productions [] 
   (jdbc/query db ["SELECT * FROM productions"]))
 
+(defn add-production [production]
+    (jdbc/insert! db :productions production))
