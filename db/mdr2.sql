@@ -26,7 +26,9 @@ CREATE TABLE productions (
   revisionDescription TEXT,
   totalTime TEXT,
   audioFormat TEXT,
-  state TEXT
+  -- SBS specific columns 
+  state TEXT,
+  productNumber TEXT
 );
 
 INSERT INTO productions (title, creator, source, language, sourcePublisher) VALUES 

@@ -10,10 +10,11 @@
 
 (def root "/AbaConnectContainer/Task/Transaction/DocumentData/")
 (def schema "resources/schema/abacus_export.xsd")
-(def import-dir "/var/spool/mdr2")
+;;(def import-dir "/var/spool/mdr2")
+(def import-dir "/home/eglic/tmp/mdr2")
 
 (def param-mapping
-  {:product-number "artikel_nr"
+  {:productNumber "artikel_nr"
    :title "MetaData/dc/title"
    :creator "MetaData/dc/creator"
    :date "MetaData/dc/date"
@@ -36,12 +37,13 @@
                     (SchemaFactory/newInstance XMLConstants/W3C_XML_SCHEMA_NS_URI)
                     (StreamSource. (File. schema))))]
     (try
-      (.validate validator (StreamSource. (File. file)))
+      (.validate validator (StreamSource. file))
       true
       (catch SAXException e false))))
 
 (defn import-file []
-  (doseq [f (file-seq (io/file import-dir))] 
-    (if (valid? f)
+  (doseq [f (filter #(.isFile %) 
+                    (file-seq (io/file import-dir)))] 
+    (when (valid? f)
       (msg/publish "queue.create" (read-file f))
       (io/delete-file f))))
