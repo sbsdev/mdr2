@@ -6,4 +6,5 @@
     [:head
      [:title "mdr2"]
      (include-css "/css/bootstrap.min.css")]
-    [:body body]))
+    [:body 
+     [:div.container body]]))
