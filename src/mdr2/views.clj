@@ -1,7 +1,9 @@
 (ns mdr2.views
-  (:require [clojure.string :as str]
+  (:require [clojure.data.xml :as xml]
+            [ring.util.response :as ring]
             [mdr2.db :as db]
-            [mdr2.layout :as layout]))
+            [mdr2.layout :as layout]
+            [mdr2.dtbook :refer [dtbook]]))
 
 (defn home []
   (layout/common 
@@ -30,4 +32,10 @@
     (layout/common 
      [:h1 (str "Production: " (:title p))]
      [:p (:author p)])))
+
+(defn production-xml [id]
+  (let [production (db/get-production id)]
+    (-> (xml/emit-str (xml/sexp-as-element (dtbook production)))
+        (ring/response)
+        (ring/content-type "text/xml"))))
 

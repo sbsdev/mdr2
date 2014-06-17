@@ -7,6 +7,7 @@
 
 (defroutes app-routes
   (GET "/" [] (views/home))
+  (GET "/production/:id.xml" [id] (views/production-xml id))
   (GET "/production/:id" [id] (views/production id))
   (route/resources "/")
   (route/not-found "Not Found"))

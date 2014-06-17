@@ -6,6 +6,7 @@
                  [compojure "1.1.6"]
                  [org.clojure/java.jdbc "0.3.3"]
                  [org.xerial/sqlite-jdbc "3.7.2"]
+                 [org.clojure/data.xml "0.0.7"]
                  [com.github.kyleburton/clj-xpath "1.4.3"]]
   :plugins [[lein-ring "0.8.10"]]
   :ring {:handler mdr2.web/app}
