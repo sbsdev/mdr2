@@ -1,3 +1,5 @@
+-- Meta data for a production
+-- see http://www.daisy.org/z3986/2005/Z3986-2005.html#PubMed
 CREATE TABLE productions (
   id INTEGER PRIMARY KEY,
   title TEXT,
