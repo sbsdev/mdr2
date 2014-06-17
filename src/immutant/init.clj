@@ -2,12 +2,12 @@
   (:require [immutant.web :as web]
             [immutant.messaging :as msg]
             [immutant.jobs :as jobs]
-            [mdr2.web :refer [app]]
+            [mdr2.handler :as handler]
             [mdr2.abacus :as abacus]
             [mdr2.pipeline1 :as pipeline1]
             [mdr2.db :as db]))
 
-(web/start app)
+(web/start handler/app)
 
 ;; set up queues...
 (msg/start "queue.create")
