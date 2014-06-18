@@ -4,7 +4,8 @@
             [hiccup.form :as form]
             [mdr2.db :as db]
             [mdr2.layout :as layout]
-            [mdr2.dtbook :refer [dtbook]]))
+            [mdr2.dtbook :refer [dtbook]]
+            [mdr2.pipeline1 :as pipeline]))
 
 (defn home []
   (layout/common 
@@ -36,11 +37,13 @@
         (ring/response)
         (ring/content-type "text/xml"))))
 
-(defn file-upload-form [id]
+(defn file-upload-form [id & [errors]]
   (let [p (db/get-production id)]
     (layout/common
      [:h1 "Upload"]
      [:p (str "Upload structure for " (:title p))]
+     (when (seq? errors)
+       [:p [:ul.alert.alert-danger (for [e errors] [:li e])]])
      (form/form-to
       {:enctype "multipart/form-data"}
       [:post (str "/production/" id "/upload")]
@@ -48,8 +51,13 @@
       (form/submit-button "Upload")))))
 
 (defn production-add-xml [id file]
-  (let [{tempfile :tempfile} file]
-    (println id)
-    (println tempfile)
-    (ring/redirect "/")))
+  (let [{tempfile :tempfile} file
+        errors (pipeline/validate (.getPath tempfile))]
+    (if (seq? errors)
+      (file-upload-form id errors)
+      (do
+        ;; store the xml
+        ;; and add a reference to the path in the db
+        ;; finally redirect to the index
+        (ring/redirect "/")))))
 
