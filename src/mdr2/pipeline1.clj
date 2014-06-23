@@ -6,11 +6,11 @@
   (-> line
       (s/replace "[ERROR, Validator]" "")
       (s/replace (str "Location: file:" file) "Line:")
-      (s/trim)))
+      s/trim))
 
 (defn- filter-output [output file]
   (->> output
-       (s/split-lines)
+       s/split-lines
        (filter #(re-matches #"^\[ERROR, Validator\].*" %))
        (map #(clean-line % file))))
 
@@ -22,7 +22,7 @@
           "--validatorRequireInputType=Dtbook document"
           ;; make sure files with a missing DOCTYPE declaration do not validate
           "--validatorInputDelegates=org.daisy.util.fileset.validation.delegate.impl.NoDocTypeDeclarationDelegate")
-      (:out)
+      :out
       (filter-output file)))
 
 (defn audio-encoder [args]

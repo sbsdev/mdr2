@@ -34,7 +34,7 @@
 (defn production-xml [id]
   (let [production (db/get-production id)]
     (-> (xml/emit-str (xml/sexp-as-element (dtbook production)))
-        (ring/response)
+        ring/response
         (ring/content-type "text/xml"))))
 
 (defn file-upload-form [id & [errors]]
