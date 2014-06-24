@@ -11,12 +11,12 @@
             [mdr2.views :as views]))
 
 (defroutes app-routes
-  (GET "/" [] (views/home))
+  (GET "/" request (views/home request))
   (GET "/production/:id.xml" [id] (friend/authenticated (views/production-xml id)))
   (GET "/production/:id/upload" [id] (friend/authenticated (views/file-upload-form id)))
   (POST "/production/:id/upload" [id file] (friend/authenticated (views/production-add-xml id file)))
   (GET "/production/:id" [id] (friend/authenticated (views/production id)))
-  (GET "/production/:id/delete" [id] (friend/authenticated (views/production-delete id)))
+  (GET "/production/:id/delete" [id] (friend/authorize #{:admin} (views/production-delete id)))
   (GET "/login" [] (views/login-form))
   (GET "/logout" req (friend/logout* (response/redirect "/")))
   (route/resources "/")
@@ -26,6 +26,7 @@
   (-> app-routes
       (friend/authenticate 
        {:credential-fn (partial creds/bcrypt-credential-fn db/get-user)
-        :workflows [(workflows/interactive-form)]})
+        :workflows [(workflows/interactive-form)]
+        :unauthorized-handler views/unauthorized})
       handler/site
       wrap-base-url))

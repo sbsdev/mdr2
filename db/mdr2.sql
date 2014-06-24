@@ -76,13 +76,15 @@ INSERT INTO production (title, creator, source, language, sourcePublisher) VALUE
 ("Info-Express, Februar 2014", "SZB Taubblinden-Beratung", "", "de", "");
 
 INSERT INTO user (username, first_name, last_name, email, password) VALUES 
-("eglic", "Christian", "Egli", "christian.egli@sbs.ch", "$2a$10$go0rXWbX0IjhzkgjGKGf/uigHii6.bqTls.tjfQAsg9IdoSe.ouPq");
+("eglic", "Christian", "Egli", "christian.egli@sbs.ch", "$2a$10$go0rXWbX0IjhzkgjGKGf/uigHii6.bqTls.tjfQAsg9IdoSe.ouPq"),
+("admin", "Super", "User", "admin@sbs.ch", "$2a$10$go0rXWbX0IjhzkgjGKGf/uigHii6.bqTls.tjfQAsg9IdoSe.ouPq");
 
 INSERT INTO role (name) VALUES 
-("Admin"),
-("User");
+("User"),
+("Admin");
 
 INSERT INTO user_role (user_id, role_id) VALUES 
 (1,1),
-(1,2);
+(2,1),
+(2,2);
 

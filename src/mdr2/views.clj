@@ -3,12 +3,13 @@
             [ring.util.response :as response]
             [hiccup.form :as form]
             [hiccup.element :refer [link-to]]
+            [cemerick.friend :as friend]
             [mdr2.db :as db]
             [mdr2.layout :as layout]
             [mdr2.dtbook :refer [dtbook]]
             [mdr2.pipeline1 :as pipeline]))
 
-(defn home []
+(defn home [request]
   (layout/common
    [:h1 "Productions"]
    [:table.table.table-striped
@@ -25,8 +26,9 @@
             [:span.glyphicon.glyphicon-download]]
            [:a.btn.btn-default {:href (str "/production/" (:id p) "/upload")}
             [:span.glyphicon.glyphicon-upload]]
-           [:a.btn.btn-default {:href (str "/production/" (:id p) "/delete")}
-            [:span.glyphicon.glyphicon-trash]]]]]])]]))
+           (when (friend/authorized? #{:admin} (friend/identity request))
+             [:a.btn.btn-default {:href (str "/production/" (:id p) "/delete")}
+              [:span.glyphicon.glyphicon-trash]])]]]])]]))
 
 (defn production [id]
   (let [p (db/get-production id)]
@@ -80,3 +82,12 @@
      (form/label "password" "Password:")
      (form/password-field {:class "form-control"} "password")]
     (form/submit-button {:class "btn btn-default"} "Login"))))
+
+(defn unauthorized [request]
+  (-> 
+   (layout/common
+    [:h2 
+     [:div.alert.alert-danger "Sorry, you do not have sufficient privileges to access " (:uri request)]]
+    [:p "Please ask an administrator for help"])
+   response/response
+   (response/status 401)))
