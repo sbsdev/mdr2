@@ -1,6 +1,6 @@
 (ns mdr2.views
   (:require [clojure.data.xml :as xml]
-            [ring.util.response :as ring]
+            [ring.util.response :as response]
             [hiccup.form :as form]
             [hiccup.element :refer [link-to]]
             [mdr2.db :as db]
@@ -24,7 +24,9 @@
            [:a.btn.btn-default {:href (str "/production/" (:id p) ".xml")}
             [:span.glyphicon.glyphicon-download]]
            [:a.btn.btn-default {:href (str "/production/" (:id p) "/upload")}
-            [:span.glyphicon.glyphicon-upload]]]]]])]]))
+            [:span.glyphicon.glyphicon-upload]]
+           [:a.btn.btn-default {:href (str "/production/" (:id p) "/delete")}
+            [:span.glyphicon.glyphicon-trash]]]]]])]]))
 
 (defn production [id]
   (let [p (db/get-production id)]
@@ -35,8 +37,8 @@
 (defn production-xml [id]
   (let [production (db/get-production id)]
     (-> (xml/emit-str (xml/sexp-as-element (dtbook production)))
-        ring/response
-        (ring/content-type "text/xml"))))
+        response/response
+        (response/content-type "text/xml"))))
 
 (defn file-upload-form [id & [errors]]
   (let [p (db/get-production id)]
@@ -60,7 +62,11 @@
         ;; store the xml
         ;; and add a reference to the path in the db
         ;; finally redirect to the index
-        (ring/redirect "/")))))
+        (response/redirect "/")))))
+
+(defn production-delete [id]
+  (db/delete-production id)
+  (response/redirect "/"))
 
 (defn login-form []
   (layout/common

@@ -12,7 +12,10 @@
   (jdbc/query db ["SELECT * FROM production"]))
 
 (defn add-production [production]
-    (jdbc/insert! db :productions production))
+    (jdbc/insert! db :production production))
+
+(defn delete-production [id]
+    (jdbc/delete! db :production ["id = ?" id]))
 
 (defn get-user [username]
   (when-let [user (first (jdbc/query db ["SELECT * FROM user WHERE username = ?" username]))]

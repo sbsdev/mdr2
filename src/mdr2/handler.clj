@@ -16,6 +16,7 @@
   (GET "/production/:id/upload" [id] (friend/authenticated (views/file-upload-form id)))
   (POST "/production/:id/upload" [id file] (friend/authenticated (views/production-add-xml id file)))
   (GET "/production/:id" [id] (friend/authenticated (views/production id)))
+  (GET "/production/:id/delete" [id] (friend/authenticated (views/production-delete id)))
   (GET "/login" [] (views/login-form))
   (GET "/logout" req (friend/logout* (response/redirect "/")))
   (route/resources "/")
