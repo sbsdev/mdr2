@@ -2,20 +2,21 @@
   (:require [clojure.data.xml :as xml]
             [ring.util.response :as ring]
             [hiccup.form :as form]
+            [hiccup.element :refer [link-to]]
             [mdr2.db :as db]
             [mdr2.layout :as layout]
             [mdr2.dtbook :refer [dtbook]]
             [mdr2.pipeline1 :as pipeline]))
 
 (defn home []
-  (layout/common 
+  (layout/common
    [:h1 "Productions"]
    [:table.table.table-striped
     [:thead [:tr [:th "Title"] [:th "State"] [:th "Action"]]]
     [:tbody
      (for [p (db/get-productions)]
        [:tr 
-        [:td (:title p)]
+        [:td (link-to (str "/production/" (:id p)) (:title p))]
         [:td (:state p)]
         [:td 
          [:div.btn-toolbar {:role "toolbar"}
@@ -61,3 +62,15 @@
         ;; finally redirect to the index
         (ring/redirect "/")))))
 
+(defn login-form []
+  (layout/common
+   [:h3 "Login"]
+   (form/form-to
+    [:post "/login"]
+    [:div.form-group
+     (form/label "username" "Username:")
+     (form/text-field {:class "form-control"} "username")]
+    [:div.form-group
+     (form/label "password" "Password:")
+     (form/password-field {:class "form-control"} "password")]
+    (form/submit-button {:class "btn btn-default"} "Login"))))
