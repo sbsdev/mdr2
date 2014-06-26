@@ -10,29 +10,32 @@
             [mdr2.pipeline1 :as pipeline]))
 
 (defn home [request]
-  (layout/common
-   [:h1 "Productions"]
-   [:table.table.table-striped
-    [:thead [:tr [:th "Title"] [:th "State"] [:th "Action"]]]
-    [:tbody
-     (for [p (db/get-productions)]
-       [:tr 
-        [:td (link-to (str "/production/" (:id p)) (:title p))]
-        [:td (:state p)]
-        [:td 
-         [:div.btn-toolbar {:role "toolbar"}
-          [:div.btn-group
-           [:a.btn.btn-default {:href (str "/production/" (:id p) ".xml")}
-            [:span.glyphicon.glyphicon-download]]
-           [:a.btn.btn-default {:href (str "/production/" (:id p) "/upload")}
-            [:span.glyphicon.glyphicon-upload]]
-           (when (friend/authorized? #{:admin} (friend/identity request))
-             [:a.btn.btn-default {:href (str "/production/" (:id p) "/delete")}
-              [:span.glyphicon.glyphicon-trash]])]]]])]]))
+  (let [identity (friend/identity request)
+        user (friend/current-authentication request)]
+    (layout/common user
+     [:h1 "Productions"]
+     [:table.table.table-striped
+      [:thead [:tr [:th "Title"] [:th "State"] [:th "Action"]]]
+      [:tbody
+       (for [p (db/get-productions)]
+         [:tr
+          [:td (link-to (str "/production/" (:id p)) (:title p))]
+          [:td (:state p)]
+          [:td
+           [:div.btn-toolbar {:role "toolbar"}
+            [:div.btn-group
+             [:a.btn.btn-default {:href (str "/production/" (:id p) ".xml")}
+              [:span.glyphicon.glyphicon-download]]
+             [:a.btn.btn-default {:href (str "/production/" (:id p) "/upload")}
+              [:span.glyphicon.glyphicon-upload]]
+             (when (friend/authorized? #{:admin} identity)
+               [:a.btn.btn-default {:href (str "/production/" (:id p) "/delete")}
+                [:span.glyphicon.glyphicon-trash]])]]]])]])))
 
-(defn production [id]
-  (let [p (db/get-production id)]
-    (layout/common 
+(defn production [request id]
+  (let [p (db/get-production id)
+        user (friend/current-authentication request)]
+    (layout/common user
      [:h1 (str "Production: " (:title p))]
      [:p (:author p)])))
 
@@ -42,9 +45,10 @@
         response/response
         (response/content-type "text/xml"))))
 
-(defn file-upload-form [id & [errors]]
-  (let [p (db/get-production id)]
-    (layout/common
+(defn file-upload-form [request id & [errors]]
+  (let [p (db/get-production id)
+        user (friend/current-authentication request)]
+    (layout/common user
      [:h1 "Upload"]
      [:p (str "Upload structure for " (:title p))]
      (when (seq? errors)
@@ -71,7 +75,7 @@
   (response/redirect "/"))
 
 (defn login-form []
-  (layout/common
+  (layout/common nil
    [:h3 "Login"]
    (form/form-to
     [:post "/login"]
@@ -84,10 +88,13 @@
     (form/submit-button {:class "btn btn-default"} "Login"))))
 
 (defn unauthorized [request]
-  (-> 
-   (layout/common
-    [:h2 
-     [:div.alert.alert-danger "Sorry, you do not have sufficient privileges to access " (:uri request)]]
-    [:p "Please ask an administrator for help"])
-   response/response
-   (response/status 401)))
+  (let [user (friend/current-authentication request)]
+    (->
+     (layout/common user
+      [:h2
+       [:div.alert.alert-danger
+        "Sorry, you do not have sufficient privileges to access "
+        (:uri request)]]
+      [:p "Please ask an administrator for help"])
+     response/response
+     (response/status 401))))

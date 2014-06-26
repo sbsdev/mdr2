@@ -13,9 +13,9 @@
 (defroutes app-routes
   (GET "/" request (views/home request))
   (GET "/production/:id.xml" [id] (friend/authenticated (views/production-xml id)))
-  (GET "/production/:id/upload" [id] (friend/authenticated (views/file-upload-form id)))
+  (GET "/production/:id/upload" [id :as r] (friend/authenticated (views/file-upload-form r id)))
   (POST "/production/:id/upload" [id file] (friend/authenticated (views/production-add-xml id file)))
-  (GET "/production/:id" [id] (friend/authenticated (views/production id)))
+  (GET "/production/:id" [id :as r] (friend/authenticated (views/production r id)))
   (GET "/production/:id/delete" [id] (friend/authorize #{:admin} (views/production-delete id)))
   (GET "/login" [] (views/login-form))
   (GET "/logout" req (friend/logout* (response/redirect "/")))
