@@ -1,6 +1,14 @@
 (ns mdr2.layout
   (:require [hiccup.page :refer [html5 include-css]]))
 
+(defn loginbar [user]
+  [:ul.nav.navbar-nav.navbar-right
+   (if user
+     (list
+      [:li [:a "Logged in as " [:b (:username user)]]]
+      [:li [:a {:href "/logout"} "Logout"]])
+     [:li [:a {:href "/login"} "Login"]])])
+
 (defn navbar [user]
   [:div.navbar.navbar-default {:role "navigation"}
    [:div.container-fluid
@@ -16,11 +24,7 @@
     [:div.collapse.navbar-collapse
      {:id "navbar-collapse-target"}
      [:ul.nav.navbar-nav.navbar-right
-      (if user
-        (list
-         [:li [:a "Logged in as " [:b (:username user)]]]
-         [:li [:a {:href "/logout"} "Logout"]])
-        [:li [:a {:href "/login"} "Login"]])]]]])
+      (loginbar user)]]]])
 
 (defn common [user & body]
   (html5
