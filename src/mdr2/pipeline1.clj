@@ -1,4 +1,5 @@
 (ns mdr2.pipeline1
+  "Wrapper around the DAISY pipeline 1 scripts"
   (:use [clojure.java.shell :only [sh]])
   (:require [clojure.string :as s]))
 
@@ -14,7 +15,10 @@
        (filter #(re-matches #"^\[ERROR, Validator\].*" %))
        (map #(clean-line % file))))
 
-(defn validate [file]
+(defn validate
+  "Invoke the validator script from for given file. Returns an empty
+  seq on successful validation or a seq of error messages otherwise"
+  [file]
   (-> (sh "daisy-pipeline"
           "/usr/lib/daisy-pipeline/scripts/verify/ConfigurableValidator.taskScript"
           (str "--validatorInputFile=" file)
@@ -25,7 +29,9 @@
       :out
       (filter-output file)))
 
-(defn audio-encoder [args]
+(defn audio-encoder
+  "Invoke the audio encoder script."
+  [args]
   (apply sh "daisy-pipeline"
          "/usr/lib/daisy-pipeline/scripts/modify_improve/dtb/DTBAudioEncoder.taskScript"
          (map (fn [[k v]] (format "--%s=%s" (name k) v)) args)))

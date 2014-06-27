@@ -1,7 +1,10 @@
 (ns mdr2.layout
+  "Define the basic page structure and layout"
   (:require [hiccup.page :refer [html5 include-css]]))
 
-(defn loginbar [user]
+(defn loginbar 
+  "Display a login link or information about the currently logged in user if user is non-nil"
+  [user]
   [:ul.nav.navbar-nav.navbar-right
    (if user
      (list
@@ -9,7 +12,9 @@
       [:li [:a {:href "/logout"} "Logout"]])
      [:li [:a {:href "/login"} "Login"]])])
 
-(defn navbar [user]
+(defn navbar
+  "Display the navbar"
+  [user]
   [:div.navbar.navbar-default {:role "navigation"}
    [:div.container-fluid
     [:div.navbar-header
@@ -26,7 +31,9 @@
      [:ul.nav.navbar-nav.navbar-right
       (loginbar user)]]]])
 
-(defn common [user & body]
+(defn common
+  "Display a page using the bootstrap css"
+  [user & body]
   (html5
     [:head
      [:title "mdr2"]

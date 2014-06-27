@@ -1,4 +1,5 @@
 (ns mdr2.handler
+  "Main entry points to the application"
   (:require [compojure.core :refer [defroutes GET POST]]
             [compojure.handler :as handler]
             [hiccup.middleware :refer [wrap-base-url]]
@@ -11,6 +12,7 @@
             [mdr2.views :as views]))
 
 (defroutes app-routes
+  "Main routes for the application"
   (GET "/" request (views/home request))
   (GET "/production/:id.xml" [id] (friend/authenticated (views/production-xml id)))
   (GET "/production/:id/upload" [id :as r] (friend/authenticated (views/file-upload-form r id)))
@@ -23,6 +25,7 @@
   (route/not-found "Not Found"))
 
 (def app
+  "Main handler for the application"
   (-> app-routes
       (friend/authenticate 
        {:credential-fn (partial creds/bcrypt-credential-fn db/get-user)
