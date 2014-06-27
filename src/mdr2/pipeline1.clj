@@ -1,5 +1,9 @@
 (ns mdr2.pipeline1
-  "Wrapper around the DAISY pipeline 1 scripts"
+  "Wrapper around the DAISY pipeline 1 scripts.
+
+  It is assumed that there is a binary named `daisy-pipeline` on the
+  path and that the pipeline scripts are installed under
+  `/usr/lib/daisy-pipeline/scripts`."
   (:use [clojure.java.shell :only [sh]])
   (:require [clojure.string :as s]))
 
