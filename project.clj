@@ -11,8 +11,13 @@
                  [com.cemerick/friend "0.2.1"]]
   :plugins [[lein-ring "0.8.10"]
             [codox "0.8.9"]]
-  :codox {:src-dir-uri "https://github.com/sbsdev/mdr2/blob/master/"
-          :src-linenum-anchor-prefix "L"}
+  :codox {:project {:name "Madras2"}
+          :src-dir-uri "https://github.com/sbsdev/mdr2/blob/master/"
+          :src-linenum-anchor-prefix "L"
+          :defaults {:doc/format :markdown}
+          ;; FIXME: we have problems with files that require immutant
+          ;; modules as this is only available during run time
+          :exclude [immutant.init mdr2.abacus mdr2.messaging]}
   :ring {:handler mdr2.web/app}
   :immutant {:context-path "/"}
   :profiles
