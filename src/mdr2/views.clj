@@ -1,6 +1,5 @@
 (ns mdr2.views
-  (:require [clojure.data.xml :as xml]
-            [ring.util.response :as response]
+  (:require [ring.util.response :as response]
             [hiccup.form :as form]
             [hiccup.element :refer [link-to]]
             [cemerick.friend :as friend]
@@ -41,7 +40,7 @@
 
 (defn production-xml [id]
   (let [production (db/get-production id)]
-    (-> (xml/emit-str (xml/sexp-as-element (dtbook production)))
+    (-> (dtbook production)
         response/response
         (response/content-type "text/xml"))))
 

@@ -1,8 +1,7 @@
-(ns mdr2.dtbook)
+(ns mdr2.dtbook
+  (:require [clojure.data.xml :as xml]))
 
-(defn dtbook 
-  "Create a minimal DTBook template according to http://www.daisy.org/z3986/2005/Z3986-2005.html"
-  [production]
+(defn- dtbook-sexp [production]
   (let [{:keys [title creator subject description publisher date identifier source language rights 
                 sourceDate sourceEdition sourcePublisher sourceRights sourceTitle
                 multimediaType multimediaContent narrator producedDate 
@@ -48,3 +47,11 @@
        [:level1
         [:h1]
         [:p]]]]]))
+
+(defn dtbook 
+  "Create a minimal DTBook template according to http://www.daisy.org/z3986/2005/Z3986-2005.html"
+  [production]
+  (-> production
+      dtbook-sexp
+      xml/sexp-as-element
+      xml/emit-str))
