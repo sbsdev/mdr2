@@ -15,12 +15,12 @@
         durationInSeconds (/ frames frameRate)]
     durationInSeconds))
 
-(defn audio-file? [file]
+(defn wav-file? [file]
   (and (.isFile file)
-       (.endsWith ".wav" (.getName file))))
+       (.endsWith (.getName file) ".wav")))
 
 (defn audio-length [dtb]
-  (let [audio-files (filter audio-file? (file-seq (file dtb)))]
+  (let [audio-files (filter wav-file? (file-seq (file dtb)))]
     (reduce + (map file-audio-length audio-files))))
 
   
