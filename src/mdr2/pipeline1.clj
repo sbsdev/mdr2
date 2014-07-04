@@ -4,8 +4,8 @@
   It is assumed that there is a binary named `daisy-pipeline` on the
   path and that the pipeline scripts are installed under
   `/usr/lib/daisy-pipeline/scripts`."
-  (:use [clojure.java.shell :only [sh]])
-  (:require [clojure.string :as s]))
+  (:require [clojure.java.shell :refer [sh]]
+            [clojure.string :as s]))
 
 (defn- clean-line [line file]
   (-> line
