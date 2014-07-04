@@ -1,9 +1,7 @@
 (ns mdr2.dtb
   "Functions to query DAISY Talking Books"
   (:require [clojure.data.xml :as xml]
-            [clojure.java.io :refer [file]]
-            [clojure.java.shell :refer [sh]]
-            [clojure.string :refer [trim-newline]])
+            [clojure.java.io :refer [file]])
   (:import javax.sound.sampled.AudioSystem))
 
 (defn file-audio-length
@@ -16,15 +14,6 @@
         frames (.getFrameLength stream)
         durationInSeconds (/ frames frameRate)]
     durationInSeconds))
-
-;; admitedly this is kinda hackish but the "Java-way" using
-;; AudioSystem et al doesn't seem to work inside immutant
-;; see https://issues.jboss.org/browse/IMMUTANT-457
-;; (defn file-audio-length [file]
-;;   (-> (sh "soxi" "-D" (.getPath file))
-;;       :out
-;;       trim-newline
-;;       Double/parseDouble))
 
 (defn wav-file? [file]
   (and (.isFile file)
