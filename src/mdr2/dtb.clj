@@ -4,7 +4,10 @@
             [clojure.java.io :refer [file]])
   (:import javax.sound.sampled.AudioSystem))
 
-(defn file-audio-length [file]
+(defn file-audio-length
+  "Get the length of the audio in seconds for a given audio file"
+  [file]
+  ;; see http://stackoverflow.com/questions/3009908/how-do-i-get-a-sound-files-total-time-in-java
   (let [stream (AudioSystem/getAudioInputStream file)
         format (.getFormat stream)
         frameRate (.getFrameRate format)
