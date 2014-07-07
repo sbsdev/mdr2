@@ -53,21 +53,23 @@ https://github.com/technomancy/leiningen/blob/stable/doc/DEPLOY.md"
 (defn container-id [production]
   (str "dam" (:id production)))
 
-(defn container-path 
-  "Return the name of a archive spool directory for a given production"
-  [production]
-  (str spool-dir "/" (container-id production)))
-
-(defn container-rdf-path 
-  "Return the name of an rdf file in the archive spool for a given production"
+(defn container-path
+  "Return the archive spool directory for a given production"
   [production]
   (let [id (container-id production)]
-    (str spool-dir "/" id "/" id ".rdf")))
+    (file spool-dir id)))
+
+(defn container-rdf-path
+  "Return an rdf file in the archive spool for a given production"
+  [production]
+  (let [id (container-id production)
+        rdf-name (str id ".rdf")]
+    (file spool-dir id rdf-name)))
 
 (defn add-to-db [production]
   (let [new-job 
         {:id (container-id production)
-         :verzeichnis (container-path production)
+         :verzeichnis (.getPath (container-path production))
          ;; if there is a cdimage attached to this production then we
          ;; need to add some magic incantations to get this properly
          ;; archived
@@ -104,7 +106,7 @@ Return a map with an additional key `iso-path` where the iso is located"
   [production]
   (let [path (:path production)
         iso-path (:iso-path production)
-        archive-path (file (container-path production))]
+        archive-path (container-path production)]
     ;; if the production has an iso archive that, otherwise just
     ;; archive the raw unencoded files
     (if iso-path 
