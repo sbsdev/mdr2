@@ -35,7 +35,7 @@
 
 (defn audio-encoder
   "Invoke the audio encoder script."
-  [args]
+  [{:keys [input output bitrate] :as args}]
   (apply sh "daisy-pipeline"
          "/usr/lib/daisy-pipeline/scripts/modify_improve/dtb/DTBAudioEncoder.taskScript"
          (map (fn [[k v]] (format "--%s=%s" (name k) v)) args)))
