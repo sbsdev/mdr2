@@ -1,25 +1,9 @@
 (ns mdr2.rdf
-  (:require [clojure.data.xml :as xml]))
+  (:require [clojure.data.xml :as xml]
+            [mdr2.dtb :as dtb]))
 
-(defn- depth [production] 0)
-
-(defn- files [production] 0)
-
-(defn- size [production] 0)
-
-(defn- page-front [production] 0)
-(defn- page-normal [production] 0)
-(defn- page-special [production] 0)
-
-(defn get-meta-data [production]
-  (merge
-   {:depth (depth production)
-    :files (files production)
-    :size (size production)
-    :page-front (page-front production)
-    :page-normal (page-normal production)
-    :page-special (page-special production)}
-   production))
+(defn get-meta-data [{:keys [path] :as production}]
+  (merge production (dtb/meta-data path)))
 
 (defn- rdf-sexp [production]
   (let [{:keys [title creator subject description publisher date identifier source language rights 
