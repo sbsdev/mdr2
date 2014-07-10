@@ -10,10 +10,10 @@
     (is (= (container-id {:id 456}) "dam456")))
 
   (testing "container path"
-    (is (= (.getPath (container-path {:id 123})) "/var/spool/agadir/dam123")))
+    (is (= (container-path {:id 123}) "/var/spool/agadir/dam123")))
   
   (testing "rdf path"
-    (is (= (.getPath (container-rdf-path {:id 123})) "/var/spool/agadir/dam123/dam123.rdf")))
+    (is (= (container-rdf-path {:id 123}) "/var/spool/agadir/dam123/dam123.rdf")))
 
   (testing "add to db"
     (with-redefs [clojure.java.jdbc/insert! mock-jdbc-insert]
