@@ -59,6 +59,6 @@
     ;; of course we could look up the fn using (ns-resolve ns (symbol
     ;; (name kw))) but there is a balance between readybility and
     ;; cleverness
-    (zipmap keys (map #(%1 %2) fns (repeat dtb)))))
+    (zipmap keys (map #(%1 dtb) fns))))
 
 
