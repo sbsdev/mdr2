@@ -45,7 +45,7 @@
     [:dtb:revisionDate revisionDate]
     [:dtb:revisionDescription revisionDescription]
     [:dtb:totalTime totalTime]
-    [:dtb:audioFormat audioFormat]]]))
+    [:dtb:audioFormat audioFormat]]])
 
 (defn rdf
   "Create rdf for a given production"
