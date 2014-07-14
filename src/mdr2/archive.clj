@@ -86,7 +86,8 @@ https://github.com/technomancy/leiningen/blob/stable/doc/DEPLOY.md"
          ;; archived
          :sektion (if (:iso-path production) "cdimage" "master")}
         job (merge default-job new-job)]
-    (jdbc/insert! db :container job)))
+    (jdbc/insert! db :container job)
+    production))
 
 (defn encode-production
   "Encode a production, i.e. convert the wav files to mp3"
