@@ -92,8 +92,10 @@ https://github.com/technomancy/leiningen/blob/stable/doc/DEPLOY.md"
 (defn encode-production
   "Encode a production, i.e. convert the wav files to mp3"
   [{:keys [path] :as production}]
-  (let [tmp-path (.getPath (fs/temp-dir "mdr2"))]
-    (pipeline/audio-encoder {:input path :output tmp-path})
+  (let [tmp-path (.getPath (fs/temp-dir "mdr2"))
+        ;; FIXME: it might be better to allow for different manifest names
+        manifest (.getPath (file path "package.opf"))] 
+    (pipeline/audio-encoder {:input manifest :output tmp-path})
     (assoc production :encoded-path tmp-path)))
 
 (defn create-iso 
