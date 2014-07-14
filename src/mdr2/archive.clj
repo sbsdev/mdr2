@@ -144,8 +144,7 @@ Return a map with an additional key `iso-path` where the iso is located"
   (-> production
       copy-files ; place all the files in the spool dir
       create-rdf ; create an rdf file
-      add-to-db ; add it to the db so that the agadir machinery will pick it up
-      clean-up-tmp-files))
+      add-to-db)) ; add it to the db so that the agadir machinery will pick it up
 
 (defn archive-distribution-master 
   "Archive a distribution master .i.e. a DTB encoded with mp3 and packed up in one or more iso files"
