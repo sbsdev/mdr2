@@ -11,20 +11,29 @@
 
   (testing "container path"
     (is (= (container-path {:id 123}) "/var/spool/agadir/dam123")))
-  
+
   (testing "rdf path"
-    (is (= (container-rdf-path {:id 123}) "/var/spool/agadir/dam123/dam123.rdf")))
+    (is (= (container-rdf-path {:id 123})
+           "/var/spool/agadir/dam123/dam123.rdf")))
 
-  (testing "add to db"
+  (testing "add master to db"
     (with-redefs [clojure.java.jdbc/insert! mock-jdbc-insert]
-      (is (= (add-to-db {:id 123}) 
-             {:id "dam123", 
-              :verzeichnis "/var/spool/agadir/dam123", 
-              :sektion "master", 
-              :aktion "save", 
-              :transaktions_status "pending", 
-              :abholer "NN", 
-              :archivar "NN", 
+      (is (= (add-to-db {:id 123})
+             {:verzeichnis "dam123",
+              :sektion "master",
+              :aktion "save",
+              :transaktions_status "pending",
+              :abholer "NN",
+              :archivar "NN",
+              :flags "x"}))))
+
+  (testing "add iso to db"
+    (with-redefs [clojure.java.jdbc/insert! mock-jdbc-insert]
+      (is (= (add-to-db {:id 123 :iso-path "foo"})
+             {:verzeichnis "ds123",
+              :sektion "master",
+              :aktion "save",
+              :transaktions_status "pending",
+              :abholer "NN",
+              :archivar "NN",
               :flags "x"})))))
-
-

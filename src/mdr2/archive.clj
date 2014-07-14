@@ -54,8 +54,10 @@ https://github.com/technomancy/leiningen/blob/stable/doc/DEPLOY.md"
 
 (defn container-id 
   "Return the name of a archive spool directory for a given production"
-  [{:keys [id]}]
-  (str "dam" id))
+  [{:keys [id iso-path]}]
+  (cond
+   iso-path (str "ds" id) ; if it has an iso it is supposed to be called "ds"
+   :else (str "dam" id)))
 
 (defn container-path
   "Return the path to the archive spool directory for a given production"
