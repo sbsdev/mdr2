@@ -116,12 +116,17 @@ Return a map with an additional key `iso-path` where the iso is located"
 
 (defn copy-files 
   "Copy a production to the archive spool dir"
+  ;; FIXME: this fails if there is already an archiving in progress
+  ;; because it will create another copy inside the already existing
+  ;; dam directory
   [{:keys [path iso-path] :as production}]
-  (let [archive-path (container-path production)]
+  (let [archive-path (container-path production)
+        iso-archive-name (str (container-id production) ".iso")
+        iso-archive-path (.getPath (file archive-path iso-archive-name))]
     ;; if the production has an iso archive that, otherwise just
     ;; archive the raw unencoded files
     (if iso-path 
-      (fs/copy+ iso-path archive-path)
+      (fs/copy+ iso-path iso-archive-path)
       (fs/copy-dir path archive-path)))
   production)
 
