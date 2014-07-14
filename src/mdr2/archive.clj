@@ -45,8 +45,7 @@ https://github.com/technomancy/leiningen/blob/stable/doc/DEPLOY.md"
    "/var/spool/agadir")
 
 (def ^:private default-job
-  {:id 1
-   :verzeichnis ""
+  {:verzeichnis ""
    :archivar "NN"
    :abholer "NN"
    :aktion "save"
@@ -77,8 +76,9 @@ https://github.com/technomancy/leiningen/blob/stable/doc/DEPLOY.md"
   archiving process from the point of view of the production system."
   [production]
   (let [new-job 
-        {:id (container-id production)
-         :verzeichnis (container-path production)
+        {:verzeichnis (container-id production)
+         ;; :id (container-id production)
+         ;; :verzeichnis (container-path production)
          ;; if there is a cdimage attached to this production then we
          ;; need to add some magic incantations to get this properly
          ;; archived
