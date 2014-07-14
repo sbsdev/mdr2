@@ -13,8 +13,7 @@
            totalTime audioFormat type]}]
   [:rdf:DRF {:xmlns:rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
              :xmlns:dc "http://purl.org/dc/elements/1.1/"
-             :xmlns:ncc "http://www.daisy.org/publications/specifications/"
-             :xmlns:sbs "http://www.sbszh.ch/sbs/namespace"}
+             :xmlns:dtb "http://www.daisy.org/z3986/2005/dtbook/"}
    ;; see also
    ;; http://www.daisy.org/z3986/2005/Z3986-2005.html#Over
    [:rdf:Description
