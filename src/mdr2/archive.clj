@@ -99,7 +99,9 @@ https://github.com/technomancy/leiningen/blob/stable/doc/DEPLOY.md"
 (defn create-iso 
   "Pack a production in an iso file. 
 Return a map with an additional key `iso-path` where the iso is located"
-  [{:keys [encoded-path title publisher] :as production}]
+  [{:keys [encoded-path title publisher]
+    :or {title "FIXME:" publisher "FIXME:"} ; title and publisher shouldn't be empty
+    :as production}]
   (let [iso-path (.getPath (file (fs/tmpdir) (fs/temp-name "mdr2" ".iso")))]
     (sh "genisoimage" 
         "-quiet" 
