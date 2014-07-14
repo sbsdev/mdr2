@@ -37,7 +37,7 @@ https://github.com/technomancy/leiningen/blob/stable/doc/DEPLOY.md"
             [mdr2.pipeline1 :as pipeline]))
 
 (def ^:private db {:subprotocol "sqlite" 
-                   :subname "db/mdr2.db"})
+                   :subname "db/archive.db"})
 
 (def spool-dir
   "Path to the archive spool directory, i.e. where to place incoming
