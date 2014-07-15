@@ -12,12 +12,16 @@
 
 ;; set up queues...
 (msg/start "queue.create")
-(msg/start "queue.encode")
 (msg/start "queue.archive")
+(msg/start "queue.notify-abacus")
 
 ;; ...and wire them up
 (msg/listen "queue.create" #(db/add-production %))
-(msg/listen "queue.encode" #(msg/publish "queue.archive" (pipeline1/audio-encoder %)))
 (msg/listen "queue.archive" #(archive/archive %))
+(msg/listen "queue.notify-abacus" #(abacus/notify %))
 
+;; get new productions from ABACUS
 (jobs/schedule "abacus-import" abacus/import-file "0 */10 6-20 ? * MON-FRI")
+
+;; get status updates on existing productions from ABACUS
+(jobs/schedule "abacus-status-sync" abacus/status-sync "0 */10 6-20 ? * MON-FRI")
