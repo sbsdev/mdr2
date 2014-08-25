@@ -2,7 +2,10 @@
   (:use clojure.test
         mdr2.archive))
 
-(defn mock-jdbc-insert [db table job] job)
+(def mock-db (atom ()))
+
+(defn mock-jdbc-insert [db table job]
+  (reset! mock-db job))
 
 (deftest test-archiving
   (testing "container id"
@@ -18,7 +21,9 @@
 
   (testing "add master to db"
     (with-redefs [clojure.java.jdbc/insert! mock-jdbc-insert]
-      (is (= (add-to-db {:id 123})
+      (is (= (do
+               (add-to-db {:id 123})
+               @mock-db)
              {:verzeichnis "dam123",
               :sektion "master",
               :aktion "save",
@@ -29,9 +34,11 @@
 
   (testing "add iso to db"
     (with-redefs [clojure.java.jdbc/insert! mock-jdbc-insert]
-      (is (= (add-to-db {:id 123 :iso-path "foo"})
+      (is (= (do
+               (add-to-db {:id 123 :iso-path "foo"})
+               @mock-db)
              {:verzeichnis "ds123",
-              :sektion "master",
+              :sektion "cdimage",
               :aktion "save",
               :transaktions_status "pending",
               :abholer "NN",
