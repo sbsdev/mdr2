@@ -3,13 +3,13 @@
   :url "https://github.com/sbsdev/mdr2"
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [hiccup "1.0.5"]
-                 [compojure "1.1.6"]
-                 [org.clojure/java.jdbc "0.3.3"]
+                 [compojure "1.1.8"]
+                 [org.clojure/java.jdbc "0.3.5"]
                  [org.xerial/sqlite-jdbc "3.7.2"]
-                 [org.clojure/data.xml "0.0.7"]
+                 [org.clojure/data.xml "0.0.8"]
                  [com.github.kyleburton/clj-xpath "1.4.3"]
                  [com.cemerick/friend "0.2.1"]
-                 [me.raynes/fs "1.4.4"]]
+                 [me.raynes/fs "1.4.6"]]
   :plugins [[lein-ring "0.8.10"]
             [codox "0.8.9"]]
   :codox {:project {:name "Madras2"}
