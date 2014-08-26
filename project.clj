@@ -9,7 +9,10 @@
                  [org.clojure/data.xml "0.0.8"]
                  [com.github.kyleburton/clj-xpath "1.4.3"]
                  [com.cemerick/friend "0.2.1"]
-                 [me.raynes/fs "1.4.6"]]
+                 [me.raynes/fs "1.4.6"]
+                 [org.immutant/immutant "2.x.incremental.264"]]
+  :repositories [["Immutant 2.x incremental builds"
+                  "http://downloads.immutant.org/incremental/"]]
   :plugins [[lein-ring "0.8.10"]
             [codox "0.8.9"]]
   :codox {:project {:name "Madras2"}
@@ -19,8 +22,9 @@
           ;; FIXME: we have problems with files that require immutant
           ;; modules as this is only available during run time
           :exclude [immutant.init mdr2.abacus mdr2.messaging]}
-  :ring {:handler mdr2.web/app}
+  :ring {:handler mdr2.handler/app}
   :immutant {:context-path "/"}
   :profiles
   {:dev {:dependencies [[javax.servlet/servlet-api "2.5"]
-                        [ring-mock "0.1.5"]]}})
+                        [ring-mock "0.1.5"]
+                        [ring/ring-devel "1.3.1"]]}})
