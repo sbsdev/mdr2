@@ -1,27 +1,28 @@
 (ns mdr2.db
   "Persistence for productions"
+  (:refer-clojure :exclude [find])
   (:require [clojure.java.jdbc :as jdbc]
             [clojure.string :as s]))
 
 (def ^:private db {:subprotocol "sqlite"
                    :subname "db/mdr2.db"})
 
-(defn get-production
+(defn find
   "Return production for given `id`"
   [id]
   (first (jdbc/query db ["SELECT * FROM production WHERE id = ?" id])))
 
-(defn get-productions
+(defn find-all
   "Return all productions"
   []
   (jdbc/query db ["SELECT * FROM production"]))
 
-(defn add-production
+(defn add
   "Add the given `production`"
   [production]
   (jdbc/insert! db :production production))
 
-(defn delete-production
+(defn delete
   "Remove the production with the given `id`"
   [id]
   (jdbc/delete! db :production ["id = ?" id]))

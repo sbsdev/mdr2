@@ -3,7 +3,7 @@
             [hiccup.form :as form]
             [hiccup.element :refer [link-to]]
             [cemerick.friend :as friend]
-            [mdr2.db :as db]
+            [mdr2.production :as production]
             [mdr2.layout :as layout]
             [mdr2.dtbook :refer [dtbook]]
             [mdr2.pipeline1 :as pipeline]))
@@ -16,7 +16,7 @@
      [:table.table.table-striped
       [:thead [:tr [:th "Title"] [:th "State"] [:th "Action"]]]
       [:tbody
-       (for [p (db/get-productions)]
+       (for [p (production/find-all)]
          [:tr
           [:td (link-to (str "/production/" (:id p)) (:title p))]
           [:td (:state p)]
@@ -32,20 +32,20 @@
                 [:span.glyphicon.glyphicon-trash]])]]]])]])))
 
 (defn production [request id]
-  (let [p (db/get-production id)
+  (let [p (production/find id)
         user (friend/current-authentication request)]
     (layout/common user
      [:h1 (str "Production: " (:title p))]
      [:p (:author p)])))
 
 (defn production-xml [id]
-  (let [production (db/get-production id)]
+  (let [production (production/find id)]
     (-> (dtbook production)
         response/response
         (response/content-type "text/xml"))))
 
 (defn file-upload-form [request id & [errors]]
-  (let [p (db/get-production id)
+  (let [p (production/find id)
         user (friend/current-authentication request)]
     (layout/common user
      [:h1 "Upload"]
@@ -70,7 +70,7 @@
         (response/redirect "/")))))
 
 (defn production-delete [id]
-  (db/delete-production id)
+  (production/delete id)
   (response/redirect "/"))
 
 (defn login-form []
