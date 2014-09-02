@@ -67,8 +67,7 @@
       (do
         ;; store the xml
         (fs/move tempfile (prod/path id))
-        ;; and add a reference to the path in the db
-        ;; finally redirect to the index
+        ;; and redirect to the index
         (response/redirect "/")))))
 
 (defn production-delete [id]

@@ -1,22 +1,23 @@
 (ns mdr2.production
   "Functionality for productions"
   (:refer-clojure :exclude [find])
-  (:require [mdr2.db :as db]
+  (:require [clojure.java.io :refer [file]]
             [me.raynes.fs :as fs]
-            [environ.core :refer [env]]))
+            [environ.core :refer [env]]
+            [mdr2.db :as db]))
 
 (def production-path (env :production-path))
 
 (defn path
   "Return the path for a given `id`"
   [id]
-  (str production-path "/" id))
+  (.getPath (file production-path (str id ".xml"))))
 
 (defn create
   "Create a production"
   [{id :id :as p}]
   (db/add p)
-  (fs/mkdir (path id)))
+  (fs/mkdirs (fs/parent (path id))))
 
 (defn find
   "Find a production given its `id` (i.e. product number)"
