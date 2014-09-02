@@ -27,11 +27,5 @@
   :ring {:handler mdr2.handler/app}
   :immutant {:context-path "/"}
   :profiles {:dev {:dependencies [[javax.servlet/servlet-api "2.5"]
-                                  [ring-mock "0.1.5"]
-                                  [ring/ring-devel "1.3.1"]]
-                   :env {:database-url "sqlite://home/eglic/src/mdr2/db/mdr2.db"
-                         :archive-spool-dir "/home/eglic/tmp/mdr2/archive"
-                         :archive-database-url "sqlite://home/eglic/src/mdr2/db/mdr2.db"
-                         :production-path "/home/eglic/tmp/mdr2/production"
-                         :abacus-import-dir "/home/eglic/tmp/mdr2/abacus"}}
-             })
+                                  [ring/ring-devel "1.3.1"]]}
+             :test {:dependencies [[ring-mock "0.1.5"]]}})

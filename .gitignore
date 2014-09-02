@@ -12,3 +12,4 @@ pom.xml.asc
 /db/mdr2.db
 /doc/
 /db/archive.db
+/profiles.clj
