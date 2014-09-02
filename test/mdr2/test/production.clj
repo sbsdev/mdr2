@@ -1,6 +1,8 @@
 (ns mdr2.test.production
   (:use clojure.test)
-  (:require [mdr2.production :as production]))
+  (:require [clojure.java.io :refer [file]]
+            [mdr2.production :as production]
+            [environ.core :refer [env]]))
 
 (defn mock-jdbc-query [_ _]
   [{:id 123}])
@@ -11,4 +13,5 @@
       (is (= (production/find 123) {:id 123}))))
 
   (testing "get production path"
-    (is (= (production/path "foo") "/var/lib/mdr2/foo"))))
+    (is (= (production/path "foo")
+           (.getPath (file (env :production-path) "foo"))))))

@@ -32,17 +32,17 @@ https://github.com/technomancy/leiningen/blob/stable/doc/DEPLOY.md"
   (:require [clojure.java.jdbc :as jdbc]
             [clojure.java.io :refer [file]]
             [clojure.java.shell :refer [sh]]
+            [environ.core :refer [env]]
             [me.raynes.fs :as fs]
             [mdr2.rdf :as rdf]
             [mdr2.pipeline1 :as pipeline]))
 
-(def ^:private db {:subprotocol "sqlite" 
-                   :subname "db/archive.db"})
+(def ^:private db (env :archive-database-url))
 
 (def spool-dir
   "Path to the archive spool directory, i.e. where to place incoming
   productions that are to be archived"
-   "/var/spool/agadir")
+   (env :archive-spool-dir))
 
 (def ^:private default-job
   {:verzeichnis ""

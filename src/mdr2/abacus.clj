@@ -1,7 +1,8 @@
 (ns mdr2.abacus
   (:require [clj-xpath.core :refer [xml->doc $x:text]]
             [clojure.java.io :refer [file delete-file]]
-            [immutant.messaging :as msg])
+            [immutant.messaging :as msg]
+            [environ.core :refer [env]])
   (:import javax.xml.XMLConstants
            org.xml.sax.SAXException
            javax.xml.validation.SchemaFactory
@@ -10,8 +11,7 @@
 
 (def ^:private root "/AbaConnectContainer/Task/Transaction/DocumentData/")
 (def ^:private schema "resources/schema/abacus_export.xsd")
-;;(def import-dir "/var/spool/mdr2")
-(def ^:private import-dir "/home/eglic/tmp/mdr2")
+(def ^:private import-dir (env :abacus-import-dir))
 
 (def ^:private param-mapping
   {:productNumber "artikel_nr"

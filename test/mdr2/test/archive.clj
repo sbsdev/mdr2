@@ -1,6 +1,8 @@
 (ns mdr2.test.archive
   (:use clojure.test
-        mdr2.archive))
+        mdr2.archive)
+  (:require [clojure.java.io :refer [file]]
+            [environ.core :refer [env]]))
 
 (def mock-db (atom ()))
 
@@ -13,11 +15,11 @@
     (is (= (container-id {:id 456}) "dam456")))
 
   (testing "container path"
-    (is (= (container-path {:id 123}) "/var/spool/agadir/dam123")))
+    (is (= (container-path {:id 123}) (.getPath (file (env :archive-spool-dir) "dam123")))))
 
   (testing "rdf path"
     (is (= (container-rdf-path {:id 123})
-           "/var/spool/agadir/dam123/dam123.rdf")))
+           (.getPath (file (env :archive-spool-dir) "dam123" "dam123.rdf")))))
 
   (testing "add master to db"
     (with-redefs [clojure.java.jdbc/insert! mock-jdbc-insert]

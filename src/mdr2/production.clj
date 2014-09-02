@@ -2,9 +2,10 @@
   "Functionality for productions"
   (:refer-clojure :exclude [find])
   (:require [mdr2.db :as db]
-            [me.raynes.fs :as fs]))
+            [me.raynes.fs :as fs]
+            [environ.core :refer [env]]))
 
-(def production-path "/var/lib/mdr2")
+(def production-path (env :production-path))
 
 (defn path
   "Return the path for a given `id`"

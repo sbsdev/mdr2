@@ -2,10 +2,10 @@
   "Persistence for productions"
   (:refer-clojure :exclude [find])
   (:require [clojure.java.jdbc :as jdbc]
-            [clojure.string :as s]))
+            [clojure.string :as s]
+            [environ.core :refer [env]]))
 
-(def ^:private db {:subprotocol "sqlite"
-                   :subname "db/mdr2.db"})
+(def ^:private db (env :database-url))
 
 (defn find
   "Return production for given `id`"
