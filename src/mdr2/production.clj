@@ -20,9 +20,14 @@
   (fs/mkdirs (fs/parent (path id))))
 
 (defn find
-  "Find a production given its `id` (i.e. product number)"
+  "Find a production given its `id`"
   [id]
   (db/find id))
+
+(defn find-by-productnumber
+  "Find a production given its `productNumber`"
+  [productnumber]
+  (db/find-by-productnumber productnumber))
 
 (defn find-all
   "Find all productions"

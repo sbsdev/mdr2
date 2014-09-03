@@ -12,6 +12,11 @@
   [id]
   (first (jdbc/query db ["SELECT * FROM production WHERE id = ?" id])))
 
+(defn find-by-productnumber
+  "Return production for given productnumber"
+  [productnumber]
+  (first (jdbc/query db ["SELECT * FROM production WHERE productNumber = ?" productnumber])))
+
 (defn find-all
   "Return all productions"
   []
