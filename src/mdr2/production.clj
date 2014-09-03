@@ -33,4 +33,4 @@
   "Delete a production with the given `id`"
   [id]
   (db/delete id)
-  (fs/delete-dir (path id)))
+  (fs/delete-dir (fs/parent (path id))))
