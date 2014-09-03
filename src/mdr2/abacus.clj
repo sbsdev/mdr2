@@ -2,7 +2,8 @@
   (:require [clj-xpath.core :refer [xml->doc $x:text]]
             [clojure.java.io :refer [file delete-file]]
             [immutant.messaging :as msg]
-            [environ.core :refer [env]])
+            [environ.core :refer [env]]
+            [mdr2.production :as production])
   (:import javax.xml.XMLConstants
            org.xml.sax.SAXException
            javax.xml.validation.SchemaFactory
@@ -48,19 +49,19 @@
 (defn import-file
   "Import new productions from ABACUS and put them on the create queue"
   []
-  (doseq [f (filter #(.isFile %)
+  (doseq [f (filter #(and (.isFile %) (valid? %))
                     (file-seq (file import-dir)))]
-    (when (valid? f)
-      (msg/publish "queue.create" (read-file f))
-      (delete-file f))))
+    (msg/publish "queue.create" (read-file f))
+    (delete-file f))))
 
 (defn status-sync
   "Import status updates from ABACUS and put them on the archive queue"
   []
-  (doseq [f (filter #(.isFile %)
+  (doseq [f (filter #(and (.isFile %) (valid? %))
                     (file-seq (file import-dir)))]
-    (when (valid? f)
-      (msg/publish "queue.archive" (read-file f))
+    (let [{product-number :productNumber} (read-file f)
+          production (production/find-by-productnumber product-number)]
+      (msg/publish "queue.archive" production)
       (delete-file f))))
 
 (defn notify
