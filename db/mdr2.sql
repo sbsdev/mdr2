@@ -30,7 +30,15 @@ CREATE TABLE production (
   audioFormat TEXT,
   -- SBS specific columns 
   state INTEGER,
+  -- production number given by the erp system. We should really use
+  -- this as the primary key but alas some productions are done
+  -- without involving the erp system, so we need to keep our own
+  -- primary key
   productNumber TEXT,
+  -- provisional number given to the production by the libary system.
+  -- There is only a libraryNumber if there is no productNumber, i.e.
+  -- if this production is done behind the back of the erp system
+  libraryNumber TEXT, 
   FOREIGN KEY(state) REFERENCES state(id)
 );
 
