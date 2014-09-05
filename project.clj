@@ -7,6 +7,7 @@
                  [org.clojure/java.jdbc "0.3.5"]
                  [org.xerial/sqlite-jdbc "3.7.2"]
                  [org.clojure/data.xml "0.0.8"]
+                 [org.clojure/data.zip "0.1.1"]
                  [com.github.kyleburton/clj-xpath "1.4.3"]
                  [com.cemerick/friend "0.2.1"]
                  [me.raynes/fs "1.4.6"]
