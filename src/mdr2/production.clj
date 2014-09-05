@@ -3,8 +3,13 @@
   (:refer-clojure :exclude [find])
   (:require [clojure.java.io :refer [file]]
             [me.raynes.fs :as fs]
+            [clj-time.core :as t]
+            [clj-time.format :as f]
             [environ.core :refer [env]]
             [mdr2.db :as db]))
+
+(def ^:private default-publisher "Swiss Library for the Blind, Visually Impaired and Print Disabled")
+(def ^:private default-date-formatter (f/formatters :date))
 
 (def production-path (env :production-path))
 
@@ -39,3 +44,20 @@
   [id]
   (db/delete id)
   (fs/delete-dir (fs/parent (path id))))
+
+(defn uuid
+  "Return a randomly generated UUID optionally prefixed with `prefix`"
+  ([] (uuid "ch-sbs-"))
+  ([prefix] (str prefix (java.util.UUID/randomUUID))))
+
+(defn default-meta-data
+  "Return default meta data"
+  []
+  {:publisher default-publisher
+   :date (f/unparse default-date-formatter (t/now))
+   :identifier (uuid)})
+
+(defn add-default-meta-data
+  "Add the default meta data to a production"
+  [production]
+  (merge (default-meta-data) production))

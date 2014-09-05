@@ -10,6 +10,7 @@
                  [com.github.kyleburton/clj-xpath "1.4.3"]
                  [com.cemerick/friend "0.2.1"]
                  [me.raynes/fs "1.4.6"]
+                 [clj-time "0.8.0"]
                  [environ "1.0.0"]
                  [org.immutant/immutant "2.x.incremental.264"]]
   :repositories [["Immutant 2.x incremental builds"
