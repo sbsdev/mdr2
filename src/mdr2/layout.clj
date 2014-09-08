@@ -7,9 +7,9 @@
 
 (defn button-group [buttons]
   [:div.btn-group
-   (for [{href :href glyphicon-class :glyphicon} buttons]
+   (for [{href :href icon :icon} buttons]
      [:a.btn.btn-default {:href href}
-      (glyphicon glyphicon-class)])])
+      (glyphicon icon)])])
 
 (defn loginbar 
   "Display a login link or information about the currently logged in user if user is non-nil"

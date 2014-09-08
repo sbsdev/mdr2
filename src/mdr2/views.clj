@@ -22,15 +22,14 @@
           [:td (link-to (str "/production/" (:id p)) (:title p))]
           [:td (:state p)]
           [:td
-           [:div.btn-toolbar {:role "toolbar"}
-            [:div.btn-group
-             [:a.btn.btn-default {:href (str "/production/" (:id p) ".xml")}
-              [:span.glyphicon.glyphicon-download]]
-             [:a.btn.btn-default {:href (str "/production/" (:id p) "/upload")}
-              [:span.glyphicon.glyphicon-upload]]
-             (when (friend/authorized? #{:admin} identity)
-               [:a.btn.btn-default {:href (str "/production/" (:id p) "/delete")}
-                [:span.glyphicon.glyphicon-trash]])]]]])]])))
+           (layout/button-group
+            (remove nil? [{:href (str "/production/" (:id p) ".xml")
+                           :icon "download"}
+                          {:href (str "/production/" (:id p) "/upload")
+                           :icon "upload"}
+                          (when (friend/authorized? #{:admin} identity)
+                            {:href (str "/production/" (:id p) "/delete")
+                             :icon "trash"})]))]])]])))
 
 (defn production [request id]
   (let [p (prod/find id)
