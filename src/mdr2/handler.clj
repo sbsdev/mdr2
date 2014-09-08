@@ -8,19 +8,30 @@
             (cemerick.friend [workflows :as workflows]
                              [credentials :as creds])
             [ring.util.response :as response]
+            [ring.middleware.nested-params :as nested-params]
             [mdr2.db :as db]
             [mdr2.views :as views]))
 
 (defroutes app-routes
   "Main routes for the application"
   (GET "/" request (views/home request))
+  ;; bulk import of productions
+  (GET "/production/upload" request (friend/authenticated
+                                     (views/production-bulk-import-form request)))
+  (POST "/production/upload-confirm" [file :as r] (friend/authenticated
+                                                   (views/production-bulk-import-confirm r file)))
+  (POST "/production/upload" [productions :as r] (friend/authenticated
+                                                  (views/production-bulk-import r productions)))
+  ;; individual productions
   (GET "/production/:id.xml" [id] (friend/authenticated (views/production-xml id)))
   (GET "/production/:id/upload" [id :as r] (friend/authenticated (views/file-upload-form r id)))
   (POST "/production/:id/upload" [id file :as r] (friend/authenticated (views/production-add-xml r id file)))
   (GET "/production/:id" [id :as r] (friend/authenticated (views/production r id)))
   (GET "/production/:id/delete" [id] (friend/authorize #{:admin} (views/production-delete id)))
+  ;; auth
   (GET "/login" [] (views/login-form))
   (GET "/logout" req (friend/logout* (response/redirect "/")))
+  ;; resources and 404
   (route/resources "/")
   (route/not-found "Not Found"))
 
@@ -32,4 +43,5 @@
         :workflows [(workflows/interactive-form)]
         :unauthorized-handler views/unauthorized})
       handler/site
+      nested-params/wrap-nested-params
       wrap-base-url))

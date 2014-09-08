@@ -1,10 +1,12 @@
 (ns mdr2.views
-  (:require [ring.util.response :as response]
+  (:require [clojure.string :refer [capitalize]]
+            [ring.util.response :as response]
             [hiccup.form :as form]
             [hiccup.element :refer [link-to]]
             [cemerick.friend :as friend]
             [me.raynes.fs :as fs]
             [mdr2.production :as prod]
+            [mdr2.vubis :as vubis]
             [mdr2.layout :as layout]
             [mdr2.dtbook :refer [dtbook]]
             [mdr2.pipeline1 :as pipeline]))
@@ -14,6 +16,7 @@
         user (friend/current-authentication request)]
     (layout/common user
      [:h1 "Productions"]
+     (layout/button-group [{:href "/production/upload" :icon "upload"}])
      [:table.table.table-striped
       [:thead [:tr [:th "Title"] [:th "State"] [:th "Action"]]]
       [:tbody
@@ -72,6 +75,55 @@
 (defn production-delete [id]
   (prod/delete id)
   (response/redirect "/"))
+
+(defn production-bulk-import-form [request & [errors]]
+  (let [user (friend/current-authentication request)]
+    (layout/common user
+     [:h1 "Upload new productions from Vubis XML"]
+     (when (seq? errors)
+       [:p [:ul.alert.alert-danger (for [e errors] [:li e])]])
+     (form/form-to
+      {:enctype "multipart/form-data"}
+      [:post (str "/production/upload-confirm")]
+      (form/file-upload "file")
+      (form/submit-button "Upload")))))
+
+(defn production-bulk-import-confirm-form [request productions]
+  (let [user (friend/current-authentication request)
+        keys [:title :creator :source :description :libraryNumber :sourcePublisher :sourceDate]]
+    (layout/common
+     user
+     [:h1 "Productions to import"]
+     [:table.table.table-striped
+      [:thead [:tr (for [k keys]
+                     [:th (capitalize (name k))])]]
+      [:tbody
+       (for [p productions]
+         [:tr (for [k keys]
+                [:td (get p k)])])]]
+     (form/form-to
+      [:post "/production/upload"]
+        (for [p productions]
+          (for [k keys]
+            (form/with-group "productions"
+              (form/with-group (:libraryNumber p)
+                (form/hidden-field k (get p k))))))
+      (form/submit-button {:class "btn btn-default"} "Confirm")))))
+
+(defn production-bulk-import-confirm
+  [request file]
+  (let [{tempfile :tempfile} file
+        errors (vubis/validate (.getPath tempfile))]
+    (if (seq errors)
+      (production-bulk-import-form request errors)
+      (production-bulk-import-confirm-form request (vubis/read-file tempfile)))))
+
+(defn production-bulk-import
+  [request productions]
+  (let [user (friend/current-authentication request)]
+    (doseq [[_ p] productions]
+      (prod/update-or-create! p))
+    (response/redirect "/")))
 
 (defn login-form []
   (layout/common nil
