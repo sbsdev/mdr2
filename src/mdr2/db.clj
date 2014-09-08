@@ -27,6 +27,25 @@
   [production]
   (jdbc/insert! db :production production))
 
+(defn- update-or-insert!
+  "Updates columns or inserts a new row in the specified table"
+  [db table row where-clause]
+  (jdbc/with-db-transaction [t-con db]
+    (let [result (jdbc/update! t-con table row where-clause)]
+      (if (zero? (first result))
+        (jdbc/insert! t-con table row)
+        result))))
+
+(defn add-or-update!
+  "Add or update the given `production`"
+  [{libraryNumber :libraryNumber productNumber :productNumber :as production}]
+  (cond
+   libraryNumber (update-or-insert!
+                  db :production production ["libraryNumber = ?" libraryNumber])
+   productNumber (update-or-insert!
+                  db :production production ["productNumber = ?" productNumber])
+   :else (jdbc/insert! db :production production)))
+
 (defn delete
   "Remove the production with the given `id`"
   [id]
@@ -39,4 +58,3 @@
     (let [roles (jdbc/query db ["SELECT role.name from role JOIN user_role on user_role.role_id = role.id WHERE user_role.user_id = ?" (:id user)] 
                             :row-fn (comp keyword s/lower-case :name))]
       (assoc user :roles (set roles)))))
-

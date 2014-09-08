@@ -24,6 +24,11 @@
   (db/add p)
   (fs/mkdirs (fs/parent (path id))))
 
+(defn update-or-create!
+  [{id :id :as production}]
+  (db/add-or-update! production)
+  (fs/mkdirs (fs/parent (path id))))
+
 (defn find
   "Find a production given its `id`"
   [id]
