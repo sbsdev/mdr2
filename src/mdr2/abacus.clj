@@ -52,7 +52,7 @@
   (doseq [f (filter #(and (.isFile %) (valid? %))
                     (file-seq (file import-dir)))]
     (msg/publish "queue.create" (read-file f))
-    (delete-file f))))
+    (delete-file f)))
 
 (defn status-sync
   "Import status updates from ABACUS and put them on the archive queue"
@@ -67,5 +67,4 @@
 (defn notify
   "Create an XML file to be read by ABACUS. This is used to send
   status notifications to ABACUS."
-  [production]
-  )
+  [production])
