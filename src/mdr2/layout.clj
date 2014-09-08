@@ -2,15 +2,24 @@
   "Define the basic page structure and layout"
   (:require [hiccup.page :refer [html5 include-css]]))
 
+(defn glyphicon [class]
+  [:span {:class (str "glyphicon glyphicon-" class)}])
+
+(defn button-group [buttons]
+  [:div.btn-group
+   (for [{href :href glyphicon-class :glyphicon} buttons]
+     [:a.btn.btn-default {:href href}
+      (glyphicon glyphicon-class)])])
+
 (defn loginbar 
   "Display a login link or information about the currently logged in user if user is non-nil"
   [user]
   [:ul.nav.navbar-nav.navbar-right
    (if user
      (list
-      [:li [:a "Logged in as " [:b (:username user)]]]
-      [:li [:a {:href "/logout"} "Logout"]])
-     [:li [:a {:href "/login"} "Login"]])])
+      [:li [:a [:b (:username user)]]]
+      [:li [:a {:href "/logout"} (glyphicon "log-out")]])
+     [:li [:a {:href "/login"} (glyphicon "log-in")]])])
 
 (defn navbar
   "Display the navbar"
