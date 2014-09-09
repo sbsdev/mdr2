@@ -95,15 +95,26 @@
 (defn export
   "Export the state of a production as a csv-like structure, ready to
   be consumed by ABACUS"
-  [{:keys [productNumber totalTime state audioFormat multimediaType date id] :as production}]
+  [{:keys [productNumber totalTime state audioFormat multimediaType
+           date id producedDate volumes] :as production}]
   (->> [(create-row 2 productNumber)
         (create-row 233 totalTime) ; in minutes
         (create-row 106 state) ; Process Status Madras
+        ;; FIXME: what exactly is the document status? In what way is
+        ;; it different than the process status? In my view there is
+        ;; only one state and that is the state of the production. Is
+        ;; the production ready for recording, is it waiting for
+        ;; volume splitting, etc?
         (create-row 107 :FIXME) ; Document Status Madras
         (create-row 276 audioFormat)
-        (create-row 275 :FIXME) ; Number of CDs
+        ;; FIXME: the number of CDs is only determined at the time of
+        ;; archiving. Is this persisted in the db?
+        (create-row 275 volumes ; Number of CDs
         (create-row 277 multimediaType)
-        (create-row 252 :FIXME) ; Date of production end
+        ;; FIXME: again the date of the end of the production is only
+        ;; known once we start the archiving. Should this be persisted
+        ;; to the db?
+        (create-row 252 producedDate) ; Date of production end
         (create-row 274 date) ; Date of production start
         (create-row 4 (production/dam-number production))] ; for legacy purposes
        (remove nil?) ; remove empty rows
