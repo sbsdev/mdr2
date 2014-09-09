@@ -18,18 +18,20 @@
    :date "MetaData/dc/date"
    :source "MetaData/dc/source"
    :language "MetaData/dc/language"
-   ;; :source_edition "MetaData/sbs/auflageJahr"
-   ;; :source_publisher "MetaData/sbs/verlag"
+   :sourcePublisher "MetaData/ncc/sourcePublisher"
+   :sourceEdition "MetaData/ncc/sourceDate"
+   ;;   :volumes "MetaData/ncc/setInfo" ; not sure if this is reliable
+   :revisionDate "MetaData/ncc/revisionDate"
    })
 
-(defn- read-file
+(defn read-file
   "Read an export file from ABACUS and return a map with all the data"
   [file]
   (let [xml (-> file slurp xml->doc)]
     (into {} (for [[key path] param-mapping]
                [key ($x:text (str root path) xml)]))))
 
-(defn import-file
+(defn import-productions
   "Import new productions from ABACUS and put them on the create queue"
   []
   (doseq [f (filter #(and (.isFile %) (validation/valid? %))
@@ -46,11 +48,6 @@
           production (production/find-by-productnumber product-number)]
       (msg/publish "queue.archive" production)
       (delete-file f))))
-
-(defn notify
-  "Create an XML file to be read by ABACUS. This is used to send
-  status notifications to ABACUS."
-  [production])
 
 (defn escape
   "Escape a string `s` for ABACUS consumption"
@@ -90,7 +87,7 @@
         (create-row 276 audioFormat)
         ;; FIXME: the number of CDs is only determined at the time of
         ;; archiving. Is this persisted in the db?
-        (create-row 275 volumes ; Number of CDs
+        (create-row 275 volumes) ; Number of CDs
         (create-row 277 multimediaType)
         ;; FIXME: again the date of the end of the production is only
         ;; known once we start the archiving. Should this be persisted
