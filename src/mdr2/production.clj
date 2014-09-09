@@ -66,3 +66,8 @@
   "Add the default meta data to a production"
   [production]
   (merge (default-meta-data) production))
+
+(defn dam-number
+  "Return an id for a production as it is expected by legacy systems"
+  [{id :id}]
+  (str "dam" id))
