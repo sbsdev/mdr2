@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+  <xs:element name="AbaConnectContainer">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Task"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Task">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Parameter"/>
+        <xs:element ref="Transaction"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Parameter">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Application"/>
+        <xs:element ref="Id"/>
+        <xs:element ref="Version"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Application">
+    <xs:simpleType>
+      <xs:restriction base="xs:token">
+        <xs:enumeration value="MadrasApi"/>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:element>
+  <xs:element name="Id">
+    <xs:simpleType>
+      <xs:restriction base="xs:token">
+        <xs:enumeration value="Document"/>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:element>
+  <xs:element name="Version">
+    <xs:simpleType>
+      <xs:restriction base="xs:token">
+        <xs:enumeration value="1.0"/>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:element>
+  <xs:element name="Transaction">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="DocumentData"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="DocumentData">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="artikel_nr"/>
+        <xs:element ref="priority"/>
+        <xs:element ref="deadline"/>
+        <xs:element ref="title"/>
+        <xs:element ref="process_status"/>
+        <xs:element ref="document_status"/>
+        <xs:element ref="is_meta"/>
+        <xs:element ref="mvl_only"/>
+        <xs:element ref="MetaData"/>
+      </xs:sequence>
+      <xs:attribute name="command" use="required">
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="mdaDocAdd"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="artikel_nr" type="xs:NCName"/>
+  <xs:element name="priority" type="xs:NCName"/>
+  <xs:element name="deadline" type="xs:date"/>
+  <xs:element name="process_status" type="xs:NCName"/>
+  <xs:element name="document_status" type="xs:NCName"/>
+  <xs:element name="is_meta" type="xs:NCName"/>
+  <xs:element name="mvl_only" type="xs:NCName"/>
+  <xs:element name="MetaData">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="dc"/>
+        <xs:element ref="sbs"/>
+        <xs:element ref="ncc"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="dc">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="title"/>
+        <xs:element minOccurs="0" ref="creator"/>
+        <xs:element minOccurs="0" ref="source"/>
+        <xs:element ref="language"/>
+        <xs:element ref="date"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="creator" type="xs:string"/>
+  <xs:element name="source" type="xs:NMTOKEN"/>
+  <xs:element name="language" type="xs:NCName"/>
+  <xs:element name="date" type="xs:date"/>
+  <xs:element name="sbs">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="idVorstufe"/>
+        <xs:element ref="printPageNumber"/>
+        <xs:element ref="idPrint"/>
+        <xs:element ref="kostenstelle"/>
+        <xs:sequence minOccurs="0">
+          <xs:element ref="idZeitkurz"/>
+          <xs:element ref="jahr"/>
+        </xs:sequence>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="idVorstufe" type="xs:string"/>
+  <xs:element name="printPageNumber" type="xs:integer"/>
+  <xs:element name="idPrint" type="xs:integer"/>
+  <xs:element name="kostenstelle" type="xs:integer"/>
+  <xs:element name="idZeitkurz" type="xs:NCName"/>
+  <xs:element name="jahr" type="xs:integer"/>
+  <xs:element name="ncc">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="sourcePublisher"/>
+        <xs:element ref="sourceDate"/>
+        <xs:element minOccurs="0" ref="narrator"/>
+        <xs:element ref="setInfo"/>
+        <xs:element ref="revisionDate"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="sourcePublisher" type="xs:NCName"/>
+  <xs:element name="sourceDate" type="xs:string"/>
+  <xs:element name="narrator" type="xs:NCName"/>
+  <xs:element name="setInfo" type="xs:integer"/>
+  <xs:element name="revisionDate" type="xs:date"/>
+  <xs:element name="title" type="xs:string"/>
+</xs:schema>

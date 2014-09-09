@@ -1,0 +1,51 @@
+default namespace = ""
+
+start =
+  element AbaConnectContainer {
+    element Task {
+      element Parameter {
+        element Application { "MadrasApi" },
+        element Id { "Document" },
+        element Version { "1.0" }
+      },
+      element Transaction {
+        element DocumentData {
+          attribute command { "mdaDocAdd" },
+          element artikel_nr { xsd:NCName },
+          element priority { xsd:NCName },
+          element deadline { xsd:date },
+          title,
+          element process_status { xsd:NCName },
+          element document_status { xsd:NCName },
+          element is_meta { xsd:NCName },
+          element mvl_only { xsd:NCName },
+          element MetaData {
+            element dc {
+              title,
+              element creator { text }?,
+              element source { xsd:NMTOKEN }?,
+              element language { xsd:NCName },
+              element date { xsd:date }
+            },
+            element sbs {
+              element idVorstufe { text },
+              element printPageNumber { xsd:integer },
+              element idPrint { xsd:integer },
+              element kostenstelle { xsd:integer },
+              (element idZeitkurz { xsd:NCName },
+               element jahr { xsd:integer })?
+            },
+            element ncc {
+              element sourcePublisher { xsd:NCName },
+              element sourceDate { text },
+              element narrator { xsd:NCName }?,
+               # FIXME: could probably also be something of the form "1 of 3"
+              element setInfo { xsd:integer }, 
+              element revisionDate { xsd:date }
+            }
+          }
+        }
+      }
+    }
+  }
+title = element title { text }
