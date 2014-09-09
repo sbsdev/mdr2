@@ -108,7 +108,7 @@
         (create-row 4 (production/dam-number production))] ; for legacy purposes
        (remove nil?) ; remove empty rows
        wrap-rows ; wrap the payload
-       (map #(conj %2 %1) (iterate inc 1)) ; number each row
+       (map-indexed #(conj %2 %1)) ; number each row
        (map #(string/join "," %))
        (map println-str)
        (string/join)))
