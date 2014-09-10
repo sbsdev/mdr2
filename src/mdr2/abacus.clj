@@ -31,18 +31,35 @@
     (into {} (for [[key path] param-mapping]
                [key ($x:text (str root path) xml)]))))
 
-(defn import-productions
+(defn- file-startswith? [f xs]
+  (some #(.startsWith % (.getName f)) xs))
+
+(defn open-production?
+  "Is the given `file` an export for opening a production?"
+  [file]
+  (file-startswith? file ["SN1_" "SN10_"]))
+
+(defn import-new-productions
   "Import new productions from ABACUS and put them on the create queue"
   []
-  (doseq [f (filter #(and (.isFile %) (validation/valid? %))
+  (doseq [f (filter #(and (.isFile %)
+                          (open-production? %)
+                          (validation/valid-open? %))
                     (file-seq (file import-dir)))]
     (msg/publish "queue.create" (read-file f))
     (delete-file f)))
 
-(defn status-sync
-  "Import status updates from ABACUS and put them on the archive queue"
+(defn recorded-production?
+  "Is the given `file` an export for a production that has been recorded?"
+  [file]
+  (file-startswith? file ["SN3_" "SN12_"]))
+
+(defn import-recorded-productions
+  "Import recorded productions from ABACUS and put them on the archive queue"
   []
-  (doseq [f (filter #(and (.isFile %) (validation/valid? %))
+  (doseq [f (filter #(and (.isFile %)
+                          (recorded-production? %)
+                          (validation/valid-recorded? %))
                     (file-seq (file import-dir)))]
     (let [{product-number :productNumber} (read-file f)
           production (production/find-by-productnumber product-number)]

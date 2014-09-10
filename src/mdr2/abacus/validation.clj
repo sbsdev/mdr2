@@ -5,11 +5,12 @@
            javax.xml.validation.SchemaFactory
            javax.xml.transform.stream.StreamSource))
 
-(def ^:private schema "schema/open_production.xsd")
+(def ^:private open-schema "schema/open_production.xsd")
+(def ^:private recorded-schema "schema/recorded_production.xsd")
 
 (defn valid?
-  "Check if an export file from ABACUS is valid"
-  [file]
+  "Check if a `file` is valid against given `schema`"
+  [file schema]
   ;; basically a minimal port of
   ;; http://stackoverflow.com/questions/15732/whats-the-best-way-to-validate-an-xml-file-against-an-xsd-file
   (let [validator (.newValidator
@@ -20,4 +21,16 @@
       (.validate validator (StreamSource. file))
       true
       (catch SAXException e false))))
+
+(defn valid-open?
+  "Check if an export file from ABACUS is a valid request for opening
+  a production"
+  [file]
+  (valid? file open-schema))
+
+(defn valid-recorded?
+  "Check if an export file from ABACUS is valid request for announcing
+  that a production is recorded"
+  [file]
+  (valid? file recorded-schema))
 
