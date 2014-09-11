@@ -110,12 +110,9 @@
   (->> [(create-row 2 productNumber)
         (create-row 233 totalTime) ; in minutes
         (create-row 106 state) ; Process Status Madras
-        ;; FIXME: what exactly is the document status? In what way is
-        ;; it different than the process status? In my view there is
-        ;; only one state and that is the state of the production. Is
-        ;; the production ready for recording, is it waiting for
-        ;; volume splitting, etc?
-        (create-row 107 :FIXME) ; Document Status Madras
+        (create-row 107 "") ; the Document Status Madras is no longer
+                            ; used but ABACUS still expects it. Just
+                            ; give it an empty string to chew on
         (create-row 276 audioFormat)
         ;; FIXME: the number of CDs is only determined at the time of
         ;; archiving. Is this persisted in the db?
