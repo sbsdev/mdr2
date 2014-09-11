@@ -1,4 +1,7 @@
 (ns mdr2.rdf
+  "Create RDF files containing meta data for a production.
+
+  RDF files are needed to pass meta data to the archive."
   (:require [clojure.data.xml :as xml]
             [mdr2.dtb :as dtb]))
 

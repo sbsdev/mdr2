@@ -1,4 +1,5 @@
 (ns mdr2.abacus.validation
+  "Validate XML files from ABACUS"
   (:require [clojure.java.io :as io])
   (:import javax.xml.XMLConstants
            org.xml.sax.SAXException

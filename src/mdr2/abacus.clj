@@ -1,4 +1,19 @@
 (ns mdr2.abacus
+  "Import and export files to and from ABACUS
+
+  Unfortunately the interface to our ERP is very crude: you basically
+  read and write files from an directory. The import from ABACUS is
+  done via XML and the export to ABACUS is done via some form of csv.
+  The interface imports the following notifications:
+
+  - Start (open) a production
+  - a production is recorded
+  - Meta data updates
+
+  and the interface sends notifications to ABACUS when:
+
+  - the state of a production changes
+  - meta data of a production changes."
   (:require [clj-xpath.core :refer [xml->doc $x:text]]
             [clojure.java.io :refer [file delete-file]]
             [clojure.string :as string]

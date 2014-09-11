@@ -1,4 +1,5 @@
 (ns mdr2.vubis
+  "Import and validate XML files from the library system"
   (:require [clojure.java.io :as io]
             [clojure.xml :as xml]
             [clojure.zip :as zip]
