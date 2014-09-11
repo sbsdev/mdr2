@@ -3,7 +3,7 @@
   :url "https://github.com/sbsdev/mdr2"
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [hiccup "1.0.5"]
-                 [compojure "1.1.8"]
+                 [compojure "1.1.9"]
                  [org.clojure/java.jdbc "0.3.5"]
                  [org.xerial/sqlite-jdbc "3.7.2"]
                  [org.clojure/data.xml "0.0.8"]
@@ -23,9 +23,7 @@
           :src-dir-uri "https://github.com/sbsdev/mdr2/blob/master/"
           :src-linenum-anchor-prefix "L"
           :defaults {:doc/format :markdown}
-          ;; FIXME: we have problems with files that require immutant
-          ;; modules as this is only available during run time
-          :exclude [immutant.init mdr2.abacus mdr2.messaging]}
+          :exclude [immutant.init]}
   :ring {:handler mdr2.handler/app}
   :immutant {:context-path "/"}
   :profiles {:dev {:dependencies [[javax.servlet/servlet-api "2.5"]
