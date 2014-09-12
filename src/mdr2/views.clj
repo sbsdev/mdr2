@@ -68,7 +68,7 @@
       (file-upload-form request id errors)
       (do
         ;; store the xml
-        (fs/move tempfile (prod/path id))
+        (fs/move tempfile (prod/xml-path id))
         ;; and redirect to the index
         (response/redirect "/")))))
 

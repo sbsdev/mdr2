@@ -18,6 +18,13 @@
   [id]
   (.getPath (file production-path (str id ".xml"))))
 
+(defn xml-path
+  "Return the path to the meta data XML file, i.e. the DTBook file for a given `id`"
+  [id]
+  (let [file-name (str id ".xml")
+        path (path id)]
+    (.getPath (file path file-name))))
+
 (defn create
   "Create a production"
   [{id :id :as p}]
