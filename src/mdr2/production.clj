@@ -14,9 +14,10 @@
 (def production-path (env :production-path))
 
 (defn path
-  "Return the path for a given `id`"
+  "Return the path for a given `id`. This is a directory where the
+  relevant files are stored"
   [id]
-  (.getPath (file production-path (str id ".xml"))))
+  (.getPath (file production-path (str id))))
 
 (defn xml-path
   "Return the path to the meta data XML file, i.e. the DTBook file for a given `id`"
@@ -29,7 +30,7 @@
   "Create a production"
   [{id :id :as p}]
   (db/add p)
-  (fs/mkdirs (fs/parent (path id))))
+  (fs/mkdirs (path id)))
 
 (defn update-or-create!
   [{id :id :as production}]
@@ -55,7 +56,7 @@
   "Delete a production with the given `id`"
   [id]
   (db/delete id)
-  (fs/delete-dir (fs/parent (path id))))
+  (fs/delete-dir (path id)))
 
 (defn uuid
   "Return a randomly generated UUID optionally prefixed with `prefix`"
