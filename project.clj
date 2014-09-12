@@ -13,7 +13,8 @@
                  [me.raynes/fs "1.4.6"]
                  [clj-time "0.8.0"]
                  [environ "1.0.0"]
-                 [org.immutant/immutant "2.x.incremental.264"]]
+                 [org.immutant/immutant "2.0.0-alpha1"]
+                 [ring/ring-devel "1.3.0"]]
   :repositories [["Immutant 2.x incremental builds"
                   "http://downloads.immutant.org/incremental/"]]
   :plugins [[lein-ring "0.8.10"]
