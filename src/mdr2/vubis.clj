@@ -25,8 +25,7 @@
   "Get the subfield text for the given `path` in the given `record`.
   Returns nil if there is no such subfield"
   [record path]
-  (when-let [loc (apply xml1-> record path)]
-    (text loc)))
+  (some-> (apply xml1-> record path) text))
 
 (defn read-file
   "Read an export file from VUBIS and return a map with all the data"
