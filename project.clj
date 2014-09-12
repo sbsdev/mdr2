@@ -23,9 +23,9 @@
   :codox {:project {:name "Madras2"}
           :src-dir-uri "https://github.com/sbsdev/mdr2/blob/master/"
           :src-linenum-anchor-prefix "L"
-          :defaults {:doc/format :markdown}
-          :exclude [immutant.init]}
+          :defaults {:doc/format :markdown}}
   :ring {:handler mdr2.handler/app}
+  :main mdr2.main
   :immutant {:context-path "/"}
   :profiles {:dev {:dependencies [[javax.servlet/servlet-api "2.5"]
                                   [ring/ring-devel "1.3.1"]]}
