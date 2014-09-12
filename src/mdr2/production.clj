@@ -33,9 +33,18 @@
   (fs/mkdirs (path id)))
 
 (defn update-or-create!
-  [{id :id :as production}]
-  (db/add-or-update! production)
-  (fs/mkdirs (fs/parent (path id))))
+  [production]
+  (as-> production p
+        ;; if a production doesn't have an id yet, e.g. in the case of
+        ;; a bulk import, the id is assigned in the db insert. For
+        ;; that reason we need the as-> macro to thread the result of
+        ;; the insert into the next function
+        ;; FIXME: we should delay the insert into the db until the
+        ;; dirs have been created, i.e. if anything the view fails the
+        ;; db should be rolled back. Kinda like the
+        ;; @transaction.commit_on_success annotation in Django
+        (db/add-or-update! p)
+        (fs/mkdirs (path (:id p)))))
 
 (defn find
   "Find a production given its `id`"

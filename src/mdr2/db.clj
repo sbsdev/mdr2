@@ -36,15 +36,27 @@
         (jdbc/insert! t-con table row)
         result))))
 
+(defn get-generated-key
+  "Get the generated key from an `insert!` result. Returns `nil` if the
+  result is not from an insert"
+  [result]
+  (let [m (first result)]
+    (when (map? m) ; an insert returns a sequence of maps
+      (-> m vals first))))
+
 (defn add-or-update!
-  "Add or update the given `production`"
+  "Add or update the given `production`. Return it possibly updated
+  with an `:id` in the case of an insert"
   [{libraryNumber :libraryNumber productNumber :productNumber :as production}]
-  (cond
-   libraryNumber (update-or-insert!
-                  db :production production ["libraryNumber = ?" libraryNumber])
-   productNumber (update-or-insert!
-                  db :production production ["productNumber = ?" productNumber])
-   :else (jdbc/insert! db :production production)))
+  (if-let [key (get-generated-key 
+                (cond
+                 libraryNumber (update-or-insert!
+                                db :production production ["libraryNumber = ?" libraryNumber])
+                 productNumber (update-or-insert!
+                                db :production production ["productNumber = ?" productNumber])
+                 :else (jdbc/insert! db :production production)))]
+    (assoc production :id key)
+    production))
 
 (defn delete
   "Remove the production with the given `id`"
