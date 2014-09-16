@@ -81,6 +81,39 @@
       (msg/publish "queue.archive" production)
       (delete-file f))))
 
+(defn status-request?
+  "Is the given `file` an status request for a production?"
+  [file]
+  (file-startswith? file ["SNStatus_"]))
+
+(defn import-status-requests
+  "Import status requests from ABACUS and put them on the queue"
+  []
+  (doseq [f (filter #(and (.isFile %)
+                          (status-request? %)
+                          (validation/valid-status-request? %))
+                    (file-seq (file import-dir)))]
+    (let [{product-number :productNumber} (read-file f)
+          production (production/find-by-productnumber product-number)]
+      (msg/publish "queue.notify-abacus" production)
+      (delete-file f))))
+
+(defn metadata-update?
+  "Is the given `file` an metadata update for a production?"
+  [file]
+  (file-startswith? file ["SNMeta_"]))
+
+(defn import-metadata-updates
+  "Import metadata updates from ABACUS and put them on the queue"
+  []
+  (doseq [f (filter #(and (.isFile %)
+                          (metadata-update? %)
+                          (validation/valid-metadata-sync? %))
+                    (file-seq (file import-dir)))]
+    (let [production (read-file f)]
+      (msg/publish "queue.metadata-update" production)
+      (delete-file f))))
+
 (defn escape
   "Escape a string `s` for ABACUS consumption"
   [s]

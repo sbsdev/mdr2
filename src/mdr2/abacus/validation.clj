@@ -8,6 +8,8 @@
 
 (def ^:private open-schema "schema/open_production.xsd")
 (def ^:private recorded-schema "schema/recorded_production.xsd")
+(def ^:private metadata-schema "schema/metadata_sync.xsd")
+(def ^:private status-request-schema "schema/status_request.xsd")
 
 (defn valid?
   "Check if a `file` is valid against given `schema`"
@@ -34,4 +36,16 @@
   that a production is recorded"
   [file]
   (valid? file recorded-schema))
+
+(defn valid-metadata-sync?
+  "Check if an export file from ABACUS is valid request for
+  synchronizing meta data"
+  [file]
+  (valid? file metadata-schema))
+
+(defn valid-status-request?
+  "Check if an export file from ABACUS is valid request status
+  information"
+  [file]
+  (valid? file status-request-schema))
 

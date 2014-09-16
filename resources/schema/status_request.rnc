@@ -1,0 +1,19 @@
+default namespace = ""
+
+start =
+  element AbaConnectContainer {
+    element Task {
+      element Parameter {
+        element Application { "MadrasApi" },
+        element Id { "Document" },
+        element Version { "1.0" }
+      },
+      element Transaction {
+        element DocumentData {
+          attribute command { "mdaDocModify" },
+          element artikel_nr { xsd:NCName },
+          element identifier { xsd:NCName }
+        }
+      }
+    }
+  }

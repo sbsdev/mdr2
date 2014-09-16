@@ -11,6 +11,7 @@
 (def create-queue (msg/queue "create"))
 (def archive-queue (msg/queue "archive"))
 (def notify-abacus-queue (msg/queue "notify-abacus"))
+(def metadata-update (msg/queue "metadata-update"))
 
 (defn -main []
   ;; start web server
@@ -20,6 +21,7 @@
   (msg/listen create-queue #(production/create %))
   (msg/listen archive-queue #(archive/archive %))
   (msg/listen notify-abacus-queue #(abacus/export-file %))
+  (msg/listen metadata-update #(production/update-or-create! %))
 
   ;; set up cron jobs
   ;; get new productions from ABACUS
