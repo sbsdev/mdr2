@@ -9,6 +9,7 @@
             [mdr2.vubis :as vubis]
             [mdr2.layout :as layout]
             [mdr2.dtbook :refer [dtbook]]
+            [mdr2.dtbook.validation :refer [validate-metadata]]
             [mdr2.pipeline1 :as pipeline]))
 
 (defn home [request]
@@ -63,7 +64,11 @@
 
 (defn production-add-xml [request id file]
   (let [{tempfile :tempfile} file
-        errors (pipeline/validate (.getPath tempfile))]
+        path (.getPath tempfile)
+        production (prod/find id)
+        errors (concat 
+                (pipeline/validate path) ; validate XML
+                (validate-metadata path production))] ; validate meta data
     (if (seq errors)
       (file-upload-form request id errors)
       (do
