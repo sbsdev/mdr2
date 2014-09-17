@@ -19,6 +19,7 @@
   "Returns an empty seq on successful validation of `file` as a proper
   vubis export file or a seq of error messages otherwise"
   [file]
+  ;; FIXME: implement proper validation for vubis export files
   ())
 
 (defn get-subfield

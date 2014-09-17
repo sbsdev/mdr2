@@ -43,6 +43,8 @@
         ;; dirs have been created, i.e. if anything the view fails the
         ;; db should be rolled back. Kinda like the
         ;; @transaction.commit_on_success annotation in Django
+        ;; FIXME: shouldn't we update the DTBook XML when the meta
+        ;; data is updated?
         (db/add-or-update! p)
         (fs/mkdirs (path (:id p)))))
 
