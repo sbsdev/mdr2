@@ -14,37 +14,40 @@
 
   - the state of a production changes
   - meta data of a production changes."
-  (:require [clj-xpath.core :refer [xml->doc $x:text]]
-            [clojure.java.io :refer [file delete-file]]
+  (:require [clojure.java.io :as io]
+            [clojure.xml :as xml]
+            [clojure.zip :as zip]
+            [clojure.data.zip.xml :refer [xml1-> attr= attr text]]
             [clojure.string :as string]
             [immutant.messaging :as msg]
             [environ.core :refer [env]]
             [mdr2.production :as production]
             [mdr2.abacus.validation :as validation]))
 
-(def ^:private root "/AbaConnectContainer/Task/Transaction/DocumentData/")
+(def ^:private root-path [:Task :Transaction :DocumentData])
 (def ^:private import-dir (env :abacus-import-dir))
 (def ^:private export-dir (env :abacus-export-dir))
 
 (def ^:private param-mapping
-  {:productNumber "artikel_nr"
-   :title "MetaData/dc/title"
-   :creator "MetaData/dc/creator"
-   :date "MetaData/dc/date"
-   :source "MetaData/dc/source"
-   :language "MetaData/dc/language"
-   :sourcePublisher "MetaData/ncc/sourcePublisher"
-   :sourceEdition "MetaData/ncc/sourceDate"
-   ;;   :volumes "MetaData/ncc/setInfo" ; not sure if this is reliable
-   :revisionDate "MetaData/ncc/revisionDate"
+  {:productNumber [:artikel_nr text]
+   :title [:MetaData :dc :title text]
+   :creator [:MetaData :dc :creator text]
+   :date [:MetaData :dc :date text]
+   :source [:MetaData :dc :source text]
+   :language [:MetaData :dc :language text]
+   :sourcePublisher [:MetaData :ncc :sourcePublisher text]
+   :sourceEdition [:MetaData :ncc :sourceDate text]
+   ;;   :volumes [:MetaData :ncc :setInfo text] ; not sure if this is reliable
+   :revisionDate [:MetaData :ncc :revisionDate text]
    })
 
 (defn read-file
   "Read an export file from ABACUS and return a map with all the data"
   [file]
-  (let [xml (-> file slurp xml->doc)]
-    (into {} (for [[key path] param-mapping]
-               [key ($x:text (str root path) xml)]))))
+  (let [zipper (-> file io/file xml/parse zip/xml-zip)]
+    (into {} (for [[key path] param-mapping
+                   :let [val (apply xml1-> zipper (concat root-path path))]]
+               [key val]))))
 
 (defn file-startswith? [f xs]
   (some #(.startsWith (.getName f) %) xs))
@@ -52,12 +55,12 @@
 (defn get-all-files []
   "Return all files from the `import-dir`"
   (filter #(.isFile %)
-          (file-seq (file import-dir))))
+          (file-seq (io/file import-dir))))
 
 (defn delete-files!
   "Delete all given `files`"
   [files]
-  (doseq [f files] (delete-file f)))
+  (doseq [f files] (io/delete-file f)))
 
 (defn open-production?
   "Is the given `file` an export for opening a production?"
@@ -199,5 +202,5 @@
   files are overwritten"
   [{productNumber :productNumber :as production}]
   ;; file names are supposed to be "Ax_productNumber.txt, e.g. Ax_DY15000.txt"
-  (let [file-name (.getPath (file export-dir "Ax_" productNumber ".txt"))]
+  (let [file-name (.getPath (io/file export-dir "Ax_" productNumber ".txt"))]
     (spit file-name (export production))))
