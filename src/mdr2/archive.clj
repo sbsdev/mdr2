@@ -52,7 +52,7 @@ https://github.com/technomancy/leiningen/blob/stable/doc/DEPLOY.md"
    :flags "x"
    :transaktions_status "pending"})
 
-(defn container-id 
+(defn container-id
   "Return the name of a archive spool directory for a given production"
   [{:keys [id iso-path]}]
   (cond
@@ -77,7 +77,7 @@ https://github.com/technomancy/leiningen/blob/stable/doc/DEPLOY.md"
   the spool directory as ready for archiving and concludes the
   archiving process from the point of view of the production system."
   [production]
-  (let [new-job 
+  (let [new-job
         {:verzeichnis (container-id production)
          ;; :id (container-id production)
          ;; :verzeichnis (container-path production)
@@ -94,27 +94,27 @@ https://github.com/technomancy/leiningen/blob/stable/doc/DEPLOY.md"
   [{:keys [path] :as production}]
   (let [tmp-path (.getPath (fs/temp-dir "mdr2"))
         ;; FIXME: it might be better to allow for different manifest names
-        manifest (.getPath (file path "package.opf"))] 
+        manifest (.getPath (file path "package.opf"))]
     (pipeline/audio-encoder {:input manifest :output tmp-path})
     (assoc production :encoded-path tmp-path)))
 
-(defn create-iso 
-  "Pack a production in an iso file. 
+(defn create-iso
+  "Pack a production in an iso file.
 Return a map with an additional key `iso-path` where the iso is located"
   [{:keys [encoded-path title publisher]
     :or {title "FIXME:" publisher "FIXME:"} ; title and publisher shouldn't be empty
     :as production}]
   (let [iso-path (.getPath (file (fs/tmpdir) (fs/temp-name "mdr2" ".iso")))]
-    (sh "genisoimage" 
-        "-quiet" 
-        "-r" 
+    (sh "genisoimage"
+        "-quiet"
+        "-r"
         "-publisher" publisher
         "-V" title ; volume ID (volume name or label)
         "-J" ; Generate Joliet directory records in addition to regular ISO9660 filenames.
         "-o" iso-path encoded-path)
     (assoc production :iso-path iso-path)))
 
-(defn copy-files 
+(defn copy-files
   "Copy a production to the archive spool dir"
   ;; FIXME: this fails if there is already an archiving in progress
   ;; because it will create another copy inside the already existing
@@ -125,12 +125,12 @@ Return a map with an additional key `iso-path` where the iso is located"
         iso-archive-path (.getPath (file archive-path iso-archive-name))]
     ;; if the production has an iso archive that, otherwise just
     ;; archive the raw unencoded files
-    (if iso-path 
+    (if iso-path
       (fs/copy+ iso-path iso-archive-path)
       (fs/copy-dir path archive-path)))
   production)
 
-(defn create-rdf 
+(defn create-rdf
   "Create an rdf file and place it in the archive spool directory"
   [production]
   (let [rdf (rdf/rdf production)
@@ -153,7 +153,7 @@ Return a map with an additional key `iso-path` where the iso is located"
       create-rdf ; create an rdf file
       add-to-db)) ; add it to the db so that the agadir machinery will pick it up
 
-(defn archive-distribution-master 
+(defn archive-distribution-master
   "Archive a distribution master .i.e. a DTB encoded with mp3 and packed up in one or more iso files"
   [production]
   (-> production
@@ -169,4 +169,3 @@ Return a map with an additional key `iso-path` where the iso is located"
   [production]
   (archive-master production)
   (archive-distribution-master production))
-  
