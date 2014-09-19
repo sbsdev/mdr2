@@ -29,7 +29,7 @@ CREATE TABLE production (
   totalTime TEXT,
   audioFormat TEXT,
   -- SBS specific columns 
-  state INTEGER,
+  state_id INTEGER,
   -- production number given by the erp system. We should really use
   -- this as the primary key but alas some productions are done
   -- without involving the erp system, so we need to keep our own
@@ -39,12 +39,13 @@ CREATE TABLE production (
   -- There is only a libraryNumber if there is no productNumber, i.e.
   -- if this production is done behind the back of the erp system
   libraryNumber TEXT, 
-  FOREIGN KEY(state) REFERENCES state(id)
+  FOREIGN KEY(state_id) REFERENCES state(id)
 );
 
 CREATE TABLE state (
   id INTEGER PRIMARY KEY,
-  name TEXT
+  name TEXT,
+  sort_order INTEGER
 );
 
 CREATE TABLE product (

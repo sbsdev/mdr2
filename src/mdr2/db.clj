@@ -20,7 +20,7 @@
 (defn find-all
   "Return all productions"
   []
-  (jdbc/query db ["SELECT * FROM production"]))
+  (jdbc/query db ["SELECT production.*, state.name AS state FROM production LEFT JOIN state ON (state_id = state.id)"]))
 
 (defn add
   "Add the given `production`"
@@ -70,3 +70,10 @@
     (let [roles (jdbc/query db ["SELECT role.name from role JOIN user_role on user_role.role_id = role.id WHERE user_role.user_id = ?" (:id user)] 
                             :row-fn (comp keyword s/lower-case :name))]
       (assoc user :roles (set roles)))))
+
+(defn initial-state
+  "Return the id of the initial state"
+  []
+  (:id
+   (first
+    (jdbc/query db ["SELECT id FROM state WHERE sort_order IN (SELECT MIN(sort_order) FROM state)"]))))
