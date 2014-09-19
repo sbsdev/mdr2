@@ -22,10 +22,28 @@
   []
   (jdbc/query db ["SELECT production.*, state.name AS state FROM production LEFT JOIN state ON (state_id = state.id)"]))
 
+(defn get-generated-key
+  "Get the generated key from an `insert!` result. Returns `nil` if the
+  result is not from an insert"
+  [result]
+  (let [m (first result)]
+    (when (map? m) ; an insert returns a sequence of maps
+      (-> m vals first))))
+
 (defn add
   "Add the given `production`"
   [production]
-  (jdbc/insert! db :production production))
+  (if-let [key (get-generated-key (jdbc/insert! db :production production))]
+    (assoc production :id key)
+    production))
+
+(defn update!
+  "Update the production with the given `productNumber` or `libraryNumber`"
+  [{libraryNumber :libraryNumber productNumber :productNumber :as production}]
+  (when (or productNumber libraryNumber)
+    (jdbc/update! db :production production
+                  (cond libraryNumber ["libraryNumber = ?" libraryNumber]
+                        productNumber ["productNumber = ?" productNumber]))))
 
 (defn- update-or-insert!
   "Updates columns or inserts a new row in the specified table"
@@ -36,25 +54,16 @@
         (jdbc/insert! t-con table row)
         result))))
 
-(defn get-generated-key
-  "Get the generated key from an `insert!` result. Returns `nil` if the
-  result is not from an insert"
-  [result]
-  (let [m (first result)]
-    (when (map? m) ; an insert returns a sequence of maps
-      (-> m vals first))))
-
 (defn add-or-update!
   "Add or update the given `production`. Return it possibly updated
   with an `:id` in the case of an insert"
   [{libraryNumber :libraryNumber productNumber :productNumber :as production}]
-  (if-let [key (get-generated-key 
-                (cond
-                 libraryNumber (update-or-insert!
-                                db :production production ["libraryNumber = ?" libraryNumber])
-                 productNumber (update-or-insert!
-                                db :production production ["productNumber = ?" productNumber])
-                 :else (jdbc/insert! db :production production)))]
+  (if-let [key (get-generated-key
+                (if (or productNumber libraryNumber)
+                  (update-or-insert! db :production production
+                   (cond libraryNumber ["libraryNumber = ?" libraryNumber]
+                         productNumber ["productNumber = ?" productNumber]))
+                  (jdbc/insert! db :production production)))]
     (assoc production :id key)
     production))
 

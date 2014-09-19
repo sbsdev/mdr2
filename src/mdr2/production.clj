@@ -28,9 +28,11 @@
 
 (defn create
   "Create a production"
-  [{id :id :as p}]
-  (db/add p)
-  (fs/mkdirs (path id)))
+  [production]
+  (as-> production p
+        (merge p {:state (db/initial-state)})
+        (db/add p)
+        (fs/mkdirs (path (:id p)))))
 
 (defn update-or-create!
   [production]
@@ -47,6 +49,9 @@
         ;; data is updated?
         (db/add-or-update! p)
         (fs/mkdirs (path (:id p)))))
+
+(defn update [production]
+  (db/update production))
 
 (defn find
   "Find a production given its `id`"
