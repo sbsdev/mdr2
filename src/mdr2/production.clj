@@ -30,7 +30,7 @@
   "Create a production"
   [production]
   (as-> production p
-        (merge p {:state (db/initial-state)})
+        (merge p {:state_id (db/initial-state)})
         (db/add p)
         (fs/mkdirs (path (:id p)))))
 
