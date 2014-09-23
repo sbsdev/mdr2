@@ -29,7 +29,7 @@ CREATE TABLE production (
   totalTime TEXT,
   audioFormat TEXT,
   -- SBS specific columns 
-  state_id INTEGER,
+  state INTEGER,
   -- production number given by the erp system. We should really use
   -- this as the primary key but alas some productions are done
   -- without involving the erp system, so we need to keep our own
@@ -38,14 +38,7 @@ CREATE TABLE production (
   -- provisional number given to the production by the libary system.
   -- There is only a libraryNumber if there is no productNumber, i.e.
   -- if this production is done behind the back of the erp system
-  libraryNumber TEXT, 
-  FOREIGN KEY(state_id) REFERENCES state(id)
-);
-
-CREATE TABLE state (
-  id INTEGER PRIMARY KEY,
-  name TEXT,
-  sort_order INTEGER
+  libraryNumber TEXT
 );
 
 CREATE TABLE product (
@@ -79,10 +72,10 @@ CREATE TABLE user_role (
 );
 
 
-INSERT INTO production (title, creator, source, language, sourcePublisher) VALUES 
-("Unter dem Deich", "Hart, Maarten", "978-3-492-05573-4", "de", "Piper"),
-("Aus dem Berliner Journal", "Frisch, Max", "978-3-518-42352-3", "de", "Suhrkamp"),
-("Info-Express, Februar 2014", "SZB Taubblinden-Beratung", "", "de", "");
+INSERT INTO production (title, creator, source, language, sourcePublisher, state) VALUES
+("Unter dem Deich", "Hart, Maarten", "978-3-492-05573-4", "de", "Piper", 0),
+("Aus dem Berliner Journal", "Frisch, Max", "978-3-518-42352-3", "de", "Suhrkamp", 0),
+("Info-Express, Februar 2014", "SZB Taubblinden-Beratung", "", "de", "", 0);
 
 INSERT INTO user (username, first_name, last_name, email, password) VALUES 
 ("eglic", "Christian", "Egli", "christian.egli@sbs.ch", "$2a$10$go0rXWbX0IjhzkgjGKGf/uigHii6.bqTls.tjfQAsg9IdoSe.ouPq"),

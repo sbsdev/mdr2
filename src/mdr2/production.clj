@@ -6,7 +6,8 @@
             [clj-time.core :as t]
             [clj-time.format :as f]
             [environ.core :refer [env]]
-            [mdr2.db :as db]))
+            [mdr2.db :as db]
+            [mdr2.state :as state]))
 
 (def ^:private default-publisher "Swiss Library for the Blind, Visually Impaired and Print Disabled")
 (def ^:private default-date-formatter (f/formatters :date))
@@ -30,7 +31,7 @@
   "Create a production"
   [production]
   (as-> production p
-        (merge p {:state_id (db/initial-state)})
+        (merge p {:state (state/initial-state)})
         (db/add p)
         (fs/mkdirs (path (:id p)))))
 

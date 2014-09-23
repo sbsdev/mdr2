@@ -6,6 +6,7 @@
             [cemerick.friend :as friend]
             [me.raynes.fs :as fs]
             [mdr2.production :as prod]
+            [mdr2.state :as state]
             [mdr2.vubis :as vubis]
             [mdr2.layout :as layout]
             [mdr2.dtbook :refer [dtbook]]
@@ -24,7 +25,7 @@
        (for [p (prod/find-all)]
          [:tr
           [:td (link-to (str "/production/" (:id p)) (:title p))]
-          [:td (:state p)]
+          [:td (state/to-str (:state p))]
           [:td
            (layout/button-group
             (remove nil? [{:href (str "/production/" (:id p) ".xml")

@@ -3,24 +3,34 @@
   (:refer-clojure :exclude [find])
   (:require [clojure.java.jdbc :as jdbc]
             [clojure.string :as s]
-            [environ.core :refer [env]]))
+            [environ.core :refer [env]]
+            [mdr2.state :as state]))
 
 (def ^:private db (env :database-url))
+
+(defn map-state-to-kw [row]
+  (update-in row [:state] state/from-int))
+
+(defn map-state-to-int [row]
+  (update-in row [:state] state/to-int))
 
 (defn find
   "Return production for given `id`"
   [id]
-  (first (jdbc/query db ["SELECT * FROM production WHERE id = ?" id])))
+  (first (jdbc/query db ["SELECT * FROM production WHERE id = ?" id]
+                     :row-fn map-state-to-kw)))
 
 (defn find-by-productnumber
   "Return production for given productnumber"
   [productnumber]
-  (first (jdbc/query db ["SELECT * FROM production WHERE productNumber = ?" productnumber])))
+  (first (jdbc/query db ["SELECT * FROM production WHERE productNumber = ?" productnumber]
+                     :row-fn map-state-to-kw)))
 
 (defn find-all
   "Return all productions"
   []
-  (jdbc/query db ["SELECT production.*, state.name AS state FROM production LEFT JOIN state ON (state_id = state.id)"]))
+  (jdbc/query db ["SELECT production.* FROM production"]
+              :row-fn map-state-to-kw))
 
 (defn get-generated-key
   "Get the generated key from an `insert!` result. Returns `nil` if the
@@ -33,7 +43,7 @@
 (defn add
   "Add the given `production`"
   [production]
-  (if-let [key (get-generated-key (jdbc/insert! db :production production))]
+  (if-let [key (get-generated-key (jdbc/insert! db :production (map-state-to-int production)))]
     (assoc production :id key)
     production))
 
@@ -41,7 +51,7 @@
   "Update the production with the given `productNumber` or `libraryNumber`"
   [{libraryNumber :libraryNumber productNumber :productNumber :as production}]
   (when (or productNumber libraryNumber)
-    (jdbc/update! db :production production
+    (jdbc/update! db :production (map-state-to-int production)
                   (cond libraryNumber ["libraryNumber = ?" libraryNumber]
                         productNumber ["productNumber = ?" productNumber]))))
 
@@ -60,10 +70,10 @@
   [{libraryNumber :libraryNumber productNumber :productNumber :as production}]
   (if-let [key (get-generated-key
                 (if (or productNumber libraryNumber)
-                  (update-or-insert! db :production production
+                  (update-or-insert! db :production (map-state-to-int production)
                    (cond libraryNumber ["libraryNumber = ?" libraryNumber]
                          productNumber ["productNumber = ?" productNumber]))
-                  (jdbc/insert! db :production production)))]
+                  (jdbc/insert! db :production (map-state-to-int production))))]
     (assoc production :id key)
     production))
 
@@ -80,9 +90,3 @@
                             :row-fn (comp keyword s/lower-case :name))]
       (assoc user :roles (set roles)))))
 
-(defn initial-state
-  "Return the id of the initial state"
-  []
-  (:id
-   (first
-    (jdbc/query db ["SELECT id FROM state WHERE sort_order IN (SELECT MIN(sort_order) FROM state)"]))))
