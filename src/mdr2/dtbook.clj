@@ -2,6 +2,46 @@
   "Functionality around [DTBook XML](http://www.daisy.org/z3986/2005/Z3986-2005.html)"
   (:require [clojure.data.xml :as xml]))
 
+(defn default-book
+  "Return an default book sexp"
+  [title creator]
+  [:book
+   [:frontmatter
+    [:doctitle title]
+    [:docauthor creator]
+    [:level1 [:p]]]
+   [:bodymatter
+    [:level1 [:h1] [:p]]]])
+
+(defn commercial-audiobook
+  "Return an sexp for the body of a commercial audiobook"
+  [title creator]
+  [:book
+   [:frontmatter
+    [:doctitle title]
+    [:docauthor creator]
+    [:level1
+     [:h1 "Zu diesem DAISY-Buch"]
+     [:p]]
+    [:level1
+     [:h1 "Bibliographische Angaben"]
+     [:p]]
+    [:level1
+     [:h1 "Klappentexte"]
+     [:p]]]
+   [:bodymatter
+    [:level1 [:h1 "[Audioimport]"] [:p]]]
+   [:rearmatter
+    [:level1
+     [:h1 "Mitwirkende"]
+     [:p]]
+    [:level1
+     [:h1 "Hörbuchbeilagen"]
+     [:p]]
+    [:level1
+     [:h1 "Ende des Buches"]
+     [:p]]]])
+
 (defn- dtbook-sexp 
   [{:keys [title creator subject description publisher date identifier source language rights 
            sourcedate sourceedition sourcepublisher sourcerights sourcetitle
@@ -36,15 +76,13 @@
     [:meta {:name "dtb:producer" :content publisher}]
     [:meta {:name "dtb:producedDate" :content produceddate}]
     [:meta {:name "dtb:revision" :content revision}]
-   [:book
-    [:frontmatter
-     [:doctitle title]
-     [:docauthor creator]
-     [:level1 [:p]]]
-    [:bodymatter
-     [:level1
-      [:h1]
-      [:p]]]]])
+    [:meta {:name "dtb:revisionDate" :content revisiondate}]
+    [:meta {:name "dtb:revisionDescription" :content revisiondescription}]
+    [:meta {:name "dtb:totalTime" :content totaltime}]
+    [:meta {:name "dtb:audioFormat" :content audioformat}]]
+   (if librarynumber
+     (commercial-audiobook title creator)
+     (default-book title creator))])
 
 (defn dtbook 
   "Create a minimal DTBook XML template according to [the spec](http://www.daisy.org/z3986/2005/Z3986-2005.html) for a given `production`"
