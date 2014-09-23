@@ -52,7 +52,7 @@
         (fs/mkdirs (path (:id p)))))
 
 (defn update [production]
-  (db/update production))
+  (db/update! production))
 
 (defn find
   "Find a production given its `id`"
