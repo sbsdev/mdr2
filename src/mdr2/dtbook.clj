@@ -4,10 +4,11 @@
 
 (defn- dtbook-sexp 
   [{:keys [title creator subject description publisher date identifier source language rights 
-           sourceDate sourceEdition sourcePublisher sourceRights sourceTitle
-           multimediaType multimediaContent narrator producedDate 
-           revision revisionDate revisionDescription
-           totalTime audioFormat]}]
+           sourcedate sourceedition sourcepublisher sourcerights sourcetitle
+           multimediatype multimediacontent narrator produceddate 
+           revision revisiondate revisiondescription
+           totaltime audioformat
+           librarynumber]}] ; only books imported from the libray have this
   [:dtbook {:xmlns "http://www.daisy.org/z3986/2005/dtbook/"
             :version "2005-3" :xml:lang language}
    [:head
@@ -24,21 +25,17 @@
     [:meta {:name "dc:Language" :content language}]
     [:meta {:name "dc:Rights" :content rights}]
     [:meta {:name "dtb:uid" :content identifier}]
-    [:meta {:name "dtb:sourceDate" :content sourceDate}]
-    [:meta {:name "dtb:sourceEdition" :content sourceEdition}]
-    [:meta {:name "dtb:sourcePublisher" :content sourcePublisher}]
-    [:meta {:name "dtb:sourceRights" :content sourceRights}]
-    [:meta {:name "dtb:sourceTitle" :content sourceTitle}]
-    [:meta {:name "dtb:multimediaType" :content multimediaType}]
-    [:meta {:name "dtb:multimediaContent" :content multimediaContent}]
+    [:meta {:name "dtb:sourceDate" :content sourcedate}]
+    [:meta {:name "dtb:sourceEdition" :content sourceedition}]
+    [:meta {:name "dtb:sourcePublisher" :content sourcepublisher}]
+    [:meta {:name "dtb:sourceRights" :content sourcerights}]
+    [:meta {:name "dtb:sourceTitle" :content sourcetitle}]
+    [:meta {:name "dtb:multimediaType" :content multimediatype}]
+    [:meta {:name "dtb:multimediaContent" :content multimediacontent}]
     [:meta {:name "dtb:narrator" :content narrator}]
     [:meta {:name "dtb:producer" :content publisher}]
-    [:meta {:name "dtb:producedDate" :content producedDate}]
+    [:meta {:name "dtb:producedDate" :content produceddate}]
     [:meta {:name "dtb:revision" :content revision}]
-    [:meta {:name "dtb:revisionDate" :content revisionDate}]
-    [:meta {:name "dtb:revisionDescription" :content revisionDescription}]
-    [:meta {:name "dtb:totalTime" :content totalTime}]
-    [:meta {:name "dtb:audioFormat" :content audioFormat}]]
    [:book
     [:frontmatter
      [:doctitle title]
