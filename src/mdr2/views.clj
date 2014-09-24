@@ -18,7 +18,8 @@
         user (friend/current-authentication request)]
     (layout/common user
      [:h1 "Productions"]
-     (layout/button-group [{:href "/production/upload" :icon "upload"}])
+     (layout/button-group
+      [(layout/button "/production/upload" (layout/glyphicon "upload"))])
      [:table.table.table-striped
       [:thead [:tr [:th "Title"] [:th "State"] [:th "Action"]]]
       [:tbody
@@ -28,13 +29,20 @@
           [:td (state/to-str (:state p))]
           [:td
            (layout/button-group
-            (remove nil? [{:href (str "/production/" (:id p) ".xml")
-                           :icon "download"}
-                          {:href (str "/production/" (:id p) "/upload")
-                           :icon "upload"}
+            (remove nil? [(layout/button (str "/production/" (:id p) ".xml")
+                                         (layout/glyphicon "download"))
+                          (layout/button (str "/production/" (:id p) "/upload")
+                                         (layout/glyphicon "upload"))
+                          (layout/dropdown [(layout/menu-item
+                                             (str "/production/" (:id p) "/state/" 1)
+                                             "Structured")
+                                            (layout/menu-item
+                                             (str "/production/" (:id p) "/state/" 2)
+                                             "Recorded")]
+                                           (layout/glyphicon "transfer"))
                           (when (friend/authorized? #{:admin} identity)
-                            {:href (str "/production/" (:id p) "/delete")
-                             :icon "trash"})]))]])]])))
+                            (layout/button (layout/glyphicon "trash")
+                                           (str "/production/" (:id p) "/delete")))]))]])]])))
 
 (defn production [request id]
   (let [p (prod/find id)

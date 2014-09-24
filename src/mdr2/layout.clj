@@ -1,15 +1,28 @@
 (ns mdr2.layout
   "Define the basic page structure and layout"
-  (:require [hiccup.page :refer [html5 include-css]]))
+  (:require [hiccup.page :refer [html5 include-css include-js]]))
 
 (defn glyphicon [class]
   [:span {:class (str "glyphicon glyphicon-" class)}])
 
+(defn button [href & body]
+  [:a.btn.btn-default {:href href}
+   body])
+
+(defn menu-item [href & body]
+  [:li [:a {:href href} body]])
+
+(defn dropdown [items & body]
+  [:div.btn-group
+   [:button.btn.btn-default.dropdown-toggle {:type "button" :data-toggle "dropdown"}
+    body
+    [:span.caret]]
+   [:ul.dropdown-menu {:role "menu"}
+    (for [item items] item)]])
+
 (defn button-group [buttons]
   [:div.btn-group
-   (for [{href :href icon :icon} buttons]
-     [:a.btn.btn-default {:href href}
-      (glyphicon icon)])])
+   (for [button buttons] button)])
 
 (defn loginbar 
   "Display a login link or information about the currently logged in user if user is non-nil"
@@ -50,5 +63,7 @@
     [:body
      [:div.container
       (navbar user)
-      body]]))
+      body]
+     (include-js "/js/jquery-1.11.1.min.js")
+     (include-js "/js/bootstrap.min.js")]))
 
