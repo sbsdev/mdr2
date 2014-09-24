@@ -26,17 +26,12 @@
     :enclosures "Talking book enclosures"
     :end "End of book"}})
 
-(defn- fallback
-  "Return the `language` or the fallback language if `language` is blank"
-  [language]
-  (if (s/blank? language)
-    "de"
-    language))
-
 (defn- translate
-  "Return a string for the given `key` and `locale`"
-  [locale key]
-  (get-in translations [locale key] key))
+  "Return a string for the given `key` and `language`"
+  [language key]
+  (let [l (keyword language)
+        locale (if (contains? translations l) l :de)]
+    (get-in translations [locale key] key)))
 
 (defn default-book
   "Return an default book sexp"
@@ -52,8 +47,7 @@
 (defn commercial-audiobook
   "Return an sexp for the body of a commercial audiobook"
   [title creator language]
-  (let [locale (keyword (fallback language))
-        t (partial translate locale)]
+  (let [t (partial translate language)]
     [:book
      [:frontmatter
       [:doctitle title]
