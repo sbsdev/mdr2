@@ -21,6 +21,7 @@
             [clojure.string :as string]
             [immutant.messaging :as msg]
             [environ.core :refer [env]]
+            [mdr2.queues :as queues]
             [mdr2.production :as production]
             [mdr2.abacus.validation :as validation]))
 
@@ -70,7 +71,7 @@
 (defn import-new-production
   "Import a new production from file `f`"
   [f]
-  (msg/publish (msg/queue "create") (read-file f))
+  (msg/publish queues/create-queue (read-file f))
   f)
 
 (defn import-new-productions
@@ -93,7 +94,7 @@
   [f]
   (let [{product-number :productNumber} (read-file f)
         production (production/find-by-productnumber product-number)]
-    (msg/publish (msg/queue "archive") production)
+    (msg/publish queues/archive-queue production)
     f))
 
 (defn import-recorded-productions
@@ -114,7 +115,7 @@
 (defn import-status-request [f]
   (let [{product-number :productNumber} (read-file f)
         production (production/find-by-productnumber product-number)]
-    (msg/publish (msg/queue "notify-abacus") production)
+    (msg/publish queues/notify-abacus-queue production)
     f))
 
 (defn import-status-requests
@@ -133,7 +134,7 @@
   (file-startswith? file ["SNMeta_"]))
 
 (defn import-metadata-update [f]
-  (msg/publish (msg/queue "metadata-update") (read-file f))
+  (msg/publish queues/metadata-update (read-file f))
   f)
 
 (defn import-metadata-updates

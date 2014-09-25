@@ -2,26 +2,21 @@
   (:require [immutant.web :as web]
             [immutant.messaging :as msg]
             [immutant.scheduling :as scheduling]
+            [mdr2.queues :as queues]
             [mdr2.handler :as handler]
             [mdr2.abacus :as abacus]
             [mdr2.production :as production]
             [mdr2.archive :as archive]))
-
-;; set up queues
-(def create-queue (msg/queue "create"))
-(def archive-queue (msg/queue "archive"))
-(def notify-abacus-queue (msg/queue "notify-abacus"))
-(def metadata-update (msg/queue "metadata-update"))
 
 (defn -main []
   ;; start web server
   (web/run-dmc handler/app)
 
   ;; wire up queues
-  (msg/listen create-queue #(production/create %))
-  (msg/listen archive-queue #(archive/archive %))
-  (msg/listen notify-abacus-queue #(abacus/export-file %))
-  (msg/listen metadata-update #(production/update-or-create! %))
+  (msg/listen queues/create-queue #(production/create %))
+  (msg/listen queues/archive-queue #(archive/archive %))
+  (msg/listen queues/notify-abacus-queue #(abacus/export-file %))
+  (msg/listen queues/metadata-update #(production/update-or-create! %))
 
   ;; set up cron jobs
   ;; get new productions from ABACUS
