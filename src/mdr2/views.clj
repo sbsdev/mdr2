@@ -5,6 +5,8 @@
             [hiccup.element :refer [link-to]]
             [cemerick.friend :as friend]
             [me.raynes.fs :as fs]
+            [immutant.messaging :as msg]
+            [mdr2.queues :as queues]
             [mdr2.production :as prod]
             [mdr2.state :as state]
             [mdr2.vubis :as vubis]
@@ -142,8 +144,12 @@
 
 (defn production-set-state [request id state]
   (let [user (friend/current-authentication request)
-        p (prod/find id)]
-    (prod/update! (assoc p :state (keyword (lower-case state))))
+        state (keyword (lower-case state))
+        p (assoc (prod/find id) :state state)]
+    (prod/update! p)
+    (when (= state :recorded)
+      ;; put the production on the archive queue
+      (msg/publish queues/archive-queue p))
     (response/redirect "/")))
 
 (defn login-form []
