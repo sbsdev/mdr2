@@ -18,6 +18,11 @@
 
 (def initial-state :new)
 
+(def states-graph
+  {:new [:structured]
+   :structured [:recorded]
+   :archived [:structured]})
+
 (defn to-int 
   "Return the state number for the given `state`"
   [state]
@@ -34,3 +39,7 @@
   [i]
   (get states-inverse i :new))
 
+(defn next-states
+  "For given `state` return a seq of possible next states"
+  [state]
+  (get states-graph state))

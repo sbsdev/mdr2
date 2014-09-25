@@ -51,7 +51,7 @@
         (db/add-or-update! p)
         (fs/mkdirs (path (:id p)))))
 
-(defn update [production]
+(defn update! [production]
   (db/update! production))
 
 (defn find

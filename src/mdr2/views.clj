@@ -1,5 +1,5 @@
 (ns mdr2.views
-  (:require [clojure.string :refer [capitalize]]
+  (:require [clojure.string :refer [capitalize lower-case]]
             [ring.util.response :as response]
             [hiccup.form :as form]
             [hiccup.element :refer [link-to]]
@@ -23,26 +23,27 @@
      [:table.table.table-striped
       [:thead [:tr [:th "Title"] [:th "State"] [:th "Action"]]]
       [:tbody
-       (for [p (prod/find-all)]
+       (for [{:keys [id title state]} (prod/find-all)]
          [:tr
-          [:td (link-to (str "/production/" (:id p)) (:title p))]
-          [:td (state/to-str (:state p))]
+          [:td (link-to (str "/production/" id) title)]
+          [:td (state/to-str state)]
           [:td
            (layout/button-group
-            (remove nil? [(layout/button (str "/production/" (:id p) ".xml")
+            (remove nil? [(layout/button (str "/production/" id ".xml")
                                          (layout/glyphicon "download"))
-                          (layout/button (str "/production/" (:id p) "/upload")
+                          (layout/button (str "/production/" id "/upload")
                                          (layout/glyphicon "upload"))
-                          (layout/dropdown [(layout/menu-item
-                                             (str "/production/" (:id p) "/state/" 1)
-                                             "Structured")
-                                            (layout/menu-item
-                                             (str "/production/" (:id p) "/state/" 2)
-                                             "Recorded")]
-                                           (layout/glyphicon "transfer"))
+                          (when-let [next-state (first (state/next-states state))]
+                            (form/form-to {:class "btn-group"} 
+                                          [:post (str "/production/" id "/state")]
+                                          (form/hidden-field :state next-state)
+                                          [:button.btn.btn-default (layout/glyphicon "transfer") " " (state/to-str next-state)]))
+                          ;; (layout/dropdown (for [next (state/next-states state)]
+                          ;;                    (layout/menu-item "#" (state/to-str next)))
+                          ;;                  (layout/glyphicon "transfer"))
                           (when (friend/authorized? #{:admin} identity)
                             (layout/button (layout/glyphicon "trash")
-                                           (str "/production/" (:id p) "/delete")))]))]])]])))
+                                           (str "/production/" id "/delete")))]))]])]])))
 
 (defn production [request id]
   (let [p (prod/find id)
@@ -137,6 +138,12 @@
   (let [user (friend/current-authentication request)]
     (doseq [[_ p] productions]
       (prod/update-or-create! p))
+    (response/redirect "/")))
+
+(defn production-set-state [request id state]
+  (let [user (friend/current-authentication request)
+        p (prod/find id)]
+    (prod/update! (assoc p :state (keyword (lower-case state))))
     (response/redirect "/")))
 
 (defn login-form []

@@ -48,11 +48,12 @@
     production))
 
 (defn update!
-  "Update the production with the given `productNumber` or `libraryNumber`"
-  [{libraryNumber :libraryNumber productNumber :productNumber :as production}]
-  (when (or productNumber libraryNumber)
+  "Update the production with the given `id`, `productNumber` or `libraryNumber`"
+  [{libraryNumber :libraryNumber productNumber :productNumber id :id :as production}]
+  (when (or id productNumber libraryNumber)
     (jdbc/update! db :production (map-state-to-int production)
-                  (cond libraryNumber ["libraryNumber = ?" libraryNumber]
+                  (cond id ["id = ?" id]
+                        libraryNumber ["libraryNumber = ?" libraryNumber]
                         productNumber ["productNumber = ?" productNumber]))))
 
 (defn- update-or-insert!
