@@ -28,17 +28,27 @@ CREATE TABLE production (
   revisionDescription TEXT,
   totalTime TEXT,
   audioFormat TEXT,
-  -- SBS specific columns 
+  -- Number of CDs
+  volumes INTEGER,
+  -- Number of levels
+  depth INTEGER,
+  -- SBS specific columns
   state INTEGER,
   -- production number given by the erp system. We should really use
   -- this as the primary key but alas some productions are done
   -- without involving the erp system, so we need to keep our own
   -- primary key
   productNumber TEXT,
-  -- provisional number given to the production by the libary system.
+  -- provisional number given to the production by the library system.
   -- There is only a libraryNumber if there is no productNumber, i.e.
   -- if this production is done behind the back of the erp system
-  libraryNumber TEXT
+  libraryNumber TEXT,
+  -- The unique id that the library assigns to this production
+  librarySignature TEXT
+  -- FIXME: seems backwards that the production system has to know the
+  -- id of the library system. Alas in order to be able to archive we
+  -- need to know it. Otherwise apparently the library cannot find
+  -- anything anymore in the archive :-/
 );
 
 CREATE TABLE product (

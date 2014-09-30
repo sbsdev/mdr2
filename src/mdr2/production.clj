@@ -71,15 +71,20 @@
   [id]
   (db/find id))
 
+(defn find-all
+  "Find all productions"
+  []
+  (db/find-all))
+
 (defn find-by-productnumber
   "Find a production given its `productNumber`"
   [productnumber]
   (db/find-by-productnumber productnumber))
 
-(defn find-all
-  "Find all productions"
-  []
-  (db/find-all))
+(defn find-by-state
+  "Find all productions with the given `state`"
+  [state]
+  (db/find-by-state state))
 
 (defn delete
   "Delete a production with the given `id`"

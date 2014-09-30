@@ -27,6 +27,8 @@
   (GET "/production/:id/upload" [id :as r] (friend/authenticated (views/file-upload-form r id)))
   (POST "/production/:id/upload" [id file :as r] (friend/authenticated (views/production-add-xml r id file)))
   (POST "/production/:id/state" [id state :as r] (friend/authenticated (views/production-set-state r id state)))
+  (GET "/catalog" request (friend/authenticated (views/catalog request)))
+  (POST "/catalog/:id" [id library-signature :as r] (friend/authenticated (views/production-catalog r id library-signature)))
   (GET "/production/:id" [id :as r] (friend/authenticated (views/production r id)))
   (GET "/production/:id/delete" [id] (friend/authorize #{:admin} (views/production-delete id)))
   ;; auth

@@ -96,6 +96,49 @@
         ;; and redirect to the index
         (response/redirect "/")))))
 
+(defn catalog [request]
+  (let [identity (friend/identity request)
+        user (friend/current-authentication request)]
+    (layout/common user
+                   [:h1 "Productions"]
+     [:table.table.table-striped
+      [:thead [:tr [:th "Title"] [:th "Product Number"] [:th "DAM Number"] [:th "Duration"] [:th "Number of CDs"] [:th "Depth"] [:th "Narrator"] [:th "Date of Production"] [:th "Libary signature"]]]
+      [:tbody
+       (for [{:keys [id title productNumber totalTime volumes depth narrator producedDate] 
+              :as production} (prod/find-by-state :recorded)]
+         [:tr
+          [:td (link-to (str "/production/" id) title)]
+          [:td productNumber]
+          [:td (prod/dam-number production)]
+          [:td totalTime]
+          [:td volumes]
+          [:td depth]
+          [:td narrator]
+          [:td producedDate]
+          [:td
+           (form/form-to {:class "form-inline" :role "form"}
+                         [:post (str "/catalog/" id)]
+                         [:div.form-group
+                          (form/label {:class "sr-only"} :librarysignature "Signature")
+                          (form/text-field
+                           {:class "form-control" :placeholder "Enter Signature"}
+                           :librarysignature)
+                          [:button.btn.btn-default
+                           (layout/glyphicon "transfer")]])]])]])))
+
+
+(defn production-catalog [request id librarysignature]
+  (let [user (friend/current-authentication request)
+        p (assoc (prod/find id) 
+            :librarysignature librarysignature
+            ;; the state is implicitly set to :cataloged if the
+            ;; librarysignature is set
+            :state :cataloged)]
+    (prod/update! p)
+    ;; put the production on the archive queue
+    (msg/publish queues/archive-queue p)
+    (response/redirect "/")))
+
 (defn production-delete [id]
   (prod/delete id)
   (response/redirect "/"))
@@ -154,9 +197,6 @@
         state (keyword (lower-case state))
         p (assoc (prod/find id) :state state)]
     (prod/update! p)
-    (when (= state :recorded)
-      ;; put the production on the archive queue
-      (msg/publish queues/archive-queue p))
     (response/redirect "/")))
 
 (defn login-form []

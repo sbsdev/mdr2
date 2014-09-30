@@ -20,16 +20,22 @@
   (first (jdbc/query db ["SELECT * FROM production WHERE id = ?" id]
                      :row-fn map-state-to-kw)))
 
-(defn find-by-productnumber
-  "Return production for given productnumber"
-  [productnumber]
-  (first (jdbc/query db ["SELECT * FROM production WHERE productNumber = ?" productnumber]
-                     :row-fn map-state-to-kw)))
-
 (defn find-all
   "Return all productions"
   []
   (jdbc/query db ["SELECT production.* FROM production"]
+              :row-fn map-state-to-kw))
+
+(defn find-by-productnumber
+  "Return the first production for given `productnumber`"
+  [productnumber]
+  (first (jdbc/query db ["SELECT * FROM production WHERE productNumber = ?" productnumber]
+                     :row-fn map-state-to-kw)))
+
+(defn find-by-state
+  "Return all productions for given state"
+  [s]
+  (jdbc/query db ["SELECT * FROM production WHERE state = ?" (state/to-int s)]
               :row-fn map-state-to-kw))
 
 (defn get-generated-key
