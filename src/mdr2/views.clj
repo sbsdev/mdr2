@@ -25,28 +25,35 @@
      [:table.table.table-striped
       [:thead [:tr [:th "Title"] [:th "State"] [:th "Action"]]]
       [:tbody
-       (for [{:keys [id title state]} (prod/find-all)]
+       (for [{:keys [id title state] :as production} (prod/find-all)]
          [:tr
           [:td (link-to (str "/production/" id) title)]
           [:td (state/to-str state)]
           [:td
            (layout/button-group
-            (remove nil? [(layout/button (str "/production/" id ".xml")
-                                         (layout/glyphicon "download"))
-                          (layout/button (str "/production/" id "/upload")
-                                         (layout/glyphicon "upload"))
-                          (when-let [next-state (first (state/next-states state))]
-                            (form/form-to {:class "btn-group"} 
-                                          [:post (str "/production/" id "/state")]
-                                          (form/hidden-field :state next-state)
-                                          [:button.btn.btn-default (layout/glyphicon "transfer") " " (state/to-str next-state)]))
-                          ;; (layout/dropdown (for [next (state/next-states state)]
-                          ;;                    (layout/menu-item "#" (state/to-str next)))
-                          ;;                  (layout/glyphicon "transfer"))
-                          (when (friend/authorized? #{:admin} identity)
-                            (layout/button (layout/glyphicon "trash")
-                                           (str "/production/" id "/delete")))]))]])]])))
-
+            (remove
+             nil?
+             [(layout/button (str "/production/" id ".xml")
+                             (layout/glyphicon "download"))
+              (layout/button (str "/production/" id "/upload")
+                             (layout/glyphicon "upload"))
+              (when-let [next-state (first (state/next-states state))]
+                (form/form-to {:class "btn-group"}
+                              [:post (str "/production/" id "/state")]
+                              (form/hidden-field :state next-state)
+                              [:button.btn.btn-default
+                               ;; only allow setting the state to
+                               ;; recorded if there is a DAISY export
+                               (when (and (= next-state :recorded)
+                                          (not (prod/has-daisy-export? production)))
+                                 {:disabled "disabled"})
+                               (layout/glyphicon "transfer") " " (state/to-str next-state)]))
+              ;; (layout/dropdown (for [next (state/next-states state)]
+              ;;                    (layout/menu-item "#" (state/to-str next)))
+              ;;                  (layout/glyphicon "transfer"))
+              (when (friend/authorized? #{:admin} identity)
+                (layout/button (layout/glyphicon "trash")
+                               (str "/production/" id "/delete")))]))]])]])))
 (defn production [request id]
   (let [p (prod/find id)
         user (friend/current-authentication request)]
@@ -78,14 +85,14 @@
   (let [{tempfile :tempfile} file
         path (.getPath tempfile)
         production (prod/find id)
-        errors (concat 
+        errors (concat
                 (pipeline/validate path) ; validate XML
                 (validate-metadata path production))] ; validate meta data
     (if (seq errors)
       (file-upload-form request id errors)
       (do
         ;; store the xml
-        (fs/move tempfile (prod/xml-path id))
+        (fs/move tempfile (prod/xml-path production))
         ;; and redirect to the index
         (response/redirect "/")))))
 

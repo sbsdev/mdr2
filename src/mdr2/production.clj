@@ -15,17 +15,29 @@
 (def production-path (env :production-path))
 
 (defn path
-  "Return the path for a given `id`. This is a directory where the
-  relevant files are stored"
-  [id]
+  "Return the path for a given production. This is a directory where
+  the relevant files are stored"
+  [{id :id}]
   (.getPath (file production-path (str id))))
 
 (defn xml-path
-  "Return the path to the meta data XML file, i.e. the DTBook file for a given `id`"
-  [id]
+  "Return the path to the meta data XML file, i.e. the DTBook file for a given production"
+  [{id :id :as production}]
   (let [file-name (str id ".xml")
-        path (path id)]
+        path (path production)]
     (.getPath (file path file-name))))
+
+(defn daisy-export-path
+  "Return the path to the obi DAISY export for given production"
+  [{id :id :as production}]
+  (let [file-name (str id ".ncx")
+        path (path production)]
+    (.getPath (file path "export" file-name))))
+
+(defn has-daisy-export?
+  "Return true if the production has a DAISY export"
+  [production]
+  (fs/exists? (daisy-export-path production)))
 
 (defn create
   "Create a production"
@@ -33,7 +45,7 @@
   (as-> production p
         (merge p {:state (state/initial-state)})
         (db/add p)
-        (fs/mkdirs (path (:id p)))))
+        (fs/mkdirs (path p))))
 
 (defn update-or-create!
   [production]
@@ -49,7 +61,7 @@
         ;; FIXME: shouldn't we update the DTBook XML when the meta
         ;; data is updated?
         (db/add-or-update! p)
-        (fs/mkdirs (path (:id p)))))
+        (fs/mkdirs (path p))))
 
 (defn update! [production]
   (db/update! production))
@@ -73,7 +85,7 @@
   "Delete a production with the given `id`"
   [id]
   (db/delete id)
-  (fs/delete-dir (path id)))
+  (fs/delete-dir (path {:id id})))
 
 (defn uuid
   "Return a randomly generated UUID optionally prefixed with `prefix`"
