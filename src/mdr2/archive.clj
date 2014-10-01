@@ -35,6 +35,7 @@ https://github.com/technomancy/leiningen/blob/stable/doc/DEPLOY.md"
             [environ.core :refer [env]]
             [me.raynes.fs :as fs]
             [mdr2.production :as production]
+            [mdr2.encode :as encode]
             [mdr2.rdf :as rdf]
             [mdr2.pipeline1 :as pipeline]))
 
@@ -90,30 +91,6 @@ https://github.com/technomancy/leiningen/blob/stable/doc/DEPLOY.md"
     (jdbc/insert! db :container job)
     production))
 
-(defn encode-production
-  "Encode a production, i.e. convert the wav files to mp3"
-  [{:keys [path] :as production}]
-  (let [tmp-path (.getPath (fs/temp-dir "mdr2"))
-        manifest (production/manifest-path production)]
-    (pipeline/audio-encoder {:input manifest :output tmp-path})
-    (assoc production :encoded-path tmp-path)))
-
-(defn create-iso
-  "Pack a production in an iso file.
-Return a map with an additional key `iso-path` where the iso is located"
-  [{:keys [encoded-path title publisher]
-    :or {title "FIXME:" publisher "FIXME:"} ; title and publisher shouldn't be empty
-    :as production}]
-  (let [iso-path (.getPath (file (fs/tmpdir) (fs/temp-name "mdr2" ".iso")))]
-    (sh "genisoimage"
-        "-quiet"
-        "-r"
-        "-publisher" publisher
-        "-V" title ; volume ID (volume name or label)
-        "-J" ; Generate Joliet directory records in addition to regular ISO9660 filenames.
-        "-o" iso-path encoded-path)
-    (assoc production :iso-path iso-path)))
-
 (defn copy-files
   "Copy a production to the archive spool dir"
   ;; FIXME: this fails if there is already an archiving in progress
@@ -138,13 +115,6 @@ Return a map with an additional key `iso-path` where the iso is located"
     (spit rdf-path rdf))
   production)
 
-(defn clean-up-tmp-files
-  "Clean up temporary files of a production, namely encoded-path and iso-path"
-  [{:keys [encoded-path iso-path] :as production}]
-  (doseq [path [encoded-path iso-path]]
-    (fs/delete-dir path))
-  (dissoc production :encoded-path :iso-path))
-
 (defn archive-master
   "Archive a master"
   [production]
@@ -157,12 +127,10 @@ Return a map with an additional key `iso-path` where the iso is located"
   "Archive a distribution master .i.e. a DTB encoded with mp3 and packed up in one or more iso files"
   [production]
   (-> production
-      encode-production ; encode the dtb
-      create-iso ; pack it in an iso
       copy-files ; copy the files to the spool dir
       create-rdf ; create an rdf file
       add-to-db ; add it to the db
-      clean-up-tmp-files))
+      encode/clean-up)) ; remove iso and mp3s
 
 (defn archive
   "Archive a production"
