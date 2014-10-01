@@ -104,35 +104,35 @@
      [:table.table.table-striped
       [:thead [:tr [:th "Title"] [:th "Product Number"] [:th "DAM Number"] [:th "Duration"] [:th "Number of CDs"] [:th "Depth"] [:th "Narrator"] [:th "Date of Production"] [:th "Libary signature"]]]
       [:tbody
-       (for [{:keys [id title productNumber totalTime volumes depth narrator producedDate] 
+       (for [{:keys [id title product_number total_time volumes depth narrator produced_date] 
               :as production} (prod/find-by-state :encoded)]
          [:tr
           [:td (link-to (str "/production/" id) title)]
-          [:td productNumber]
+          [:td product_number]
           [:td (prod/dam-number production)]
-          [:td totalTime]
+          [:td total_time]
           [:td volumes]
           [:td depth]
           [:td narrator]
-          [:td producedDate]
+          [:td produced_date]
           [:td
            (form/form-to {:class "form-inline" :role "form"}
                          [:post (str "/catalog/" id)]
                          [:div.form-group
-                          (form/label {:class "sr-only"} :librarysignature "Signature")
+                          (form/label {:class "sr-only"} :library_signature "Signature")
                           (form/text-field
                            {:class "form-control" :placeholder "Enter Signature"}
-                           :librarysignature)
+                           :library_signature)
                           [:button.btn.btn-default
                            (layout/glyphicon "transfer")]])]])]])))
 
 
-(defn production-catalog [request id librarysignature]
+(defn production-catalog [request id library_signature]
   (let [user (friend/current-authentication request)
         p (assoc (prod/find id) 
-            :librarysignature librarysignature
+            :library_signature library_signature
             ;; the state is implicitly set to :cataloged if the
-            ;; librarysignature is set
+            ;; library_signature is set
             :state :cataloged)]
     (prod/update! p)
     ;; put the production on the archive queue
@@ -157,7 +157,7 @@
 
 (defn production-bulk-import-confirm-form [request productions]
   (let [user (friend/current-authentication request)
-        keys [:title :creator :source :description :libraryNumber :sourcePublisher :sourceDate]]
+        keys [:title :creator :source :description :library_number :source_publisher :source_date]]
     (layout/common
      user
      [:h1 "Productions to import"]
@@ -173,7 +173,7 @@
         (for [p productions]
           (for [k keys]
             (form/with-group "productions"
-              (form/with-group (:libraryNumber p)
+              (form/with-group (:library_number p)
                 (form/hidden-field k (get p k))))))
       (form/submit-button {:class "btn btn-default"} "Confirm")))))
 

@@ -108,7 +108,7 @@
 (defn meta-data
   "Return a map containing all queried meta data for a given DAISY Talking Book"
   [dtb]
-  (let [keys [:multimediaType :audio-format :audio-length]
+  (let [keys [:multimedia_type :audio_format :audio_length]
         fns [multimedia-type audio-format audio-length]]
     ;; of course we could look up the fn using (ns-resolve ns (symbol
     ;; (name kw))) but there is a balance between readybility and

@@ -87,9 +87,9 @@
   (db/find-all))
 
 (defn find-by-productnumber
-  "Find a production given its `productNumber`"
-  [productnumber]
-  (db/find-by-productnumber productnumber))
+  "Find a production given its `product_number`"
+  [product_number]
+  (db/find-by-productnumber product_number))
 
 (defn find-by-state
   "Find all productions with the given `state`"

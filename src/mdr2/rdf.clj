@@ -10,10 +10,10 @@
 
 (defn- rdf-sexp 
   [{:keys [title creator subject description publisher date identifier source language rights 
-           sourceDate sourceEdition sourcePublisher sourceRights sourceTitle
-           multimediaType multimediaContent narrator producer producedDate
-           revision revisionDate revisionDescription
-           totalTime audioFormat type]}]
+           source_date source_edition source_publisher source_rights source_title
+           multimedia_type multimedia_content narrator producer produced_date
+           revision revision_date revision_description
+           total_time audio_format type]}]
   [:rdf:DRF {:xmlns:rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
              :xmlns:dc "http://purl.org/dc/elements/1.1/"
              :xmlns:dtb "http://www.daisy.org/z3986/2005/dtbook/"}
@@ -33,21 +33,21 @@
     [:dc:source source]
     [:dc:language language]
     [:dc:rights rights]
-    [:dtb:sourceDate sourceDate]
-    [:dtb:sourceEdition sourceEdition]
-    [:dtb:sourcePublisher sourcePublisher]
-    [:dtb:sourceRights sourceRights]
-    [:dtb:sourceTitle sourceTitle]
-    [:dtb:multimediaType multimediaType]
-    [:dtb:multimediaContent multimediaContent]
+    [:dtb:sourceDate source_date]
+    [:dtb:sourceEdition source_edition]
+    [:dtb:sourcePublisher source_publisher]
+    [:dtb:sourceRights source_rights]
+    [:dtb:sourceTitle source_title]
+    [:dtb:multimediaType multimedia_type]
+    [:dtb:multimediaContent multimedia_content]
     [:dtb:narrator narrator]
     [:dtb:producer producer]
-    [:dtb:producedDate producedDate]
+    [:dtb:producedDate produced_date]
     [:dtb:revision revision]
-    [:dtb:revisionDate revisionDate]
-    [:dtb:revisionDescription revisionDescription]
-    [:dtb:totalTime totalTime]
-    [:dtb:audioFormat audioFormat]]])
+    [:dtb:revisionDate revision_date]
+    [:dtb:revisionDescription revision_description]
+    [:dtb:totalTime total_time]
+    [:dtb:audioFormat audio_format]]])
 
 (defn rdf
   "Create rdf for a given production"

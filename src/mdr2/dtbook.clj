@@ -79,11 +79,11 @@
 
 (defn- dtbook-sexp 
   [{:keys [title creator subject description publisher date identifier source language rights 
-           sourcedate sourceedition sourcepublisher sourcerights sourcetitle
-           multimediatype multimediacontent narrator produceddate 
-           revision revisiondate revisiondescription
-           totaltime audioformat
-           librarynumber]}] ; only books imported from the libray have this
+           source_date source_edition source_publisher source_rights source_title
+           multimedia_type multimedia_content narrator produced_date
+           revision revision_date revision_description
+           total_time audio_format
+           library_number]}] ; only books imported from the libray have this
   [:dtbook {:xmlns "http://www.daisy.org/z3986/2005/dtbook/"
             :version "2005-3" :xml:lang language}
    [:head
@@ -100,22 +100,22 @@
     [:meta {:name "dc:Language" :content language}]
     [:meta {:name "dc:Rights" :content rights}]
     [:meta {:name "dtb:uid" :content identifier}]
-    [:meta {:name "dtb:sourceDate" :content sourcedate}]
-    [:meta {:name "dtb:sourceEdition" :content sourceedition}]
-    [:meta {:name "dtb:sourcePublisher" :content sourcepublisher}]
-    [:meta {:name "dtb:sourceRights" :content sourcerights}]
-    [:meta {:name "dtb:sourceTitle" :content sourcetitle}]
-    [:meta {:name "dtb:multimediaType" :content multimediatype}]
-    [:meta {:name "dtb:multimediaContent" :content multimediacontent}]
+    [:meta {:name "dtb:sourceDate" :content source_date}]
+    [:meta {:name "dtb:sourceEdition" :content source_edition}]
+    [:meta {:name "dtb:sourcePublisher" :content source_publisher}]
+    [:meta {:name "dtb:sourceRights" :content source_rights}]
+    [:meta {:name "dtb:sourceTitle" :content source_title}]
+    [:meta {:name "dtb:multimediaType" :content multimedia_type}]
+    [:meta {:name "dtb:multimediaContent" :content multimedia_content}]
     [:meta {:name "dtb:narrator" :content narrator}]
     [:meta {:name "dtb:producer" :content publisher}]
-    [:meta {:name "dtb:producedDate" :content produceddate}]
+    [:meta {:name "dtb:producedDate" :content produced_date}]
     [:meta {:name "dtb:revision" :content revision}]
-    [:meta {:name "dtb:revisionDate" :content revisiondate}]
-    [:meta {:name "dtb:revisionDescription" :content revisiondescription}]
-    [:meta {:name "dtb:totalTime" :content totaltime}]
-    [:meta {:name "dtb:audioFormat" :content audioformat}]]
-   (if librarynumber
+    [:meta {:name "dtb:revisionDate" :content revision_date}]
+    [:meta {:name "dtb:revisionDescription" :content revision_description}]
+    [:meta {:name "dtb:totalTime" :content total_time}]
+    [:meta {:name "dtb:audioFormat" :content audio_format}]]
+   (if library_number
      (commercial-audiobook title creator language)
      (default-book title creator))])
 

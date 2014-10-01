@@ -27,9 +27,9 @@
               :row-fn map-state-to-kw))
 
 (defn find-by-productnumber
-  "Return the first production for given `productnumber`"
-  [productnumber]
-  (first (jdbc/query db ["SELECT * FROM production WHERE productNumber = ?" productnumber]
+  "Return the first production for given `product_number`"
+  [product_number]
+  (first (jdbc/query db ["SELECT * FROM production WHERE product_number = ?" product_number]
                      :row-fn map-state-to-kw)))
 
 (defn find-by-state
@@ -54,13 +54,13 @@
     production))
 
 (defn update!
-  "Update the production with the given `id`, `productNumber` or `libraryNumber`"
-  [{libraryNumber :libraryNumber productNumber :productNumber id :id :as production}]
-  (when (or id productNumber libraryNumber)
+  "Update the production with the given `id`, `product_number` or `library_number`"
+  [{library_number :library_number product_number :product_number id :id :as production}]
+  (when (or id product_number library_number)
     (jdbc/update! db :production (map-state-to-int production)
                   (cond id ["id = ?" id]
-                        libraryNumber ["libraryNumber = ?" libraryNumber]
-                        productNumber ["productNumber = ?" productNumber]))))
+                        library_number ["library_number = ?" library_number]
+                        product_number ["product_number = ?" product_number]))))
 
 (defn- update-or-insert!
   "Updates columns or inserts a new row in the specified table"
@@ -74,12 +74,12 @@
 (defn add-or-update!
   "Add or update the given `production`. Return it possibly updated
   with an `:id` in the case of an insert"
-  [{libraryNumber :libraryNumber productNumber :productNumber :as production}]
+  [{library_number :library_number product_number :product_number :as production}]
   (if-let [key (get-generated-key
-                (if (or productNumber libraryNumber)
+                (if (or product_number library_number)
                   (update-or-insert! db :production (map-state-to-int production)
-                   (cond libraryNumber ["libraryNumber = ?" libraryNumber]
-                         productNumber ["productNumber = ?" productNumber]))
+                   (cond library_number ["library_number = ?" library_number]
+                         product_number ["product_number = ?" product_number]))
                   (jdbc/insert! db :production (map-state-to-int production))))]
     (assoc production :id key)
     production))

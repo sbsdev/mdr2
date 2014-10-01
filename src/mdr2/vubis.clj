@@ -11,9 +11,9 @@
    :creator [:datafield (attr= :tag "100") :subfield]
    :source [:datafield (attr= :tag "020") :subfield]
    :description [:datafield (attr= :tag "520") :subfield]
-   :libraryNumber [:datafield (attr= :tag "091") :subfield (attr= :code "a")]
-   :sourcePublisher [:datafield (attr= :tag "534") :subfield (attr= :code "c")]
-   :sourceDate [:datafield (attr= :tag "534") :subfield (attr= :code "d")]})
+   :library_number [:datafield (attr= :tag "091") :subfield (attr= :code "a")]
+   :source_publisher [:datafield (attr= :tag "534") :subfield (attr= :code "c")]
+   :source_date [:datafield (attr= :tag "534") :subfield (attr= :code "d")]})
 
 (defn validate
   "Returns an empty seq on successful validation of `file` as a proper

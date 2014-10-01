@@ -30,16 +30,16 @@
 (def ^:private export-dir (env :abacus-export-dir))
 
 (def ^:private param-mapping
-  {:productNumber [:artikel_nr text]
+  {:product_number [:artikel_nr text]
    :title [:MetaData :dc :title text]
    :creator [:MetaData :dc :creator text]
    :date [:MetaData :dc :date text]
    :source [:MetaData :dc :source text]
    :language [:MetaData :dc :language text]
-   :sourcePublisher [:MetaData :ncc :sourcePublisher text]
-   :sourceEdition [:MetaData :ncc :sourceDate text]
+   :source_publisher [:MetaData :ncc :sourcePublisher text]
+   :source_edition [:MetaData :ncc :sourceDate text]
    ;;   :volumes [:MetaData :ncc :setInfo text] ; not sure if this is reliable
-   :revisionDate [:MetaData :ncc :revisionDate text]
+   :revision_date [:MetaData :ncc :revisionDate text]
    })
 
 (defn read-file
@@ -92,8 +92,8 @@
 (defn import-recorded-production
   "Import a recorded production from file `f`"
   [f]
-  (let [{product-number :productNumber} (read-file f)
-        production (production/find-by-productnumber product-number)]
+  (let [{product_number :product_number} (read-file f)
+        production (production/find-by-productnumber product_number)]
     (msg/publish queues/encode-queue production)
     f))
 
@@ -113,8 +113,8 @@
   (file-startswith? file ["SNStatus_"]))
 
 (defn import-status-request [f]
-  (let [{product-number :productNumber} (read-file f)
-        production (production/find-by-productnumber product-number)]
+  (let [{product_number :product_number} (read-file f)
+        production (production/find-by-productnumber product_number)]
     (msg/publish queues/notify-abacus-queue production)
     f))
 
@@ -171,23 +171,23 @@
 (defn export
   "Export the state of a production as a csv-like structure, ready to
   be consumed by ABACUS"
-  [{:keys [productNumber totalTime state audioFormat multimediaType
-           date id producedDate volumes] :as production}]
-  (->> [(create-row 2 productNumber)
-        (create-row 233 totalTime) ; in minutes
+  [{:keys [product_number total_time state audio_format multimedia_type
+           date id produced_date volumes] :as production}]
+  (->> [(create-row 2 product_number)
+        (create-row 233 total_time) ; in minutes
         (create-row 106 state) ; Process Status Madras
         (create-row 107 "") ; the Document Status Madras is no longer
                             ; used but ABACUS still expects it. Just
                             ; give it an empty string to chew on
-        (create-row 276 audioFormat)
+        (create-row 276 audio_format)
         ;; FIXME: the number of CDs is only determined at the time of
         ;; archiving. Is this persisted in the db?
         (create-row 275 volumes) ; Number of CDs
-        (create-row 277 multimediaType)
+        (create-row 277 multimedia_type)
         ;; FIXME: again the date of the end of the production is only
         ;; known once we start the archiving. Should this be persisted
         ;; to the db?
-        (create-row 252 producedDate) ; Date of production end
+        (create-row 252 produced_date) ; Date of production end
         (create-row 274 date) ; Date of production start
         (create-row 4 (production/dam-number production))] ; for legacy purposes
        (remove nil?) ; remove empty rows
@@ -199,9 +199,9 @@
 
 (defn export-file
   "Export the state of a production into a special file in
-  `export-dir`. The file is named with the `productNumber`. Existing
+  `export-dir`. The file is named with the `product_number`. Existing
   files are overwritten"
-  [{productNumber :productNumber :as production}]
-  ;; file names are supposed to be "Ax_productNumber.txt, e.g. Ax_DY15000.txt"
-  (let [file-name (.getPath (io/file export-dir "Ax_" productNumber ".txt"))]
+  [{product_number :product_number :as production}]
+  ;; file names are supposed to be "Ax_product_number.txt, e.g. Ax_DY15000.txt"
+  (let [file-name (.getPath (io/file export-dir "Ax_" product_number ".txt"))]
     (spit file-name (export production))))

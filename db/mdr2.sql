@@ -14,20 +14,20 @@ CREATE TABLE production (
   source TEXT,
   language TEXT,
   rights TEXT,
-  sourceDate TEXT,
-  sourceEdition TEXT,
-  sourcePublisher TEXT,
-  sourceRights TEXT,
-  multimediaType TEXT,
-  multimediaContent TEXT,
+  source_date TEXT,
+  source_edition TEXT,
+  source_publisher TEXT,
+  source_rights TEXT,
+  multimedia_type TEXT,
+  multimedia_content TEXT,
   narrator TEXT,
   producer TEXT,
-  producedDate TEXT,
+  produced_date TEXT,
   revision TEXT,
-  revisionDate TEXT,
-  revisionDescription TEXT,
-  totalTime TEXT,
-  audioFormat TEXT,
+  revision_date TEXT,
+  revision_description TEXT,
+  total_time TEXT,
+  audio_format TEXT,
   -- Number of CDs
   volumes INTEGER,
   -- Number of levels
@@ -38,13 +38,13 @@ CREATE TABLE production (
   -- this as the primary key but alas some productions are done
   -- without involving the erp system, so we need to keep our own
   -- primary key
-  productNumber TEXT,
+  product_number TEXT,
   -- provisional number given to the production by the library system.
   -- There is only a libraryNumber if there is no productNumber, i.e.
   -- if this production is done behind the back of the erp system
-  libraryNumber TEXT,
+  library_number TEXT,
   -- The unique id that the library assigns to this production
-  librarySignature TEXT
+  library_signature TEXT
   -- FIXME: seems backwards that the production system has to know the
   -- id of the library system. Alas in order to be able to archive we
   -- need to know it. Otherwise apparently the library cannot find
@@ -82,7 +82,7 @@ CREATE TABLE user_role (
 );
 
 
-INSERT INTO production (title, creator, source, language, sourcePublisher, state) VALUES
+INSERT INTO production (title, creator, source, language, source_publisher, state) VALUES
 ("Unter dem Deich", "Hart, Maarten", "978-3-492-05573-4", "de", "Piper", 0),
 ("Aus dem Berliner Journal", "Frisch, Max", "978-3-518-42352-3", "de", "Suhrkamp", 0),
 ("Info-Express, Februar 2014", "SZB Taubblinden-Beratung", "", "de", "", 0);

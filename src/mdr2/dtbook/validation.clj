@@ -31,13 +31,13 @@
    :language [[:dtbook :head :meta (attr= :name "dc:Language") (attr :content)]
               [:dtbook (attr= :name "xml:lang")]]
    :rights [(get-metadata-path "dc:Rights")]
-   :sourceDate [(get-metadata-path "dtb:sourceDate")]
-   :sourceEdition [(get-metadata-path "dtb:sourceEdition")]
-   :sourcePublisher [(get-metadata-path "dtb:sourcePublisher")]
-   :sourceRights [(get-metadata-path "dtb:sourceRights")]
-   :sourceTitle [(get-metadata-path "dtb:sourceTitle")]
-   :multimediaType [(get-metadata-path "dtb:multimediaType")]
-   :multimediaContent [(get-metadata-path "dtb:multimediaContent")]})
+   :source_date [(get-metadata-path "dtb:sourceDate")]
+   :source_edition [(get-metadata-path "dtb:sourceEdition")]
+   :source_publisher [(get-metadata-path "dtb:sourcePublisher")]
+   :source_rights [(get-metadata-path "dtb:sourceRights")]
+   :source_title [(get-metadata-path "dtb:sourceTitle")]
+   :multimedia_type [(get-metadata-path "dtb:multimediaType")]
+   :multimedia_content [(get-metadata-path "dtb:multimediaContent")]})
 
 (defn get-path [loc path]
   (apply xml1-> loc path))
