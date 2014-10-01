@@ -45,7 +45,7 @@
                                ;; only allow setting the state to
                                ;; recorded if there is a DAISY export
                                (when (and (= next-state :recorded)
-                                          (not (prod/has-daisy-export? production)))
+                                          (not (prod/has-manifest? production)))
                                  {:disabled "disabled"})
                                (layout/glyphicon "transfer") " " (state/to-str next-state)]))
               ;; (layout/dropdown (for [next (state/next-states state)]

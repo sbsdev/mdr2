@@ -27,17 +27,16 @@
         path (path production)]
     (.getPath (file path file-name))))
 
-(defn daisy-export-path
-  "Return the path to the obi DAISY export for given production"
-  [{id :id :as production}]
-  (let [file-name (str id ".ncx")
-        path (path production)]
-    (.getPath (file path "export" file-name))))
+(defn manifest-path
+  "Return the path to the manifest of the DTB which was exported from
+  obi for given production"
+  [production]
+  (.getPath (file (path production) "export" "package.opf"))))
 
-(defn has-daisy-export?
+(defn has-manifest?
   "Return true if the production has a DAISY export"
   [production]
-  (fs/exists? (daisy-export-path production)))
+  (fs/exists? (manifest-path production)))
 
 (defn create
   "Create a production"

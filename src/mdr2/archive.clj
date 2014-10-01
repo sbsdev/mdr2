@@ -34,6 +34,7 @@ https://github.com/technomancy/leiningen/blob/stable/doc/DEPLOY.md"
             [clojure.java.shell :refer [sh]]
             [environ.core :refer [env]]
             [me.raynes.fs :as fs]
+            [mdr2.production :as production]
             [mdr2.rdf :as rdf]
             [mdr2.pipeline1 :as pipeline]))
 
@@ -93,8 +94,7 @@ https://github.com/technomancy/leiningen/blob/stable/doc/DEPLOY.md"
   "Encode a production, i.e. convert the wav files to mp3"
   [{:keys [path] :as production}]
   (let [tmp-path (.getPath (fs/temp-dir "mdr2"))
-        ;; FIXME: it might be better to allow for different manifest names
-        manifest (.getPath (file path "package.opf"))]
+        manifest (production/manifest-path production)]
     (pipeline/audio-encoder {:input manifest :output tmp-path})
     (assoc production :encoded-path tmp-path)))
 
