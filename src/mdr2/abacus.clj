@@ -94,7 +94,7 @@
   [f]
   (let [{product-number :productNumber} (read-file f)
         production (production/find-by-productnumber product-number)]
-    (msg/publish queues/archive-queue production)
+    (msg/publish queues/encode-queue production)
     f))
 
 (defn import-recorded-productions

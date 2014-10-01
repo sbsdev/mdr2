@@ -5,7 +5,7 @@
 
 (def states
   "All possible states that a production can have"
-  [:new :structured :recorded :cataloged :archived :pending-volume-split :failed :deleted])
+  [:new :structured :recorded :encoded :cataloged :archived :pending-volume-split :failed :deleted])
 
 (def states-map
   "Map of states to state number to facilitate lookup from state kw to

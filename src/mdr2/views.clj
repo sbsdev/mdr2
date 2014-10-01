@@ -105,7 +105,7 @@
       [:thead [:tr [:th "Title"] [:th "Product Number"] [:th "DAM Number"] [:th "Duration"] [:th "Number of CDs"] [:th "Depth"] [:th "Narrator"] [:th "Date of Production"] [:th "Libary signature"]]]
       [:tbody
        (for [{:keys [id title productNumber totalTime volumes depth narrator producedDate] 
-              :as production} (prod/find-by-state :recorded)]
+              :as production} (prod/find-by-state :encoded)]
          [:tr
           [:td (link-to (str "/production/" id) title)]
           [:td productNumber]
@@ -197,6 +197,8 @@
         state (keyword (lower-case state))
         p (assoc (prod/find id) :state state)]
     (prod/update! p)
+    (when (= state :recorded)
+      (msg/publish queues/encode-queue p))
     (response/redirect "/")))
 
 (defn login-form []

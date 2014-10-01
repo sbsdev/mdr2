@@ -6,7 +6,8 @@
             [mdr2.handler :as handler]
             [mdr2.abacus :as abacus]
             [mdr2.production :as production]
-            [mdr2.archive :as archive]))
+            [mdr2.archive :as archive]
+            [mdr2.encode :as encode]))
 
 (defn -main []
   ;; start web server
@@ -14,6 +15,7 @@
 
   ;; wire up queues
   (msg/listen queues/create-queue #(production/create %))
+  (msg/listen queues/encode-queue #(encode/encode %))
   (msg/listen queues/archive-queue #(archive/archive %))
   (msg/listen queues/notify-abacus-queue #(abacus/export-file %))
   (msg/listen queues/metadata-update #(production/update-or-create! %))
