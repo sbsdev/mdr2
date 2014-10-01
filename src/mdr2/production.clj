@@ -28,10 +28,21 @@
     (.getPath (file path file-name))))
 
 (defn manifest-path
-  "Return the path to the manifest of the DTB which was exported from
-  obi for given production"
+  "Path to the manifest of the DTB which was exported from obi for
+  given `production`"
   [production]
-  (.getPath (file (path production) "export" "package.opf"))))
+  (.getPath (file (path production) "export" "package.opf")))
+
+(defn encoded-path
+  "Path to the encoded version of the exported DTB, i.e. the DTB
+  containing mp3s for given `production`"
+  [production]
+  (.getPath (file (path production) "encoded")))
+
+(defn iso-path
+  "Path to the iso of the exported DTB for given `production`"
+  [{id :id :as production}]
+  (.getPath (file (path production) "iso" (str id ".iso"))))
 
 (defn has-manifest?
   "Return true if the production has a DAISY export"
