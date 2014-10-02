@@ -54,7 +54,7 @@
   [production]
   (as-> production p
         (merge p {:state (state/initial-state)})
-        (db/add p)
+        (db/insert! p)
         (fs/mkdirs (path p))))
 
 (defn update-or-create!
@@ -70,7 +70,7 @@
         ;; @transaction.commit_on_success annotation in Django
         ;; FIXME: shouldn't we update the DTBook XML when the meta
         ;; data is updated?
-        (db/add-or-update! p)
+        (db/update-or-insert! p)
         (fs/mkdirs (path p))))
 
 (defn update! [production]

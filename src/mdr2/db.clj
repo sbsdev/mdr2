@@ -4,12 +4,12 @@
   (:require [clojure.java.jdbc :as jdbc]
             [clojure.string :as s]
             [environ.core :refer [env]]
-            [mdr2.state :as state]))
+            [mdr2.state :as states]))
 
 (def ^:private db (env :database-url))
 
 (defn map-state-to-kw [row]
-  (update-in row [:state] state/from-int))
+  (update-in row [:state] states/from-int))
 
 (defn map-state-to-int [row]
   (if-let [state (:state row)]
@@ -35,9 +35,9 @@
                      :row-fn map-state-to-kw)))
 
 (defn find-by-state
-  "Return all productions for given state"
-  [s]
-  (jdbc/query db ["SELECT * FROM production WHERE state = ?" (state/to-int s)]
+  "Return all productions for given `state`"
+  [state]
+  (jdbc/query db ["SELECT * FROM production WHERE state = ?" (states/to-int state)]
               :row-fn map-state-to-kw))
 
 (defn get-generated-key
@@ -48,8 +48,8 @@
     (when (map? m) ; an insert returns a sequence of maps
       (-> m vals first))))
 
-(defn add
-  "Add the given `production`"
+(defn insert!
+  "Insert the given `production`"
   [production]
   (if-let [key (get-generated-key (jdbc/insert! db :production (map-state-to-int production)))]
     (assoc production :id key)
@@ -64,7 +64,7 @@
                         library_number ["library_number = ?" library_number]
                         product_number ["product_number = ?" product_number]))))
 
-(defn- update-or-insert!
+(defn- update-or-insert-internal!
   "Updates columns or inserts a new row in the specified table"
   [db table row where-clause]
   (jdbc/with-db-transaction [t-con db]
@@ -73,13 +73,13 @@
         (jdbc/insert! t-con table row)
         result))))
 
-(defn add-or-update!
-  "Add or update the given `production`. Return it possibly updated
+(defn update-or-insert!
+  "Update or insert the given `production`. Return it possibly updated
   with an `:id` in the case of an insert"
   [{library_number :library_number product_number :product_number :as production}]
   (if-let [key (get-generated-key
                 (if (or product_number library_number)
-                  (update-or-insert! db :production (map-state-to-int production)
+                  (update-or-insert-internal! db :production (map-state-to-int production)
                    (cond library_number ["library_number = ?" library_number]
                          product_number ["product_number = ?" product_number]))
                   (jdbc/insert! db :production (map-state-to-int production))))]
