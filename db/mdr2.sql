@@ -33,7 +33,7 @@ CREATE TABLE production (
   -- Number of levels
   depth INTEGER,
   -- SBS specific columns
-  state INTEGER,
+  state INTEGER DEFAULT 0,
   -- production number given by the erp system. We should really use
   -- this as the primary key but alas some productions are done
   -- without involving the erp system, so we need to keep our own
