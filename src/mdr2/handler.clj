@@ -53,6 +53,6 @@
        {:credential-fn (partial creds/bcrypt-credential-fn db/get-user)
         :workflows [(workflows/interactive-form)]
         :unauthorized-handler views/unauthorized})
-      handler/site
+      handler/site ; FIXME: migrate to ring-defaults
       nested-params/wrap-nested-params
       wrap-base-url))
