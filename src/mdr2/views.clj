@@ -1,6 +1,5 @@
 (ns mdr2.views
-  (:require [clojure.string :refer [capitalize lower-case]]
-            [ring.util.response :as response]
+  (:require [ring.util.response :as response]
             [hiccup.form :as form]
             [hiccup.element :refer [link-to]]
             [cemerick.friend :as friend]
@@ -59,7 +58,8 @@
         user (friend/current-authentication request)]
     (layout/common user
      [:h1 (str "Production: " (:title p))]
-     [:p (:author p)])))
+     (for [[k v] (sort-by first (seq p))]
+       [:p [:b (layout/key-to-label k) ":"] " " v]))))
 
 (defn production-xml [id]
   (let [production (prod/find id)]
@@ -163,7 +163,7 @@
      [:h1 "Productions to import"]
      [:table.table.table-striped
       [:thead [:tr (for [k keys]
-                     [:th (capitalize (name k))])]]
+                     [:th (layout/key-to-label k)])]]
       [:tbody
        (for [p productions]
          [:tr (for [k keys]

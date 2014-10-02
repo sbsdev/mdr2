@@ -1,6 +1,15 @@
 (ns mdr2.layout
   "Define the basic page structure and layout"
-  (:require [hiccup.page :refer [html5 include-css include-js]]))
+  (:require [clojure.string :as s]
+            [hiccup.page :refer [html5 include-css include-js]]))
+
+(defn key-to-label
+  "Return a nice string from a keyword, e.g. `:product_number` will be
+  converted to \"Product Number\""
+  [k]
+  (->> (s/split (name k) #"_")
+       (map s/capitalize)
+       (s/join " ")))
 
 (defn glyphicon [class]
   [:span {:class (str "glyphicon glyphicon-" class)}])
