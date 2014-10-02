@@ -192,9 +192,9 @@
       (prod/update-or-create! p))
     (response/redirect "/")))
 
-(defn production-set-state [request id state]
+(defn production-set-state [request id state-name]
   (let [user (friend/current-authentication request)
-        state (keyword (lower-case state))
+        state (state/from-str state-name)
         p (assoc (prod/find id) :state state)]
     (prod/update! p)
     (when (= state :recorded)

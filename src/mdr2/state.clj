@@ -35,9 +35,16 @@
 
 (defn from-int 
   "Return a state for given state number. If there is no state for
-  given number return the new state"
+  given number return the `:new` state"
   [i]
   (get states-inverse i :new))
+
+(defn from-str
+  "Return a state for the given string. If there is no matching state
+  return the `:new` state"
+  [state]
+  (let [state (keyword (s/lower-case state))]
+    (if (contains? (set states) state) state :new)))
 
 (defn next-states
   "For given `state` return a seq of possible next states"
