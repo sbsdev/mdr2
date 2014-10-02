@@ -38,10 +38,3 @@
                      :when (some? val)]
                  [key val])))))
 
-(defn add-productions
-  "Add all productions from the given `file`"
-  [file]
-  (doseq [production (read-file file)]
-    (-> production
-        production/add-default-meta-data
-        production/create)))
