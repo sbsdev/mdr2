@@ -12,7 +12,9 @@
   (update-in row [:state] state/from-int))
 
 (defn map-state-to-int [row]
-  (update-in row [:state] state/to-int))
+  (if-let [state (:state row)]
+    (assoc row :state (states/to-int state))
+    row))
 
 (defn find
   "Return production for given `id`"
