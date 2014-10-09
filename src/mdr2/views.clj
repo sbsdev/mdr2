@@ -51,8 +51,8 @@
               ;;                    (layout/menu-item "#" (state/to-str next)))
               ;;                  (layout/glyphicon "transfer"))
               (when (friend/authorized? #{:admin} identity)
-                (layout/button (layout/glyphicon "trash")
-                               (str "/production/" id "/delete")))]))]])]])))
+                (layout/button (str "/production/" id "/delete")
+                               (layout/glyphicon "trash")))]))]])]])))
 (defn production [request id]
   (let [p (prod/find id)
         user (friend/current-authentication request)]
