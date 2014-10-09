@@ -9,7 +9,8 @@
             [mdr2.db :as db]
             [mdr2.state :as state]
             [mdr2.production.path :as path]
-            [mdr2.obi :as obi]))
+            [mdr2.obi :as obi])
+  (:import java.nio.file.StandardCopyOption))
 
 (def ^:private default-publisher "Swiss Library for the Blind, Visually Impaired and Print Disabled")
 (def ^:private default-date-formatter (f/formatters :date))
@@ -35,6 +36,25 @@
   "Return an id for a production as it is expected by legacy systems"
   [{id :id}]
   (str "dam" id))
+
+(defn uuid
+  "Return a randomly generated UUID optionally prefixed with `prefix`"
+  ([] (uuid "ch-sbs-"))
+  ([prefix] (str prefix (java.util.UUID/randomUUID))))
+
+(defn default-meta-data
+  "Return default meta data"
+  []
+  {:publisher default-publisher
+   :date (f/unparse default-date-formatter (t/now))
+   :identifier (uuid)
+   :language "de"
+   :state state/initial-state})
+
+(defn add-default-meta-data
+  "Add the default meta data to a production"
+  [production]
+  (merge (default-meta-data) production))
 
 (defn create
   "Create a production"
@@ -100,31 +120,12 @@
   (db/delete id)
   (delete-all-dirs {:id id}))
 
-(defn uuid
-  "Return a randomly generated UUID optionally prefixed with `prefix`"
-  ([] (uuid "ch-sbs-"))
-  ([prefix] (str prefix (java.util.UUID/randomUUID))))
-
-(defn default-meta-data
-  "Return default meta data"
-  []
-  {:publisher default-publisher
-   :date (f/unparse default-date-formatter (t/now))
-   :identifier (uuid)
-   :language "de"
-   :state state/initial-state})
-
-(defn add-default-meta-data
-  "Add the default meta data to a production"
-  [production]
-  (merge (default-meta-data) production))
-
 (defn add-structure
   "Add a DTBook XML to a `production`. This will also set the status
   to :structured"
   [production f]
   ;; move the file to the right place
-  (fs/move f (xml-path production))
+  (fs/move f (xml-path production) StandardCopyOption/REPLACE_EXISTING)
   ;; create a config file for obi
   (obi/config-file production)
   ;; update the status
