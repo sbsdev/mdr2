@@ -22,7 +22,7 @@
             [immutant.messaging :as msg]
             [environ.core :refer [env]]
             [mdr2.queues :as queues]
-            [mdr2.production :as production]
+            [mdr2.production :as prod]
             [mdr2.abacus.validation :as validation]))
 
 (def ^:private root-path [:Task :Transaction :DocumentData])
@@ -93,7 +93,7 @@
   "Import a recorded production from file `f`"
   [f]
   (let [{product_number :product_number} (read-file f)
-        production (production/find-by-productnumber product_number)]
+        production (prod/find-by-productnumber product_number)]
     (msg/publish queues/encode-queue production)
     f))
 
@@ -114,7 +114,7 @@
 
 (defn import-status-request [f]
   (let [{product_number :product_number} (read-file f)
-        production (production/find-by-productnumber product_number)]
+        production (prod/find-by-productnumber product_number)]
     (msg/publish queues/notify-abacus-queue production)
     f))
 
@@ -189,7 +189,7 @@
         ;; to the db?
         (create-row 252 produced_date) ; Date of production end
         (create-row 274 date) ; Date of production start
-        (create-row 4 (production/dam-number production))] ; for legacy purposes
+        (create-row 4 (prod/dam-number production))] ; for legacy purposes
        (remove nil?) ; remove empty rows
        wrap-rows ; wrap the payload
        (map-indexed #(conj %2 %1)) ; number each row
