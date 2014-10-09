@@ -72,13 +72,14 @@
   "Create a production"
   [production]
   (as-> production p
-        (merge p {:state (state/initial-state)})
+        (add-default-meta-data p)
         (db/insert! p)
         (fs/mkdirs (structured-path p))))
 
 (defn update-or-create!
   [production]
   (as-> production p
+        (add-default-meta-data p)
         ;; if a production doesn't have an id yet, e.g. in the case of
         ;; a bulk import, the id is assigned in the db insert. For
         ;; that reason we need the as-> macro to thread the result of
@@ -141,7 +142,9 @@
   []
   {:publisher default-publisher
    :date (f/unparse default-date-formatter (t/now))
-   :identifier (uuid)})
+   :identifier (uuid)
+   :language "de"
+   :state state/initial-state})
 
 (defn add-default-meta-data
   "Add the default meta data to a production"
