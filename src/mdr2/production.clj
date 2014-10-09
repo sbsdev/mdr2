@@ -14,35 +14,54 @@
 
 (def production-path (env :production-path))
 
-(defn path
-  "Return the path for a given production. This is a directory where
-  the relevant files are stored"
+(defn structured-path
+  "The path to the files relevant to a production that has been structured"
   [{id :id}]
-  (.getPath (file production-path (str id))))
+  (file production-path "structured" (str id)))
+
+(defn recording-path
+  "The path to the files relevant to a production that is being recorded"
+  [{id :id}]
+  (file production-path "recording" (str id)))
+
+(defn recorded-path
+  "The path to the files relevant to a production that has been recorded"
+  [{id :id}]
+  (file production-path "recorded" (str id)))
+
+(defn encoded-path
+  "Path to the encoded version of the exported DTB, i.e. the DTB
+  containing mp3s for given `production`"
+  [{id :id}]
+  (.getPath (file production-path "encoded" (str id))))
+
+(defn iso-path
+  "Path to the directory where the iso of the exported DTB for given `production` is placed"
+  [{id :id}]
+  (.getPath (file production-path "iso" (str id))))
+
+(defn iso-name
+  "Path to the iso of the exported DTB for given `production`"
+  [{id :id :as production}]
+  (.getPath (file (iso-path production) (str id ".iso"))))
+
+(defn iso?
+  "Return true if the production has an iso export"
+  [production]
+  (fs/exists? (iso-name production)))
 
 (defn xml-path
   "Return the path to the meta data XML file, i.e. the DTBook file for a given production"
   [{id :id :as production}]
   (let [file-name (str id ".xml")
-        path (path production)]
+        path (structured-path production)]
     (.getPath (file path file-name))))
 
 (defn manifest-path
   "Path to the manifest of the DTB which was exported from obi for
   given `production`"
   [production]
-  (.getPath (file (path production) "export" "package.opf")))
-
-(defn encoded-path
-  "Path to the encoded version of the exported DTB, i.e. the DTB
-  containing mp3s for given `production`"
-  [production]
-  (.getPath (file (path production) "encoded")))
-
-(defn iso-path
-  "Path to the iso of the exported DTB for given `production`"
-  [{id :id :as production}]
-  (.getPath (file (path production) "iso" (str id ".iso"))))
+  (.getPath (file (recorded-path production) "package.opf")))
 
 (defn manifest?
   "Return true if the production has a DAISY export"
@@ -55,7 +74,7 @@
   (as-> production p
         (merge p {:state (state/initial-state)})
         (db/insert! p)
-        (fs/mkdirs (path p))))
+        (fs/mkdirs (structured-path p))))
 
 (defn update-or-create!
   [production]
@@ -71,7 +90,7 @@
         ;; FIXME: shouldn't we update the DTBook XML when the meta
         ;; data is updated?
         (db/update-or-insert! p)
-        (fs/mkdirs (path p))))
+        (fs/mkdirs (structured-path p))))
 
 (defn update! [production]
   (db/update! production))
@@ -96,11 +115,21 @@
   [state]
   (db/find-by-state state))
 
+(defn delete-all-dirs
+  "Delete all artifacts on the file system for a production"
+  [production]
+  (doseq [d [(structured-path production)
+             (recording-path production)
+             (recorded-path production)
+             (encoded-path production)
+             (iso-path production)]]
+    fs/delete-dir d))
+
 (defn delete
   "Delete a production with the given `id`"
   [id]
   (db/delete id)
-  (fs/delete-dir (path {:id id})))
+  (delete-all-dirs {:id id}))
 
 (defn uuid
   "Return a randomly generated UUID optionally prefixed with `prefix`"

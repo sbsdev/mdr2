@@ -34,7 +34,7 @@ https://github.com/technomancy/leiningen/blob/stable/doc/DEPLOY.md"
             [clojure.java.shell :refer [sh]]
             [environ.core :refer [env]]
             [me.raynes.fs :as fs]
-            [mdr2.production :as production]
+            [mdr2.production :as prod]
             [mdr2.encode :as encode]
             [mdr2.rdf :as rdf]
             [mdr2.pipeline1 :as pipeline]))
@@ -55,11 +55,15 @@ https://github.com/technomancy/leiningen/blob/stable/doc/DEPLOY.md"
    :transaktions_status "pending"})
 
 (defn container-id
+  ;; FIXME: this needs to be handled differently. The master needs to
+  ;; be archived with a dam-number and the distribution master, i.e.
+  ;; the iso files need to be archived with their library signature,
+  ;; i.e. ds number
   "Return the name of a archive spool directory for a given production"
-  [{:keys [id iso-path]}]
+  [{id :id :as production}]
   (cond
-   iso-path (str "ds" id) ; if it has an iso it is supposed to be called "ds"
-   :else (str "dam" id)))
+   (prod/iso? production) (str "ds" id) ; if it has an iso it is supposed to be called "ds"
+   :else (prod/dam-number production)))
 
 (defn container-path
   "Return the path to the archive spool directory for a given production"
@@ -86,7 +90,7 @@ https://github.com/technomancy/leiningen/blob/stable/doc/DEPLOY.md"
          ;; if there is a cdimage attached to this production then we
          ;; need to add some magic incantations to get this properly
          ;; archived
-         :sektion (if (:iso-path production) "cdimage" "master")}
+         :sektion (if (prod/iso? production) "cdimage" "master")}
         job (merge default-job new-job)]
     (jdbc/insert! db :container job)
     production))
@@ -96,15 +100,15 @@ https://github.com/technomancy/leiningen/blob/stable/doc/DEPLOY.md"
   ;; FIXME: this fails if there is already an archiving in progress
   ;; because it will create another copy inside the already existing
   ;; dam directory
-  [{:keys [path iso-path] :as production}]
-  (let [archive-path (container-path production)
-        iso-archive-name (str (container-id production) ".iso")
-        iso-archive-path (.getPath (file archive-path iso-archive-name))]
+  [production]
+  (let [archive-path (container-path production)]
     ;; if the production has an iso archive that, otherwise just
     ;; archive the raw unencoded files
-    (if iso-path
-      (fs/copy+ iso-path iso-archive-path)
-      (fs/copy-dir path archive-path)))
+    (if (prod/iso? production)
+      (let [iso-archive-name (str (container-id production) ".iso")
+            iso-archive-path (.getPath (file archive-path iso-archive-name))]
+        (fs/copy+ (prod/iso-name production) iso-archive-path))
+      (fs/copy-dir (prod/recorded-path production) archive-path)))
   production)
 
 (defn create-rdf
