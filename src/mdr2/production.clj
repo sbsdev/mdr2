@@ -44,7 +44,7 @@
   [{id :id :as production}]
   (.getPath (file (path production) "iso" (str id ".iso"))))
 
-(defn has-manifest?
+(defn manifest?
   "Return true if the production has a DAISY export"
   [production]
   (fs/exists? (manifest-path production)))
