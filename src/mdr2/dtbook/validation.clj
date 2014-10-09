@@ -46,7 +46,8 @@
   "Validate `paths` in `loc` against a given `value`. Return true if
   all paths contain the `value`"
   [loc value paths]
-  (every? #(= (get-path loc %) value) paths))
+  (every? #(= (get-path loc %) (str value)) paths))
+;;  (every? #(or (= (get-path loc %) value) (and (nil? value) (string/blank? (get-path loc %)))) paths))
 
 (defn get-paths [loc paths]
   (map #(get-path loc %) paths))
