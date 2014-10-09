@@ -91,8 +91,8 @@
     (if (seq errors)
       (file-upload-form request id errors)
       (do
-        ;; store the xml
-        (fs/move tempfile (prod/xml-path production))
+        ;; add the file
+        (prod/add-structure production tempfile)
         ;; and redirect to the index
         (response/redirect "/")))))
 

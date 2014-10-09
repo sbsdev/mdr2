@@ -119,7 +119,13 @@
   [production]
   (merge (default-meta-data) production))
 
-(defn dam-number
-  "Return an id for a production as it is expected by legacy systems"
-  [{id :id}]
-  (str "dam" id))
+(defn add-structure
+  "Add a DTBook XML to a `production`. This will also set the status
+  to :structured"
+  [production f]
+  ;; move the file to the right place
+  (fs/move f (xml-path production))
+  ;; create a config file for obi
+  (obi/config-file production)
+  ;; update the status
+  (update! (assoc production :state :structured)))
