@@ -4,13 +4,14 @@
             [clojure.java.shell :refer [sh]]
             [me.raynes.fs :as fs]
             [mdr2.production :as prod]
+            [mdr2.production.path :as path]
             [mdr2.pipeline1 :as pipeline]))
 
 (defn encode-production
   "Encode a `production`, i.e. convert the wav files to mp3"
   [production]
-  (let [output (prod/encoded-path production)
-        manifest (prod/manifest-path production)]
+  (let [output (path/encoded-path production)
+        manifest (path/manifest-path production)]
     (fs/mkdir output)
     (pipeline/audio-encoder {:input manifest :output output})))
 
@@ -19,9 +20,9 @@
   [{:keys [title publisher]
     :or {title "FIXME:" publisher "FIXME:"} ; title and publisher shouldn't be empty
     :as production}]
-  (let [encoded-path (prod/encoded-path production)
-        iso-path (prod/iso-path production)
-        iso-name (prod/iso-name production)]
+  (let [encoded-path (path/encoded-path production)
+        iso-path (path/iso-path production)
+        iso-name (path/iso-name production)]
     (fs/mkdir iso-path)
     (sh "genisoimage"
         "-quiet"
@@ -38,8 +39,8 @@
   "Clean up temporary files of a production, namely the mp3 encoded
   DTB and the iso"
   [production]
-  (fs/delete-dir (prod/encoded-path production))
-  (fs/delete-dir (prod/iso-path production)))
+  (fs/delete-dir (path/encoded-path production))
+  (fs/delete-dir (path/iso-path production)))
 
 (defn encode
   [production]

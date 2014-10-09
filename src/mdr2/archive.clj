@@ -35,6 +35,7 @@ https://github.com/technomancy/leiningen/blob/stable/doc/DEPLOY.md"
             [environ.core :refer [env]]
             [me.raynes.fs :as fs]
             [mdr2.production :as prod]
+            [mdr2.production.path :as path]
             [mdr2.encode :as encode]
             [mdr2.rdf :as rdf]
             [mdr2.pipeline1 :as pipeline]))
@@ -107,8 +108,8 @@ https://github.com/technomancy/leiningen/blob/stable/doc/DEPLOY.md"
     (if (prod/iso? production)
       (let [iso-archive-name (str (container-id production) ".iso")
             iso-archive-path (.getPath (file archive-path iso-archive-name))]
-        (fs/copy+ (prod/iso-name production) iso-archive-path))
-      (fs/copy-dir (prod/recorded-path production) archive-path)))
+        (fs/copy+ (path/iso-name production) iso-archive-path))
+      (fs/copy-dir (path/recorded-path production) archive-path)))
   production)
 
 (defn create-rdf
