@@ -28,8 +28,8 @@
    :identifier [(get-metadata-path "dc:Identifier")
                 (get-metadata-path "dtb:uid")]
    :source [(get-metadata-path "dc:Source")]
-   :language [[:dtbook :head :meta (attr= :name "dc:Language") (attr :content)]
-              [:dtbook (attr= :name "xml:lang")]]
+   :language [[:head :meta (attr= :name "dc:Language") (attr :content)]
+              [(attr :xml:lang)]]
    :rights [(get-metadata-path "dc:Rights")]
    :source_date [(get-metadata-path "dtb:sourceDate")]
    :source_edition [(get-metadata-path "dtb:sourceEdition")]
