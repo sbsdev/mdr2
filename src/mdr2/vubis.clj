@@ -3,8 +3,7 @@
   (:require [clojure.java.io :as io]
             [clojure.xml :as xml]
             [clojure.zip :as zip]
-            [clojure.data.zip.xml :refer [xml-> xml1-> attr= text]]
-            [mdr2.production :as production]))
+            [clojure.data.zip.xml :refer [xml-> xml1-> attr= text]]))
 
 (def ^:private param-mapping
   {:title [:datafield (attr= :tag "245") :subfield (attr= :code "a")]
