@@ -1,7 +1,6 @@
 (ns mdr2.dtb
   "Functions to query [DAISY Talking Books](http://www.daisy.org/daisypedia/daisy-digital-talking-book)"
-  (:require [clojure.data.xml :as xml]
-            [clojure.java.io :refer [file]]
+  (:require [clojure.java.io :refer [file]]
             [clojure.string :as s])
   (:import javax.sound.sampled.AudioSystem
            java.nio.file.Files))
