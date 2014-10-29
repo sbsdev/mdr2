@@ -1,7 +1,8 @@
 (ns mdr2.dtbook
   "Functionality around [DTBook XML](http://www.daisy.org/z3986/2005/Z3986-2005.html)"
-  (:require [clojure.data.xml :as xml]
-            [clojure.string :as s]))
+  (:require [clojure.string :as s]
+            [clojure.data.xml :as xml]
+            [mdr2.data.xml :as xml-new]))
 
 ;; FIXME: we should probably use some ready made library for i18n.
 ;; There is https://github.com/ptaoussanis/tower,
@@ -25,6 +26,12 @@
     :contributors "Contributors"
     :enclosures "Talking book enclosures"
     :end "End of book"}})
+
+(def ^:private doctype
+  (str
+   "<!DOCTYPE dtbook PUBLIC "
+   "\"-//NISO//DTD dtbook 2005-3//EN\" "
+   "\"http://www.daisy.org/z3986/2005/dtbook-2005-3.dtd\">"))
 
 (defn- translate
   "Return a string for the given `key` and `language`"
@@ -125,4 +132,4 @@
   (-> production
       dtbook-sexp
       xml/sexp-as-element
-      xml/emit-str))
+      (xml-new/emit-str :doctype doctype)))
