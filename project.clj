@@ -10,6 +10,7 @@
                  [org.clojure/data.zip "0.1.1"]
                  [com.cemerick/friend "0.2.1"]
                  [me.raynes/fs "1.4.6"]
+                 [com.novemberain/pantomime "2.3.0"]
                  [clj-time "0.8.0"]
                  [environ "1.0.0"]
                  [org.immutant/immutant "2.0.0-alpha1"]

@@ -1,38 +1,33 @@
 (ns mdr2.dtb
   "Functions to query [DAISY Talking Books](http://www.daisy.org/daisypedia/daisy-digital-talking-book)"
   (:require [clojure.java.io :refer [file]]
-            [clojure.string :as s])
-  (:import javax.sound.sampled.AudioSystem
-           java.nio.file.Files))
-
-(defn content-type 
-  "Return the content type for a given `file`"
-  [file]
-  (Files/probeContentType (.toPath file)))
+            [clojure.string :as s]
+            [pantomime.mime :refer [mime-type-of]])
+  (:import javax.sound.sampled.AudioSystem))
 
 (defn- wav-file?
   "Is the given `file` a wav file?"
   [file]
-  (= (content-type file) "audio/x-wav"))
+  (= (mime-type-of file) "audio/x-wav"))
 
 (defn- audio-file?
   "Is the given `file` an audio file, i.e. any of the valid audio file
   formats for a DAISY Talking Book namely *MPEG-4 AAC audio*, *MPEG-1/2
   Layer III (MP3) audio* and *Linear PCM - RIFF WAVE format audio*?"
   [file]
-  (contains? #{"audio/mpeg" "audio/x-wav" "audio/mp4"} (content-type file)))
+  (contains? #{"audio/mpeg" "audio/x-wav" "audio/mp4"} (mime-type-of file)))
 
 (defn- text-file?
   "Is the given `file` a text file, i.e. any of the valid text file
   formats for a DAISY Talking Book namely DTBook XML?"
   [file]
-  (contains? #{"application/xml"} (content-type file)))
+  (contains? #{"application/xml"} (mime-type-of file)))
 
 (defn- image-file?
   "Is the given `file` an image file, i.e. any of the valid image file
   formats for a DAISY Talking Book namely png and jpeg?"
   [file]
-  (contains? #{"image/png" "image/jpeg"} (content-type file)))
+  (contains? #{"image/png" "image/jpeg"} (mime-type-of file)))
 
 (defn- ncx-file?
   "Is the given `file` an ncx file?"
@@ -78,10 +73,10 @@
   [{path :path}]
   (let [audio-files (filter audio-file? (file-seq (file path)))]
     (cond 
-     (every? #(contains? #{"audio/mp4"} (content-type %)) audio-files) "MP4-AAC"
-     (every? #(contains? #{"audio/mpeg"} (content-type %)) audio-files) "MP3"
-     (every? #(contains? #{"audio/x-wav"} (content-type %)) audio-files) "WAV"
-     :else "")))
+     (every? #(contains? #{"audio/mp4"} (mime-type-of %)) audio-files) "MP4-AAC"
+     (every? #(contains? #{"audio/mpeg"} (mime-type-of %)) audio-files) "MP3"
+     (every? #(contains? #{"audio/x-wav"} (mime-type-of %)) audio-files) "WAV" ; FIXME: this doesn't work if we have mostly wav and one mp3. Maybe we need to filter the "tpbnarrator_res.mp3" file
+      :else "")))
 
 (defn- file-audio-length
   "Get the length of the audio in seconds for a given audio `file`"
