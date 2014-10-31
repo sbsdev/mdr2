@@ -1,5 +1,6 @@
 (ns mdr2.dtb
-  "Functions to query [DAISY Talking Books](http://www.daisy.org/daisypedia/daisy-digital-talking-book)"
+  "Functions to query [DAISY Talking
+  Books](http://www.daisy.org/daisypedia/daisy-digital-talking-book)"
   (:require [clojure.java.io :refer [file]]
             [clojure.string :as s]
             [pantomime.mime :refer [mime-type-of]])
@@ -15,19 +16,19 @@
   formats for a DAISY Talking Book namely *MPEG-4 AAC audio*, *MPEG-1/2
   Layer III (MP3) audio* and *Linear PCM - RIFF WAVE format audio*?"
   [file]
-  (contains? #{"audio/mpeg" "audio/x-wav" "audio/mp4"} (mime-type-of file)))
+  (#{"audio/mpeg" "audio/x-wav" "audio/mp4"} (mime-type-of file)))
 
 (defn- text-file?
   "Is the given `file` a text file, i.e. any of the valid text file
   formats for a DAISY Talking Book namely DTBook XML?"
   [file]
-  (contains? #{"application/xml"} (mime-type-of file)))
+  (#{"application/xml"} (mime-type-of file)))
 
 (defn- image-file?
   "Is the given `file` an image file, i.e. any of the valid image file
   formats for a DAISY Talking Book namely png and jpeg?"
   [file]
-  (contains? #{"image/png" "image/jpeg"} (mime-type-of file)))
+  (#{"image/png" "image/jpeg"} (mime-type-of file)))
 
 (defn- ncx-file?
   "Is the given `file` an ncx file?"
@@ -71,12 +72,15 @@
   "Return the format in which the audio files in the DTB file set are
   written for a given DAISY Talking Book"
   [{path :path}]
-  (let [audio-files (filter audio-file? (file-seq (file path)))]
-    (cond 
-     (every? #(contains? #{"audio/mp4"} (mime-type-of %)) audio-files) "MP4-AAC"
-     (every? #(contains? #{"audio/mpeg"} (mime-type-of %)) audio-files) "MP3"
-     (every? #(contains? #{"audio/x-wav"} (mime-type-of %)) audio-files) "WAV" ; FIXME: this doesn't work if we have mostly wav and one mp3. Maybe we need to filter the "tpbnarrator_res.mp3" file
-      :else "")))
+  (let [mime-types (->> (file-seq (file path))
+                        (filter audio-file?)
+                        (remove #(= (.getName %) "tpbnarrator_res.mp3"))
+                        (map mime-type-of))]
+    (cond
+     (every? #{"audio/mp4"} mime-types) "MP4-AAC"
+     (every? #{"audio/mpeg"} mime-types) "MP3"
+     (every? #{"audio/x-wav"} mime-types) "WAV"
+     :else "")))
 
 (defn- file-audio-length
   "Get the length of the audio in seconds for a given audio `file`"
