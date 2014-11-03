@@ -35,9 +35,14 @@
 ;; according to wikipedia it should be 737280000 (see
 ;; http://en.wikipedia.org/wiki/CD-ROM#Capacity) but according to k3b
 ;; it is 666.4 MiB (2,048 B * 341,186 blocks = 698,748,928 B)
-(def ^:private max-size 698748928)
+(def ^:private max-size
+  "Max number of bytes that fit on a CD-ROM"
+  698748928)
 
-(defn fit-on-one-cd? [production]
+(defn fit-on-one-cd?
+  "Return true if the `production`, i.e. the resulting iso file fits
+  on one CD"
+  [production]
   (let [path (path/iso-path production)
         size (fs/size path)]
     (< size max-size)))
