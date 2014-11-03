@@ -38,10 +38,10 @@
 (defn- has-type? [type-pred path]
   (some type-pred (file-seq (file path))))
 
-(defn- has-audio? [{path :path}] (has-type? audio-file? path))
-(defn- has-text? [{path :path}] (has-type? text-file? path))
-(defn- has-image? [{path :path}] (has-type? image-file? path))
-(defn- has-ncx? [{path :path}] (has-type? ncx-file? path))
+(defn- has-audio? [dtb] (has-type? audio-file? dtb))
+(defn- has-text? [dtb] (has-type? text-file? dtb))
+(defn- has-image? [dtb] (has-type? image-file? dtb))
+(defn- has-ncx? [dtb] (has-type? ncx-file? dtb))
 
 (defn- audio-content [dtb] (when (has-audio? dtb) "audio"))
 (defn- text-content [dtb] (when (has-text? dtb) "text"))
@@ -71,8 +71,8 @@
 (defn audio-format
   "Return the format in which the audio files in the DTB file set are
   written for a given DAISY Talking Book"
-  [{path :path}]
-  (let [mime-types (->> (file-seq (file path))
+  [dtb]
+  (let [mime-types (->> (file-seq (file dtb))
                         (filter audio-file?)
                         (remove #(= (.getName %) "tpbnarrator_res.mp3"))
                         (map mime-type-of))]
@@ -95,12 +95,12 @@
 
 (defn audio-length
   "Return the audio legth for a given DAISY Talking Book in seconds"
-  [{path :path}]
+  [dtb]
   ;; unfortunatelly getting the audio length of an mp3 file doesn't
   ;; seem to be supported at the moment. You need to have the proper
   ;; providers. Maybe this is a problem of openjdk? So just use wav
   ;; files for the calculation.
-  (let [audio-files (filter wav-file? (file-seq (file path)))] 
+  (let [audio-files (filter wav-file? (file-seq (file dtb)))] 
     (reduce + (map file-audio-length audio-files))))
 
 (defn meta-data
