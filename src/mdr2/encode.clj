@@ -32,8 +32,15 @@
         "-J" ; Generate Joliet directory records in addition to regular ISO9660 filenames.
         "-o" iso-name encoded-path)))
 
+;; according to wikipedia it should be 737280000 (see
+;; http://en.wikipedia.org/wiki/CD-ROM#Capacity) but according to k3b
+;; it is 666.4 MiB (2,048 B * 341,186 blocks = 698,748,928 B)
+(def ^:private max-size 698748928)
+
 (defn fit-on-one-cd? [production]
-  true)
+  (let [path (path/iso-path production)
+        size (fs/size path)]
+    (< size max-size)))
 
 (defn clean-up
   "Clean up temporary files of a production, namely the mp3 encoded
@@ -45,15 +52,14 @@
 (defn encode
   [production]
   ;; encode the production
-  (let [encoded (encode-production production)]
-    (if (fit-on-one-cd? encoded)
-      (do
-        ;; if it fits on one CD the create an iso
-        (create-iso encoded)
-        ;; and set the state to encoded
-        (prod/update! (assoc production :state :encoded)))
-      ;; otherwise move the production to state :pending-volume-split
-      ;; FIXME: clean up first
-      (do
-        (clean-up production)
-        (prod/update! (assoc production :state :pending-volume-split))))))
+  (encode-production production)
+  ;; create an iso
+  (create-iso production)
+  (if (fit-on-one-cd? production)
+    ;; set the state to encoded
+    (prod/update! (assoc production :state :encoded))
+    ;; otherwise move the production to state :pending-volume-split
+    ;; FIXME: clean up first
+    (do
+      (clean-up production)
+      (prod/update! (assoc production :state :pending-volume-split)))))
