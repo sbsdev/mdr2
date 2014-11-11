@@ -136,7 +136,7 @@
             :state :cataloged)]
     (prod/update! p)
     ;; put the production on the archive queue
-    (msg/publish queues/archive-queue p)
+    (msg/publish (queues/archive) p)
     (response/redirect "/")))
 
 (defn production-delete [id]
@@ -198,7 +198,7 @@
         p (assoc (prod/find id) :state state)]
     (prod/update! p)
     (when (= state :recorded)
-      (msg/publish queues/encode-queue p))
+      (msg/publish (queues/encode) p))
     (response/redirect "/")))
 
 (defn login-form []

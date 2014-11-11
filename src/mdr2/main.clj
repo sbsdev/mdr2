@@ -14,11 +14,11 @@
   (web/run-dmc handler/app)
 
   ;; wire up queues
-  (msg/listen queues/create-queue #(production/create %))
-  (msg/listen queues/encode-queue #(encode/encode %))
-  (msg/listen queues/archive-queue #(archive/archive %))
-  (msg/listen queues/notify-abacus-queue #(abacus/export-file %))
-  (msg/listen queues/metadata-update #(production/update-or-create! %))
+  (msg/listen (queues/create) #(production/create %))
+  (msg/listen (queues/encode) #(encode/encode %))
+  (msg/listen (queues/archive) #(archive/archive %))
+  (msg/listen (queues/notify-abacus) #(abacus/export-file %))
+  (msg/listen (queues/metadata-update) #(production/update-or-create! %))
 
   ;; set up cron jobs
   ;; get new productions from ABACUS

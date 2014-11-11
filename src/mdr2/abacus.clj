@@ -71,7 +71,7 @@
 (defn import-new-production
   "Import a new production from file `f`"
   [f]
-  (msg/publish queues/create-queue (read-file f))
+  (msg/publish (queues/create) (read-file f))
   f)
 
 (defn import-new-productions
@@ -94,7 +94,7 @@
   [f]
   (let [{product_number :product_number} (read-file f)
         production (prod/find-by-productnumber product_number)]
-    (msg/publish queues/encode-queue production)
+    (msg/publish (queues/encode) production)
     f))
 
 (defn import-recorded-productions
@@ -115,7 +115,7 @@
 (defn import-status-request [f]
   (let [{product_number :product_number} (read-file f)
         production (prod/find-by-productnumber product_number)]
-    (msg/publish queues/notify-abacus-queue production)
+    (msg/publish (queues/notify-abacus) production)
     f))
 
 (defn import-status-requests
@@ -134,7 +134,7 @@
   (file-startswith? file ["SNMeta_"]))
 
 (defn import-metadata-update [f]
-  (msg/publish queues/metadata-update (read-file f))
+  (msg/publish (queues/metadata-update) (read-file f))
   f)
 
 (defn import-metadata-updates
