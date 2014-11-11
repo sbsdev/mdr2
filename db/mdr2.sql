@@ -1,18 +1,18 @@
 -- Meta data for a production
 -- see http://www.daisy.org/z3986/2005/Z3986-2005.html#PubMed
 CREATE TABLE production (
-  id INTEGER PRIMARY KEY,
-  title TEXT,
+  id INTEGER AUTO_INCREMENT PRIMARY KEY,
+  title TEXT NOT NULL,
   creator TEXT,
   subject TEXT,
   description TEXT,
-  publisher TEXT,
-  date TEXT,
+  publisher TEXT NOT NULL,
+  date TEXT NOT NULL,
   type TEXT,
   format TEXT,
-  identifier TEXT,
+  identifier TEXT NOT NULL,
   source TEXT,
-  language TEXT,
+  language TEXT NOT NULL,
   rights TEXT,
   source_date TEXT,
   source_edition TEXT,
@@ -33,7 +33,7 @@ CREATE TABLE production (
   -- Number of levels
   depth INTEGER,
   -- SBS specific columns
-  state INTEGER DEFAULT 0,
+  state INTEGER  NOT NULL DEFAULT 0,
   -- production number given by the erp system. We should really use
   -- this as the primary key but alas some productions are done
   -- without involving the erp system, so we need to keep our own
@@ -52,7 +52,7 @@ CREATE TABLE production (
 );
 
 CREATE TABLE product (
-  id INTEGER PRIMARY KEY,
+  id INTEGER AUTO_INCREMENT PRIMARY KEY,
   identifier TEXT NOT NULL,
   type INTEGER NOT NULL,
   production_id INTEGER NOT NULL,
@@ -60,7 +60,7 @@ CREATE TABLE product (
 );
 
 CREATE TABLE user (
-  id INTEGER PRIMARY KEY,
+  id INTEGER AUTO_INCREMENT PRIMARY KEY,
   username TEXT NOT NULL,
   first_name TEXT NOT NULL,
   last_name TEXT NOT NULL,
@@ -69,12 +69,12 @@ CREATE TABLE user (
 );
 
 CREATE TABLE role (
-  id INTEGER PRIMARY KEY,
+  id INTEGER AUTO_INCREMENT PRIMARY KEY,
   name TEXT NOT NULL
 );
 
 CREATE TABLE user_role (
-  id INTEGER PRIMARY KEY,
+  id INTEGER AUTO_INCREMENT PRIMARY KEY,
   user_id INTEGER NOT NULL,
   role_id INTEGER NOT NULL,
   FOREIGN KEY(user_id) REFERENCES user(id),
