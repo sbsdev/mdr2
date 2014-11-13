@@ -13,3 +13,5 @@ pom.xml.asc
 /doc/
 /db/archive.db
 /profiles.clj
+/.descriptors/
+/hornetq-data/
