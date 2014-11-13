@@ -29,8 +29,7 @@
           :defaults {:doc/format :markdown}}
   :ring {:handler mdr2.handler/app}
   :main mdr2.main
-  :immutant {:context-path "/"
-             :dev? true}
+  :immutant {:war {:context-path "/"}}
   :profiles {:dev {:dependencies [[org.xerial/sqlite-jdbc "3.8.7"]
                                   [javax.servlet/servlet-api "2.5"]
                                   [ring/ring-devel "1.3.1"]]}
