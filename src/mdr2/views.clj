@@ -126,7 +126,6 @@
                           [:button.btn.btn-default
                            (layout/glyphicon "transfer")]])]])]])))
 
-
 (defn production-catalog [request id library_signature]
   (let [user (friend/current-authentication request)
         p (assoc (prod/find id) 
