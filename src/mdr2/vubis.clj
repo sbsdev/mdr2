@@ -3,7 +3,8 @@
   (:require [clojure.java.io :as io]
             [clojure.xml :as xml]
             [clojure.zip :as zip]
-            [clojure.data.zip.xml :refer [xml-> xml1-> attr= text]]))
+            [clojure.data.zip.xml :refer [xml-> xml1-> attr= text]]
+            [mdr2.schema-validation :refer [validation-errors]]))
 
 (def ^:private param-mapping
   {:title [:datafield (attr= :tag "245") :subfield (attr= :code "a")]
@@ -14,12 +15,13 @@
    :source_publisher [:datafield (attr= :tag "534") :subfield (attr= :code "c")]
    :source_date [:datafield (attr= :tag "534") :subfield (attr= :code "d")]})
 
+(def ^:private schema "schema/vubis_export.rng")
+
 (defn validate
   "Returns an empty seq on successful validation of `file` as a proper
   vubis export file or a seq of error messages otherwise"
   [file]
-  ;; FIXME: implement proper validation for vubis export files
-  ())
+  (validation-errors file schema))
 
 (defn get-subfield
   "Get the subfield text for the given `path` in the given `record`.

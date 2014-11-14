@@ -1,0 +1,21 @@
+default namespace = ""
+
+start =
+  element collection {
+    element record {
+      element leader { text },
+      element controlfield {
+        attribute tag { xsd:integer },
+        text
+      }+,
+      element datafield {
+        attribute ind1 { text }?,
+        attribute ind2 { text }?,
+        attribute tag { xsd:integer },
+        element subfield {
+          attribute code { xsd:NMTOKEN },
+          text
+        }+
+      }+
+    }+
+  }
