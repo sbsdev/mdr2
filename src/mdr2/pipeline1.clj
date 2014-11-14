@@ -7,6 +7,13 @@
   (:require [clojure.java.shell :refer [sh]]
             [clojure.string :as s]))
 
+(defn continuation-line? [line]
+  (cond
+   (re-find #"^\s+" line) true ; starts with white space
+   (re-find #".*:$" line) true ; ends in a colon
+   (= "" line) true
+   :else line))
+
 (defn- clean-line [line file]
   (-> line
       (s/replace "[ERROR, Validator]" "")
@@ -16,6 +23,9 @@
 (defn- filter-output [output file]
   (->> output
        s/split-lines
+       ;; make sure we merge continuation lines with their log line
+       (partition-by continuation-line?)
+       (map s/join)
        (filter #(re-matches #"^\[ERROR, Validator\].*" %))
        (map #(clean-line % file))))
 
