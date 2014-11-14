@@ -4,7 +4,8 @@
             [clojure.string :as string]
             [clojure.xml :as xml]
             [clojure.zip :as zip]
-            [clojure.data.zip.xml :refer [xml1-> attr= attr text]]))
+            [clojure.data.zip.xml :refer [xml1-> attr= attr text]])
+  (:import org.xml.sax.SAXParseException))
 
 (defn get-metadata-path
   "Return the path to the metadata for the given `field`"
@@ -68,8 +69,11 @@
   `production`. Return a sequence of error strings or an empty
   sequence if the XML in `dtbook` is valid"
   [dtbook production]
-  (let [zipper (-> dtbook io/file xml/parse zip/xml-zip)]
-    (for [[key paths] param-mapping
-          :let [value (key production)]
-          :when (not (validate-paths zipper value paths))]
-      (error-message key value (distinct (get-paths zipper paths))))))
+  (try
+    (let [zipper (-> dtbook io/file xml/parse zip/xml-zip)]
+      (for [[key paths] param-mapping
+            :let [value (key production)]
+            :when (not (validate-paths zipper value paths))]
+        (error-message key value (distinct (get-paths zipper paths)))))
+    (catch SAXParseException e
+      [(.getMessage e)])))
