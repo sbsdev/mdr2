@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<grammar ns="" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+  <start>
+    <element name="AbaConnectContainer">
+      <element name="Task">
+        <element name="Parameter">
+          <element name="Application">
+            <value>MadrasApi</value>
+          </element>
+          <element name="Id">
+            <value>Document</value>
+          </element>
+          <element name="Version">
+            <value>1.0</value>
+          </element>
+        </element>
+        <element name="Transaction">
+          <element name="DocumentData">
+            <attribute name="command">
+              <value>mdaDocAdd</value>
+            </attribute>
+            <element name="artikel_nr">
+              <data type="NCName"/>
+            </element>
+            <element name="priority">
+              <data type="NCName"/>
+            </element>
+            <element name="deadline">
+              <data type="date"/>
+            </element>
+            <ref name="title"/>
+            <element name="process_status">
+              <data type="NCName"/>
+            </element>
+            <element name="document_status">
+              <data type="NCName"/>
+            </element>
+            <element name="is_meta">
+              <data type="NCName"/>
+            </element>
+            <element name="mvl_only">
+              <data type="NCName"/>
+            </element>
+            <element name="MetaData">
+              <element name="dc">
+                <ref name="title"/>
+                <optional>
+                  <element name="creator">
+                    <text/>
+                  </element>
+                </optional>
+                <optional>
+                  <element name="source">
+                    <data type="NMTOKEN"/>
+                  </element>
+                </optional>
+                <element name="language">
+                  <data type="NCName"/>
+                </element>
+                <element name="date">
+                  <data type="date"/>
+                </element>
+              </element>
+              <element name="sbs">
+                <element name="idVorstufe">
+                  <text/>
+                </element>
+                <element name="printPageNumber">
+                  <data type="integer"/>
+                </element>
+                <element name="idPrint">
+                  <data type="integer"/>
+                </element>
+                <element name="kostenstelle">
+                  <data type="integer"/>
+                </element>
+                <optional>
+                  <element name="idZeitkurz">
+                    <data type="NCName"/>
+                  </element>
+                  <element name="jahr">
+                    <data type="integer"/>
+                  </element>
+                </optional>
+              </element>
+              <element name="ncc">
+                <element name="sourcePublisher">
+                  <data type="NCName"/>
+                </element>
+                <element name="sourceDate">
+                  <text/>
+                </element>
+                <optional>
+                  <element name="narrator">
+                    <data type="NCName"/>
+                  </element>
+                </optional>
+                <!-- FIXME: could probably also be something of the form "1 of 3" -->
+                <element name="setInfo">
+                  <data type="integer"/>
+                </element>
+                <element name="revisionDate">
+                  <data type="date"/>
+                </element>
+              </element>
+            </element>
+          </element>
+        </element>
+      </element>
+    </element>
+  </start>
+  <define name="title">
+    <element name="title">
+      <text/>
+    </element>
+  </define>
+</grammar>

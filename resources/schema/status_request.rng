@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<grammar ns="" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+  <start>
+    <element name="AbaConnectContainer">
+      <element name="Task">
+        <element name="Parameter">
+          <element name="Application">
+            <value>MadrasApi</value>
+          </element>
+          <element name="Id">
+            <value>Document</value>
+          </element>
+          <element name="Version">
+            <value>1.0</value>
+          </element>
+        </element>
+        <element name="Transaction">
+          <element name="DocumentData">
+            <attribute name="command">
+              <value>mdaDocModify</value>
+            </attribute>
+            <element name="artikel_nr">
+              <data type="NCName"/>
+            </element>
+            <element name="identifier">
+              <data type="NCName"/>
+            </element>
+          </element>
+        </element>
+      </element>
+    </element>
+  </start>
+</grammar>
