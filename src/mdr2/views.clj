@@ -73,7 +73,7 @@
     (layout/common user
      [:h1 "Upload"]
      [:p (str "Upload structure for " (:title p))]
-     (when (seq? errors)
+     (when (seq errors)
        [:p [:ul.alert.alert-danger (for [e errors] [:li e])]])
      (form/form-to
       {:enctype "multipart/form-data"}
@@ -146,7 +146,7 @@
   (let [user (friend/current-authentication request)]
     (layout/common user
      [:h1 "Upload new productions from Vubis XML"]
-     (when (seq? errors)
+     (when (seq errors)
        [:p [:ul.alert.alert-danger (for [e errors] [:li e])]])
      (form/form-to
       {:enctype "multipart/form-data"}
