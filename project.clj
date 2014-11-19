@@ -10,7 +10,10 @@
                  [org.clojure/data.zip "0.1.1"]
                  [org.clojure/tools.logging "0.3.1"]
                  [com.thaiopensource/jing "20091111"]
-                 [clj-http "1.0.1"]
+                 [pandect "0.4.1"] ; for pipeline2 client
+                 [org.clojure/data.codec "0.1.0"] ; for pipeline2 client
+                 [crypto-random "1.2.0"] ; for pipeline2 client
+                 [clj-http "1.0.1"] ; for pipeline2 client
                  [com.cemerick/friend "0.2.1"]
                  [me.raynes/fs "1.4.6"]
                  [com.novemberain/pantomime "2.3.0"]
