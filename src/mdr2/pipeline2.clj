@@ -58,63 +58,31 @@
           :body
           xml/parse-str))))
 
-(defn- attrs-to-map [element attributes]
-  (into {} 
-   (for [kw attributes] [kw (attr element kw)])))
-
-(defn- elements-to-map [parent elements]
-  (into {} 
-   (for [kw elements] [kw (xml1-> parent kw text)])))
-
 (defn wait [job])
 
 (defn jobs []
   (let [url (str ws-url "/jobs")
         response (client/get url (auth-query-params url))]
     (when (client/success? response)
-      (let [root (-> (:body response)
-                     xml/parse-str
-                     zip/xml-zip)]
-        (for [job (xml-> root :job)]
-          (merge
-           (attrs-to-map job [:id :href :status])
-           (elements-to-map job [:nicename])
-           {:log (xml1-> job :log (attr :href))
-            :results
-            (for [result (xml-> job :results :result)]
-              (attrs-to-map result [:href :from :mime-type :name :nicename]))}))))))
+      (-> response
+          :body
+          xml/parse-str))))
 
 (defn scripts []
   (let [url (str ws-url "/scripts")
         response (client/get url (auth-query-params url))]
     (when (client/success? response)
-      (let [root (-> (:body response)
-                     xml/parse-str
-                     zip/xml-zip)]
-        (for [script (xml-> root :script)]
-          {:id (attr script :id)
-           :href (attr script :href)
-           :nicename (xml1-> script :nicename text)
-           :description (xml1-> script :description text)})))))
+      (-> response
+          :body
+          xml/parse-str))))
 
 (defn script [id]
   (let [url (str ws-url "/scripts/" id)
         response (client/get url (auth-query-params url))]
     (when (client/success? response)
-      (let [script (-> (:body response)
-                       xml/parse-str
-                       zip/xml-zip)]
-        (merge 
-         (attrs-to-map script [:id :href])
-         (elements-to-map script [:nicename :description :homepage])
-         {:input
-          (for [input (xml-> script :input)]
-            (attrs-to-map script [:desc :mediaType :name :sequence]))
-          :options 
-          (for [option (xml-> script :option)]
-            (attrs-to-map 
-             option 
-             [:desc :mediaType :name :nicename :required :type :ordered :sequence]))})))))
+      (-> response
+          :body
+          xml/parse-str))))
 
 (defn alive? []
   (let [url (str ws-url "/alive")]
