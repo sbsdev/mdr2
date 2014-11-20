@@ -29,7 +29,7 @@
         params {"authid" auth-id "time" timestamp "nonce" nonce}
         query-string (str uri "?" (client/generate-query-string params))
         hashcode (create-hash query-string secret)]
-    {:query-params 
+    {:query-params
      {"authid" auth-id "time" timestamp "nonce" nonce "sign" hashcode}}))
 
 (defn job-sexp [script inputs options]
@@ -47,42 +47,65 @@
       xml/sexp-as-element
       xml/emit-str))
 
-(defn post [script inputs options]
-  (let [url (str ws-url "/jobs")
-        request (job-request script inputs options)
-        auth (auth-query-params url)
-        body {:body request}
-        response (client/post url (merge auth body))]
-    (when (client/success? response)
-      (-> response
-          :body
-          xml/parse-str))))
-
 (defn wait [job])
 
 (defn jobs []
   (let [url (str ws-url "/jobs")
         response (client/get url (auth-query-params url))]
     (when (client/success? response)
-      (-> response
-          :body
-          xml/parse-str))))
+      (-> response :body xml/parse-str))))
+
+(defn job [id]
+  (let [url (str ws-url "/jobs/" id)
+        response (client/get url (auth-query-params url))]
+    (when (client/success? response)
+      (-> response :body xml/parse-str))))
+
+(defn job-create [script inputs options]
+  (let [url (str ws-url "/jobs")
+        request (job-request script inputs options)
+        auth (auth-query-params url)
+        body {:body request}
+        response (client/post url (merge auth body))]
+    (when (client/success? response)
+      (-> response :body xml/parse-str))))
+
+(defn job-result-1 [url]
+  (let [response (client/get url (auth-query-params url))]
+    (when (client/success? response)
+      (-> response :body xml/parse-str))))
+
+(defn job-result
+  ([id]
+     (job-result-1 (str ws-url "/jobs/" id "/result")))
+  ([id type name]
+     (job-result-1 (str ws-url "/jobs/" id "/result/" type "/" name)))
+  ([id type name idx]
+     (job-result-1 (str ws-url "/jobs/" id "/result/" type "/" name "/idx/" idx))))
+
+(defn job-log [id]
+  (let [url (str ws-url "/jobs/" id "/log")
+        response (client/get url (auth-query-params url))]
+    (when (client/success? response)
+      (-> response :body))))
+
+(defn job-delete [id]
+  (let [url (str ws-url "/jobs/" id)
+        response (client/delete url (auth-query-params url))]
+    (when (client/success? response)
+      (-> response :body xml/parse-str))))
 
 (defn scripts []
   (let [url (str ws-url "/scripts")
         response (client/get url (auth-query-params url))]
     (when (client/success? response)
-      (-> response
-          :body
-          xml/parse-str))))
+      (-> response :body xml/parse-str))))
 
 (defn script [id]
   (let [url (str ws-url "/scripts/" id)
         response (client/get url (auth-query-params url))]
     (when (client/success? response)
-      (-> response
-          :body
-          xml/parse-str))))
+      (-> response :body xml/parse-str))))
 
 (defn alive? []
   (let [url (str ws-url "/alive")]
