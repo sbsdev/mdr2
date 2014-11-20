@@ -1,4 +1,4 @@
-(ns mdr2.pipeline2
+(ns mdr2.pipeline2.core
   (:require [clojure.data.xml :as xml]
             [clojure.zip :as zip]
             [clojure.data.zip.xml :refer [xml-> xml1-> attr text]]
