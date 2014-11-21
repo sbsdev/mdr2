@@ -89,8 +89,7 @@
 (defn job-delete [id]
   (let [url (str ws-url "/jobs/" id)
         response (client/delete url (auth-query-params url))]
-    (when (client/success? response)
-      (-> response :body xml/parse-str))))
+    (client/success? response)))
 
 (defn scripts []
   (let [url (str ws-url "/scripts")
