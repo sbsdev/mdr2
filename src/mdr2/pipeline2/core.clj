@@ -1,4 +1,6 @@
 (ns mdr2.pipeline2.core
+  "Thin layer on top of the [Pipeline2 Web Service
+  API](https://code.google.com/p/daisy-pipeline/wiki/WebServiceAPI)"
   (:require [clojure.data.xml :as xml]
             [clj-time.core :as t]
             [clj-time.format :as f]
