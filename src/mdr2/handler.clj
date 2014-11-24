@@ -31,6 +31,7 @@
         (friend/authenticated (views/production-add-xml r id file)))
   (POST "/production/:id/state" [id state :as r]
         (friend/authenticated (views/production-set-state r id state)))
+  ;; catalog
   (GET "/catalog" request
        (friend/authenticated (views/catalog request)))
   (POST "/catalog/:id" [id library_signature :as r]
