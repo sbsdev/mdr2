@@ -128,5 +128,8 @@
   (fs/move f (xml-path production) StandardCopyOption/REPLACE_EXISTING)
   ;; create a config file for obi
   (obi/config-file production)
+  ;; create all the directories needed for obi
+  (doseq [d [(path/recording-path production) (path/recorded-path production)]]
+    (fs/mkdirs d))
   ;; update the status
   (update! (assoc production :state :structured)))
