@@ -12,6 +12,7 @@
             [mdr2.layout :as layout]
             [mdr2.dtbook :refer [dtbook]]
             [mdr2.dtbook.validation :refer [validate-metadata]]
+            [mdr2.production-monitoring :as psm]
             [mdr2.pipeline1 :as pipeline]))
 
 (defn home [request]
@@ -199,6 +200,10 @@
     (when (= state :recorded)
       (msg/publish (queues/encode) p))
     (response/redirect "/")))
+
+(defn production-monitoring []
+  "Return a csv containing the total audio length of all productions"
+  (response/file-response (psm/csv (prod/find-by-state :structured))))
 
 (defn login-form []
   (layout/common nil

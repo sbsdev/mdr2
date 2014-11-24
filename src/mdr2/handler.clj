@@ -39,6 +39,8 @@
        (friend/authenticated (views/production r id)))
   (GET "/production/:id/delete" [id]
        (friend/authorize #{:admin} (views/production-delete id)))
+  ;; production monitoring
+  (GET "/psm.csv" [] (views/production-monitoring))
   ;; auth
   (GET "/login" [] (views/login-form))
   (GET "/logout" req (friend/logout* (response/redirect "/")))

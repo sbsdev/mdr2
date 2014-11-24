@@ -6,7 +6,7 @@
             [pantomime.mime :refer [mime-type-of]])
   (:import javax.sound.sampled.AudioSystem))
 
-(defn- wav-file?
+(defn wav-file?
   "Is the given `file` a wav file?"
   [file]
   (= (mime-type-of file) "audio/x-wav"))
