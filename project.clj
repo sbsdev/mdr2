@@ -15,7 +15,8 @@
                  [crypto-random "1.2.0"] ; for pipeline2 client
                  [clj-http "1.0.1"] ; for pipeline2 client
                  [com.cemerick/friend "0.2.1"]
-                 [me.raynes/fs "1.4.6"]
+                 [me.raynes/fs "1.4.6"] ; to be replaced by nio.file
+                 [org.tobereplaced/nio.file "0.2.0"]
                  [com.novemberain/pantomime "2.3.0"]
                  [clj-time "0.8.0"]
                  [environ "1.0.0"]
