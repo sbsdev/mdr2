@@ -62,7 +62,7 @@
   (as-> production p
         (add-default-meta-data p)
         (db/insert! p)
-        (doseq [dir (path/all)] (fs/mkdirs dir))))
+        (doseq [dir (path/all p)] (fs/mkdirs dir))))
 
 (defn update-or-create!
   [production]
@@ -79,7 +79,7 @@
         ;; FIXME: shouldn't we update the DTBook XML when the meta
         ;; data is updated?
         (db/update-or-insert! p)
-        (doseq [dir (path/all)] (fs/mkdirs dir))))
+        (doseq [dir (path/all p)] (fs/mkdirs dir))))
 
 (defn update! [production]
   (db/update! production))
@@ -107,7 +107,7 @@
 (defn delete-all-dirs
   "Delete all artifacts on the file system for a production"
   [production]
-  (doseq [dir (path/all)] (fs/delete-dir dir)))
+  (doseq [dir (path/all production)] (fs/delete-dir dir)))
 
 (defn delete
   "Delete a production with the given `id`"
