@@ -27,7 +27,8 @@
   (.getPath (file production-path "encoded" (str id))))
 
 (defn iso-path
-  "Path to the directory where the iso of the exported DTB for given `production` is placed"
+  "Path to the directory where the iso of the exported DTB for given
+  `production` is placed"
   [{id :id}]
   (.getPath (file production-path "iso" (str id))))
 
@@ -42,3 +43,8 @@
   [production]
   (.getPath (file (recorded-path production) "package.opf")))
 
+(defn all
+  "Return all the paths needed for a particular `production`"
+  [production]
+  (map #(% production)
+       [structured-path recording-path recorded-path encoded-path iso-path]))

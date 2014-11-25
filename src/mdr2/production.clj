@@ -62,7 +62,7 @@
   (as-> production p
         (add-default-meta-data p)
         (db/insert! p)
-        (fs/mkdirs (path/structured-path p))))
+        (doseq [dir (path/all)] (fs/mkdirs dir))))
 
 (defn update-or-create!
   [production]
@@ -79,7 +79,7 @@
         ;; FIXME: shouldn't we update the DTBook XML when the meta
         ;; data is updated?
         (db/update-or-insert! p)
-        (fs/mkdirs (path/structured-path p))))
+        (doseq [dir (path/all)] (fs/mkdirs dir))))
 
 (defn update! [production]
   (db/update! production))
@@ -107,12 +107,7 @@
 (defn delete-all-dirs
   "Delete all artifacts on the file system for a production"
   [production]
-  (doseq [d [(path/structured-path production)
-             (path/recording-path production)
-             (path/recorded-path production)
-             (path/encoded-path production)
-             (path/iso-path production)]]
-    fs/delete-dir d))
+  (doseq [dir (path/all)] (fs/delete-dir dir)))
 
 (defn delete
   "Delete a production with the given `id`"
@@ -128,8 +123,5 @@
   (fs/move f (xml-path production) StandardCopyOption/REPLACE_EXISTING)
   ;; create a config file for obi
   (obi/config-file production)
-  ;; create all the directories needed for obi
-  (doseq [d [(path/recording-path production) (path/recorded-path production)]]
-    (fs/mkdirs d))
   ;; update the status
   (update! (assoc production :state :structured)))
