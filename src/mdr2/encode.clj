@@ -13,16 +13,16 @@
   (let [output (path/encoded-path production)
         manifest (path/manifest-path production)]
     (fs/mkdir output)
-    (pipeline/audio-encoder {:input manifest :output output})))
+    (pipeline/audio-encoder {:input (.getPath manifest) :output (.getPath output)})))
 
 (defn create-iso
   "Pack a production in an iso file"
   [{:keys [title publisher]
     :or {title "FIXME:" publisher "FIXME:"} ; title and publisher shouldn't be empty
     :as production}]
-  (let [encoded-path (path/encoded-path production)
+  (let [encoded-path (.getPath (path/encoded-path production))
         iso-path (path/iso-path production)
-        iso-name (path/iso-name production)]
+        iso-name (.getPath (path/iso-name production))]
     (fs/mkdir iso-path)
     (sh "genisoimage"
         "-quiet"

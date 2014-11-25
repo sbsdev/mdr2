@@ -24,24 +24,24 @@
   "Path to the encoded version of the exported DTB, i.e. the DTB
   containing mp3s for given `production`"
   [{id :id}]
-  (.getPath (file production-path "encoded" (str id))))
+  (file production-path "encoded" (str id)))
 
 (defn iso-path
   "Path to the directory where the iso of the exported DTB for given
   `production` is placed"
   [{id :id}]
-  (.getPath (file production-path "iso" (str id))))
+  (file production-path "iso" (str id)))
 
 (defn iso-name
   "Path to the iso of the exported DTB for given `production`"
   [{id :id :as production}]
-  (.getPath (file (iso-path production) (str id ".iso"))))
+  (file (iso-path production) (str id ".iso")))
 
 (defn manifest-path
   "Path to the manifest of the DTB which was exported from obi for
   given `production`"
   [production]
-  (.getPath (file (recorded-path production) "package.opf")))
+  (file (recorded-path production) "package.opf"))
 
 (defn all
   "Return all the paths needed for a particular `production`"
