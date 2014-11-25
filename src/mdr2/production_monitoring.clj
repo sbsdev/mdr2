@@ -13,9 +13,8 @@
 
 (defn audio-length [production]
   ;; as it happens the function that calculates the audio-length for a
-  ;; DTB is so flexible that it can be reused as-is for obi projects
+  ;; DTB is so generic that it can be reused as-is for obi projects
   (let [path (path/recording-path production)]
-        ;; length (if (nio/exists? path) (dtb/audio-length path) 0)]
     (assoc production :audio-length (dtb/audio-length path))))
 
 (defn last-modified [production]
