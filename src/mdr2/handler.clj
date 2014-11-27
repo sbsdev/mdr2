@@ -8,7 +8,7 @@
             (cemerick.friend [workflows :as workflows]
                              [credentials :as creds])
             [ring.util.response :as response]
-            [ring.middleware.nested-params :as nested-params]
+            [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
             [mdr2.db :as db]
             [mdr2.views :as views]))
 
@@ -56,6 +56,5 @@
        {:credential-fn (partial creds/bcrypt-credential-fn db/get-user)
         :workflows [(workflows/interactive-form)]
         :unauthorized-handler views/unauthorized})
-      handler/site ; FIXME: migrate to ring-defaults
-      nested-params/wrap-nested-params
+      (wrap-defaults site-defaults)
       wrap-base-url))

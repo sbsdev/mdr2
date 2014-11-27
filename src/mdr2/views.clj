@@ -2,6 +2,7 @@
   (:require [ring.util.response :as response]
             [hiccup.form :as form]
             [hiccup.element :refer [link-to]]
+            [ring.util.anti-forgery :refer [anti-forgery-field]]
             [cemerick.friend :as friend]
             [me.raynes.fs :as fs]
             [immutant.messaging :as msg]
@@ -41,6 +42,7 @@
                 (form/form-to {:class "btn-group"}
                               [:post (str "/production/" id "/state")]
                               (form/hidden-field :state next-state)
+                              (anti-forgery-field)
                               [:button.btn.btn-default
                                ;; only allow setting the state to
                                ;; recorded if there is a DAISY export
@@ -79,6 +81,7 @@
      (form/form-to
       {:enctype "multipart/form-data"}
       [:post (str "/production/" id "/upload")]
+      (anti-forgery-field)
       (form/file-upload "file")
       (form/submit-button "Upload")))))
 
@@ -119,6 +122,7 @@
           [:td
            (form/form-to {:class "form-inline" :role "form"}
                          [:post (str "/catalog/" id)]
+                         (anti-forgery-field)
                          [:div.form-group
                           (form/label {:class "sr-only"} :library_signature "Signature")
                           (form/text-field
@@ -152,6 +156,7 @@
      (form/form-to
       {:enctype "multipart/form-data"}
       [:post (str "/production/upload-confirm")]
+      (anti-forgery-field)
       (form/file-upload "file")
       (form/submit-button "Upload")))))
 
@@ -170,6 +175,7 @@
                 [:td (get p k)])])]]
      (form/form-to
       [:post "/production/upload"]
+      (anti-forgery-field)
         (for [p productions]
           (for [k keys]
             (form/with-group "productions"
@@ -210,6 +216,7 @@
    [:h3 "Login"]
    (form/form-to
     [:post "/login"]
+    (anti-forgery-field)
     [:div.form-group
      (form/label "username" "Username:")
      (form/text-field {:class "form-control"} "username")]
