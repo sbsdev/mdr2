@@ -7,6 +7,8 @@
   (:require [clojure.java.shell :refer [sh]]
             [clojure.string :as s]))
 
+(def ^:private install-path "/usr/lib/daisy-pipeline/scripts")
+
 (defn continuation-line? [line]
   (cond
    (re-find #"^\s+" line) true ; starts with white space
@@ -34,7 +36,7 @@
   seq on successful validation or a seq of error messages otherwise"
   [file]
   (-> (sh "daisy-pipeline"
-          "/usr/lib/daisy-pipeline/scripts/verify/ConfigurableValidator.taskScript"
+          (str install-path "/verify/ConfigurableValidator.taskScript")
           (str "--validatorInputFile=" file)
           ;; make sure it has to be a DTBook file
           "--validatorRequireInputType=Dtbook document"
@@ -47,5 +49,5 @@
   "Invoke the audio encoder script."
   [{:keys [input output bitrate] :as args}]
   (apply sh "daisy-pipeline"
-         "/usr/lib/daisy-pipeline/scripts/modify_improve/dtb/DTBAudioEncoder.taskScript"
+         (str install-path "/modify_improve/dtb/DTBAudioEncoder.taskScript")
          (map (fn [[k v]] (format "--%s=%s" (name k) v)) args)))
