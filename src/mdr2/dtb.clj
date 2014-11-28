@@ -103,6 +103,41 @@
   (let [audio-files (filter wav-file? (file-seq (file dtb)))] 
     (reduce + (map file-audio-length audio-files))))
 
+(defn- file-audio-channels
+  "Return the number of audio channels for a given audio `file`"
+  [file]
+  (let [stream (AudioSystem/getAudioInputStream file)
+        format (.getFormat stream)]
+    (.getChannels format)))
+
+(defn audio-channels
+  "Return the number of audio channels for a given DAISY Talking Book"
+  [dtb]
+  (let [audio-files (filter wav-file? (file-seq (file dtb)))
+        channels (map file-audio-channels audio-files)]
+    ;; if not all files are mono we assume the whole book is stereo
+    (if (every? #(= 1 %) channels) 1 2)))
+
+(defn mono?
+  "Return true if a DAISY Talking Book is mono"
+  [dtb]
+  (= (audio-channels dtb) 1))
+
+(defn file-sampling-rate
+  "Return the sample rate for a given audio `file`"
+  [file]
+  (let [stream (AudioSystem/getAudioInputStream file)
+        format (.getFormat stream)]
+    (.getSampleRate format)))
+
+(defn sampling-rate
+  "Return the sample rate for a given DAISY Talking Book. If there is
+  a mix of sampling rates used the most frequently used is returned"
+  [dtb]
+  (let [audio-files (filter wav-file? (file-seq (file dtb)))
+        sampling-rates (map file-sampling-rate audio-files)]
+    (ffirst (sort-by val (frequencies sampling-rates)))))
+
 (defn meta-data
   "Return a map containing all queried meta data for a given DAISY Talking Book"
   [dtb]
