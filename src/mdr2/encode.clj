@@ -15,7 +15,9 @@
   "Max number of bytes that fit on a CD-ROM"
   698748928)
 
-(def sampling-rates {:mono 22050.0 :stereo 44100.0})
+(def sampling-rates
+  "Possible sample rates for encoding a DTB"
+  {:mono 22050.0 :stereo 44100.0})
 
 (defn sampling-rate
   "Return the sampling rate that should be used for the given
@@ -58,8 +60,8 @@
         "-o" iso-name encoded-path)))
 
 (def bitrates
-  "Possible bitrates for encoding"
-  [128 64 48])
+  "Possible bitrates for encoding a DTB"
+  [128 64 56 48])
 
 (defn ideal-bitrate
   "Calculate the ideal bitrate based on the size of a production and
