@@ -47,7 +47,8 @@
 
 (defn audio-encoder
   "Invoke the audio encoder script."
-  [{:keys [input output bitrate] :as args}]
-  (apply sh "daisy-pipeline"
-         (str install-path "/modify_improve/dtb/DTBAudioEncoder.taskScript")
-         (map (fn [[k v]] (format "--%s=%s" (name k) v)) args)))
+  [input output & {:keys [bitrate stereo freq] :as opts}]
+  (let [args (merge opts {:input input :output output})]
+    (apply sh "daisy-pipeline"
+           (str install-path "/modify_improve/dtb/DTBAudioEncoder.taskScript")
+           (map (fn [[k v]] (format "--%s=%s" (name k) v)) args))))
