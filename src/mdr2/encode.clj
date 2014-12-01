@@ -5,15 +5,40 @@
             [me.raynes.fs :as fs]
             [mdr2.production :as prod]
             [mdr2.production.path :as path]
+            [mdr2.dtb :as dtb]
             [mdr2.pipeline1 :as pipeline]))
 
-(defn encode-production
-  "Encode a `production`, i.e. convert the wav files to mp3"
+;; according to wikipedia it should be 737280000 (see
+;; http://en.wikipedia.org/wiki/CD-ROM#Capacity) but according to k3b
+;; it is 666.4 MiB (2,048 B * 341,186 blocks = 698,748,928 B)
+(def ^:private max-size
+  "Max number of bytes that fit on a CD-ROM"
+  698748928)
+
+(def sampling-rates {:mono 22050.0 :stereo 44100.0})
+
+(defn sampling-rate
+  "Return the sampling rate that should be used for the given
+  `production`. By default 22050.0 is used but for stereo productions
+  we use 44100.0"
   [production]
+  (let [dtb (path/recorded-path production)
+        channels (dtb/audio-channels dtb)]
+    (if (= channels 1)
+      (:mono sampling-rates)
+      (:stereo sampling-rates))))
+
+(defn encode-production
+  "Encode a `production` using the given `bitrate`, i.e. convert the
+  wav files to mp3"
+  [production bitrate]
   (let [output (path/encoded-path production)
-        manifest (path/manifest-path production)]
+        manifest (path/manifest-path production)
+        stereo (if (dtb/mono? (path/recorded-path production)) "mono" "stereo")
+        sampling-rate (sampling-rate production)]
     (fs/mkdir output)
-    (pipeline/audio-encoder {:input (.getPath manifest) :output (.getPath output)})))
+    (pipeline/audio-encoder (.getPath manifest) (.getPath output)
+                            :bitrate bitrate :stereo stereo :freq sampling-rate)))
 
 (defn create-iso
   "Pack a production in an iso file"
@@ -32,20 +57,26 @@
         "-J" ; Generate Joliet directory records in addition to regular ISO9660 filenames.
         "-o" iso-name encoded-path)))
 
-;; according to wikipedia it should be 737280000 (see
-;; http://en.wikipedia.org/wiki/CD-ROM#Capacity) but according to k3b
-;; it is 666.4 MiB (2,048 B * 341,186 blocks = 698,748,928 B)
-(def ^:private max-size
-  "Max number of bytes that fit on a CD-ROM"
-  698748928)
+(def bitrates
+  "Possible bitrates for encoding"
+  [128 64 48])
 
-(defn fit-on-one-cd?
-  "Return true if the `production`, i.e. the resulting iso file fits
-  on one CD"
+(defn ideal-bitrate
+  "Calculate the ideal bitrate based on the size of a production and
+  how much will generally fit on a CD-ROM. It will first try a higher
+  bitrate (see `bitrates`). If the production still doesn't fit on one
+  CD it will subsequently try lesser bitrates. Return nil if the
+  content doesn't even fit on one CD with the lowest bitrate."
   [production]
-  (let [path (path/iso-path production)
-        size (fs/size path)]
-    (< size max-size)))
+  (let [dtb (path/recorded-path production)
+        duration (dtb/audio-length dtb)
+        sampling-ratio (if (dtb/mono? dtb) 1/2 1)
+        max-bitrate (/ (* (/ max-size duration sampling-ratio) 8) 1000)]
+    (loop [bitrates bitrates]
+      (when-first [bitrate bitrates]
+        (if (> max-bitrate bitrate)
+          bitrate
+          (recur (rest bitrates)))))))
 
 (defn clean-up
   "Clean up temporary files of a production, namely the mp3 encoded
@@ -56,15 +87,15 @@
 
 (defn encode
   [production]
-  ;; encode the production
-  (encode-production production)
-  ;; create an iso
-  (create-iso production)
-  (if (fit-on-one-cd? production)
-    ;; set the state to encoded
-    (prod/update! (assoc production :state :encoded))
-    ;; otherwise move the production to state :pending-volume-split
-    ;; FIXME: clean up first
+  (if-let [bitrate (ideal-bitrate production)]
     (do
-      (clean-up production)
-      (prod/update! (assoc production :state :pending-volume-split)))))
+      ;; encode the production
+      (encode-production production bitrate)
+      ;; downgrade to daisy202
+
+      ;; create an iso
+      (create-iso production)
+      ;; set the state to encoded
+      (prod/update! (assoc production :state :encoded)))
+    ;; otherwise move the production to state :pending-volume-split
+    (prod/update! (assoc production :state :pending-volume-split))))
