@@ -39,23 +39,29 @@
               (layout/button (str "/production/" id "/upload")
                              (layout/glyphicon "upload"))
               (when-let [next-state (first (state/next-states state))]
-                (form/form-to {:class "btn-group"}
-                              [:post (str "/production/" id "/state")]
-                              (form/hidden-field :state next-state)
-                              (anti-forgery-field)
-                              [:button.btn.btn-default
-                               ;; only allow setting the state to
-                               ;; recorded if there is a DAISY export
-                               (when-not (and (= next-state :recorded)
-                                              (not (prod/manifest? production)))
-                                 {:disabled "disabled"})
-                               (layout/glyphicon "transfer") " " (state/to-str next-state)]))
+                (form/form-to
+                 {:class "btn-group"}
+                 [:post (str "/production/" id "/state")]
+                 (form/hidden-field :state next-state)
+                 (anti-forgery-field)
+                 [:button.btn.btn-default
+                  ;; only allow setting the state to recorded if there is a DAISY export
+                  ;; and the production has been imported from the library, i.e. is not
+                  ;; handled via ABACUS
+                  (when-not
+                      (and (= next-state :recorded)
+                           (:library_number production) ; is the product not managed by
+                                                        ; ABACUS
+                           (prod/manifest? production)) ; is there a DAISY export?
+                    {:disabled "disabled"})
+                  (layout/glyphicon "transfer") " " (state/to-str next-state)]))
               ;; (layout/dropdown (for [next (state/next-states state)]
               ;;                    (layout/menu-item "#" (state/to-str next)))
               ;;                  (layout/glyphicon "transfer"))
               (when (friend/authorized? #{:admin} identity)
                 (layout/button (str "/production/" id "/delete")
                                (layout/glyphicon "trash")))]))]])]])))
+
 (defn production [request id]
   (let [p (prod/find id)
         user (friend/current-authentication request)]
