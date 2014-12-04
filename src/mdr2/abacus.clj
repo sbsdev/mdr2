@@ -25,6 +25,7 @@
             [environ.core :refer [env]]
             [mdr2.queues :as queues]
             [mdr2.production :as prod]
+            [mdr2.production.path :as path]
             [mdr2.abacus.validation :as validation])
   (:import (java.nio.file StandardCopyOption)))
 
@@ -102,13 +103,23 @@
   [f]
   (let [{product_number :product_number} (read-file f)
         production (prod/find-by-productnumber product_number)]
-    (if (and production (= :structured (:state production)))
+    (if (and production
+             (= :structured (:state production))
+             (prod/manifest? production))
       (do (msg/publish (queues/encode) production)
           (io/delete-file f))
-      (do
-        (if (empty? production)
-          (log/warnf "Non-existing product number %s in %s" product_number (.getName f))
-          (log/warnf "Production %s is not structured (%s instead) in %s" product_number (:state production) (.getName f)))
+      (let [message
+            (cond
+             (empty? production)
+             (format "Non-existing product number %s in %s"
+                     product_number (.getName f))
+             (not= :structured (:state production))
+             (format "Production %s is not structured (%s instead) in %s"
+                     product_number (:state production) (.getName f))
+             (not (prod/manifest? production))
+             (format "Production %s has no DAISY Export in %s"
+                     product_number (path/manifest-path production)))]
+        (log/warn message)
         (move-away f "Failed")))))
 
 (defn import-recorded-production
