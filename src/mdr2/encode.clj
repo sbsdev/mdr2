@@ -17,7 +17,7 @@
 
 (def sampling-rates
   "Possible sample rates for encoding a DTB"
-  {:mono 22050.0 :stereo 44100.0})
+  {:mono 22050 :stereo 44100})
 
 (defn sampling-rate
   "Return the sampling rate that should be used for the given
