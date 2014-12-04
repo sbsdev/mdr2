@@ -19,11 +19,14 @@
             [clojure.zip :as zip]
             [clojure.data.zip.xml :refer [xml1-> attr= attr text]]
             [clojure.string :as string]
+            [clojure.tools.logging :as log]
+            [org.tobereplaced.nio.file :as nio]
             [immutant.messaging :as msg]
             [environ.core :refer [env]]
             [mdr2.queues :as queues]
             [mdr2.production :as prod]
-            [mdr2.abacus.validation :as validation]))
+            [mdr2.abacus.validation :as validation])
+  (:import (java.nio.file StandardCopyOption)))
 
 (def ^:private root-path [:Task :Transaction :DocumentData])
 (def ^:private import-dir (env :abacus-import-dir))
@@ -89,23 +92,39 @@
   [file]
   (file-startswith? file ["SN3_" "SN12_"]))
 
-(defn import-recorded-production
-  "Import a recorded production from file `f`"
+(defn move-away [f reason]
+  (let [new-name (str reason "_" (.getName f))
+        new-path (nio/resolve-sibling f new-name)]
+    (nio/move f new-path StandardCopyOption/REPLACE_EXISTING)))
+
+(defn import-valid-recorded-production
+  "Import a valid recorded production from file `f`"
   [f]
   (let [{product_number :product_number} (read-file f)
         production (prod/find-by-productnumber product_number)]
-    (msg/publish (queues/encode) production)
-    f))
+    (if (and production (= :structured (:state production)))
+      (do (msg/publish (queues/encode) production)
+          (io/delete-file f))
+      (do
+        (if (empty? production)
+          (log/warnf "Non-existing product number %s in %s" product_number (.getName f))
+          (log/warnf "Production %s is not structured (%s instead) in %s" product_number (:state production) (.getName f)))
+        (move-away f "Failed")))))
+
+(defn import-recorded-production
+  "Import a recorded production from file `f`"
+  [f]
+  (if (validation/valid-recorded? f)
+    (import-valid-recorded-production f)
+    (do
+      (log/warnf "ABACUS input file %s not valid" (.getName f))
+      (move-away f "Invalid"))))
 
 (defn import-recorded-productions
   "Import recorded productions from ABACUS and put them on the archive queue"
   []
-  (->>
-   (get-all-files)
-   (filter recorded-production?)
-   (filter validation/valid-recorded?)
-   (map import-recorded-production)
-   (delete-files!)))
+  (let [files (->> (get-all-files) (filter recorded-production?))]
+    (doseq [f files] (import-recorded-production f))))
 
 (defn status-request?
   "Is the given `file` an status request for a production?"
