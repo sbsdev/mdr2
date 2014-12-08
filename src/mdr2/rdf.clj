@@ -3,10 +3,11 @@
 
   RDF files are needed to pass meta data to the archive."
   (:require [clojure.data.xml :as xml]
+            [mdr2.production.path :as path]
             [mdr2.dtb :as dtb]))
 
 (defn get-meta-data [production]
-  (merge production (dtb/meta-data production)))
+  (merge production (dtb/meta-data (path/recorded-path production))))
 
 (defn- rdf-sexp 
   [{:keys [title creator subject description publisher date identifier source language rights 
