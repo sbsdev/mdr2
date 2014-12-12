@@ -31,7 +31,7 @@ how to do this see
 https://github.com/technomancy/leiningen/blob/stable/doc/DEPLOY.md"
   (:require [clojure.java.jdbc :as jdbc]
             [clojure.java.io :refer [file]]
-            [clojure.java.shell :refer [sh]]
+            [clojure.tools.logging :as log]
             [environ.core :refer [env]]
             [me.raynes.fs :as fs]
             [mdr2.production :as prod]
@@ -83,59 +83,65 @@ https://github.com/technomancy/leiningen/blob/stable/doc/DEPLOY.md"
   "Insert a production into the archive db. This marks the files in
   the spool directory as ready for archiving and concludes the
   archiving process from the point of view of the production system."
-  [production]
+  [production & {sektion :sektion}]
   (let [new-job
         {:verzeichnis (container-id production)
          ;; :id (container-id production)
          ;; :verzeichnis (container-path production)
-         ;; if there is a cdimage attached to this production then we
-         ;; need to add some magic incantations to get this properly
-         ;; archived
-         :sektion (if (prod/iso? production) "cdimage" "master")}
+         :sektion sektion}
         job (merge default-job new-job)]
-    (jdbc/insert! db :container job)
-    production))
+    (jdbc/insert! db :container job)))
 
-(defn copy-files
+(defn copy-master-files
+  "Copy a production master, i.e. the DAISY3 with wav files, to the
+  archive spool dir"
+  [production]
+  (let [archive-path (container-path production)]
+    (if (fs/exists? archive-path)
+      (log/error "Container-path %s already exists" archive-path)
+      (fs/copy-dir (path/recorded-path production) (container-path production)))))
+
+(defn copy-distribution-master-files
   "Copy a production to the archive spool dir"
   ;; FIXME: this fails if there is already an archiving in progress
   ;; because it will create another copy inside the already existing
   ;; dam directory
   [production]
-  (let [archive-path (container-path production)]
-    ;; if the production has an iso archive that, otherwise just
-    ;; archive the raw unencoded files
-    (if (prod/iso? production)
-      (let [iso-archive-name (str (container-id production) ".iso")
-            iso-archive-path (.getPath (file archive-path iso-archive-name))]
-        (fs/copy+ (path/iso-name production) iso-archive-path))
-      (fs/copy-dir (path/recorded-path production) archive-path)))
-  production)
+  (let [archive-path (container-path production)
+        ;; FIXME: This will fail in the light of multiple isos
+        iso-archive-name (str (container-id production) ".iso")
+        iso-archive-path (.getPath (file archive-path iso-archive-name))]
+    (fs/copy+ (path/iso-name production) iso-archive-path)))
 
 (defn create-rdf
   "Create an rdf file and place it in the archive spool directory"
   [production]
   (let [rdf (rdf/rdf production)
         rdf-path (container-rdf-path production)]
-    (spit rdf-path rdf))
-  production)
+    (spit rdf-path rdf)))
 
 (defn archive-master
   "Archive a master"
   [production]
-  (-> production
-      copy-files ; place all the files in the spool dir
-      create-rdf ; create an rdf file
-      add-to-db)) ; add it to the db so that the agadir machinery will pick it up
+  ;; place all the files in the spool dir
+  (copy-master-files production)
+  ;; create an rdf file
+  (create-rdf production)
+  ;; add it to the db so that the agadir machinery will pick it up
+  (add-to-db production :sektion "master"))
 
 (defn archive-distribution-master
-  "Archive a distribution master .i.e. a DTB encoded with mp3 and packed up in one or more iso files"
+  "Archive a distribution master, .i.e. a DTB encoded with mp3 and
+  packed up in one or more iso files"
   [production]
-  (-> production
-      copy-files ; copy the files to the spool dir
-      create-rdf ; create an rdf file
-      add-to-db ; add it to the db
-      encode/clean-up)) ; remove iso and mp3s
+  ;; place all the files in the spool dir
+  (copy-distribution-master-files production)
+  ;; create an rdf file
+  (create-rdf production)
+  ;; add it to the db so that the agadir machinery will pick it up
+  (add-to-db production :sektion "cdimage")
+  ;; remove iso and mp3s
+  (encode/clean-up))
 
 (defn archive
   "Archive a production"
