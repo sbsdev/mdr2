@@ -1,5 +1,4 @@
 -- drop all tables
-DROP TABLE IF EXISTS product;
 DROP TABLE IF EXISTS volume;
 DROP TABLE IF EXISTS production;
 DROP TABLE IF EXISTS state;
@@ -69,14 +68,6 @@ CREATE TABLE volume (
   id INTEGER AUTO_INCREMENT PRIMARY KEY,
   production_id INTEGER NOT NULL,
   sort_order TINYINT,
-  FOREIGN KEY(production_id) REFERENCES production(id)
-);
-
-CREATE TABLE product (
-  id INTEGER AUTO_INCREMENT PRIMARY KEY,
-  identifier VARCHAR(255) NOT NULL UNIQUE,
-  type INTEGER NOT NULL,
-  production_id INTEGER NOT NULL,
   FOREIGN KEY(production_id) REFERENCES production(id)
 );
 
