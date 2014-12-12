@@ -22,6 +22,10 @@ SELECT * FROM volume WHERE production_id = :id
 -- Remove the production with the given `id`
 DELETE FROM production WHERE id = :id
 
+-- name: find-state
+-- Return the state for given `id`
+SELECT * FROM state WHERE id = :id
+
 -- name: find-user
 -- Return the user with the given `id`
 SELECT * FROM user WHERE id = :id

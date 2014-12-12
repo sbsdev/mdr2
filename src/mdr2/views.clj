@@ -8,7 +8,7 @@
             [immutant.messaging :as msg]
             [mdr2.queues :as queues]
             [mdr2.production :as prod]
-            [mdr2.state :as state]
+            [mdr2.db :as db]
             [mdr2.vubis :as vubis]
             [mdr2.layout :as layout]
             [mdr2.dtbook :refer [dtbook]]
@@ -26,41 +26,42 @@
      [:table.table.table-striped
       [:thead [:tr [:th "Title"] [:th "State"] [:th "Action"]]]
       [:tbody
-       (for [{:keys [id title state] :as production} (prod/find-all)]
-         [:tr
-          [:td (link-to (str "/production/" id) title)]
-          [:td (state/to-str state)]
-          [:td
-           (layout/button-group
-            (remove
-             nil?
-             [(layout/button (str "/production/" id ".xml")
-                             (layout/glyphicon "download"))
-              (layout/button (str "/production/" id "/upload")
-                             (layout/glyphicon "upload"))
-              (when-let [next-state (first (state/next-states state))]
-                (form/form-to
-                 {:class "btn-group"}
-                 [:post (str "/production/" id "/state")]
-                 (form/hidden-field :state next-state)
-                 (anti-forgery-field)
-                 [:button.btn.btn-default
-                  ;; only allow setting the state to recorded if there is a DAISY export
-                  ;; and the production has been imported from the library, i.e. is not
-                  ;; handled via ABACUS
-                  (when-not
-                      (and (= next-state :recorded)
-                           (:library_number production) ; is the product not managed by
-                                                        ; ABACUS
-                           (prod/manifest? production)) ; is there a DAISY export?
-                    {:disabled "disabled"})
-                  (layout/glyphicon "transfer") " " (state/to-str next-state)]))
-              ;; (layout/dropdown (for [next (state/next-states state)]
-              ;;                    (layout/menu-item "#" (state/to-str next)))
-              ;;                  (layout/glyphicon "transfer"))
-              (when (friend/authorized? #{:admin} identity)
-                (layout/button (str "/production/" id "/delete")
-                               (layout/glyphicon "trash")))]))]])]])))
+       (for [{:keys [id title state_id] :as production} (prod/find-all)]
+         (let [state (db/find-state {:id state_id})]
+          [:tr
+           [:td (link-to (str "/production/" id) title)]
+           [:td (:name state)]
+           [:td
+            (layout/button-group
+             (remove
+              nil?
+              [(layout/button (str "/production/" id ".xml")
+                              (layout/glyphicon "download"))
+               (layout/button (str "/production/" id "/upload")
+                              (layout/glyphicon "upload"))
+               (when-let [next-state (:next_state_id state)]
+                 (form/form-to
+                  {:class "btn-group"}
+                  [:post (str "/production/" id "/state")]
+                  (form/hidden-field :state next-state)
+                  (anti-forgery-field)
+                  [:button.btn.btn-default
+                   ;; only allow setting the state to recorded if there is a DAISY export
+                   ;; and the production has been imported from the library, i.e. is not
+                   ;; handled via ABACUS
+                   (when-not
+                       (and (= next-state :recorded)
+                            (:library_number production) ; is the product not managed by
+                                        ; ABACUS
+                            (prod/manifest? production)) ; is there a DAISY export?
+                     {:disabled "disabled"})
+                   (layout/glyphicon "transfer") " " next-state]))
+               ;; (layout/dropdown (for [next (state/next-states state)]
+               ;;                    (layout/menu-item "#" (state/to-str next)))
+               ;;                  (layout/glyphicon "transfer"))
+               (when (friend/authorized? #{:admin} identity)
+                 (layout/button (str "/production/" id "/delete")
+                                (layout/glyphicon "trash")))]))]]))]])))
 
 (defn production [request id]
   (let [p (prod/find id)
@@ -143,7 +144,7 @@
             :library_signature library_signature
             ;; the state is implicitly set to :cataloged if the
             ;; library_signature is set
-            :state :cataloged)]
+            :state "cataloged")]
     (prod/update! p)
     ;; put the production on the archive queue
     (msg/publish (queues/archive) p)
@@ -204,9 +205,8 @@
       (prod/update-or-create! p))
     (response/redirect "/")))
 
-(defn production-set-state [request id state-name]
+(defn production-set-state [request id state]
   (let [user (friend/current-authentication request)
-        state (state/from-str state-name)
         p (assoc (prod/find id) :state state)]
     (prod/update! p)
     (when (= state :recorded)

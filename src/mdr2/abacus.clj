@@ -104,7 +104,7 @@
   (let [{product_number :product_number} (read-file f)
         production (prod/find-by-productnumber product_number)]
     (if (and production
-             (= :structured (:state production))
+             (= "structured" (:state production))
              (prod/manifest? production))
       (do (msg/publish (queues/encode) production)
           (io/delete-file f))
@@ -113,7 +113,7 @@
              (empty? production)
              (format "Non-existing product number %s in %s"
                      product_number (.getName f))
-             (not= :structured (:state production))
+             (not= "structured" (:state production))
              (format "Production %s is not structured (%s instead) in %s"
                      product_number (:state production) (.getName f))
              (not (prod/manifest? production))
