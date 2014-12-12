@@ -152,7 +152,7 @@
     (response/redirect "/")))
 
 (defn production-delete [id]
-  (prod/delete id)
+  (prod/delete! id)
   (response/redirect "/"))
 
 (defn production-bulk-import-form [request & [errors]]

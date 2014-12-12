@@ -101,7 +101,7 @@
 
 (defn volumes
   "Find all volumes for a given `production`"
-  [{:id id}]
+  [{id :id}]
   (db/find-volumes {:id id}))
 
 (defn delete-all-dirs
@@ -109,10 +109,10 @@
   [production]
   (doseq [dir (path/all production)] (fs/delete-dir dir)))
 
-(defn delete
+(defn delete!
   "Delete a production with the given `id`"
   [id]
-  (db/delete {:id id})
+  (db/delete! {:id id})
   (delete-all-dirs {:id id}))
 
 (defn add-structure
@@ -124,4 +124,4 @@
   ;; create a config file for obi
   (obi/config-file production)
   ;; update the status
-  (update! (assoc production :state :structured)))
+  (update! (assoc production :state "structured")))
