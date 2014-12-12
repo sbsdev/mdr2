@@ -23,13 +23,13 @@ CREATE TABLE production (
   creator VARCHAR(255),
   subject TEXT,
   description TEXT,
-  publisher VARCHAR(255) NOT NULL,
+  publisher VARCHAR(255) NOT NULL DEFAULT "Swiss Library for the Blind, Visually Impaired and Print Disabled",
   date DATE NOT NULL,
   type VARCHAR(255),
   format VARCHAR(255),
   identifier VARCHAR(255) NOT NULL UNIQUE,
   source VARCHAR(255),
-  language VARCHAR(10) NOT NULL,
+  language VARCHAR(10) NOT NULL DEFAULT "de",
   rights VARCHAR(64),
   source_date DATE,
   source_edition VARCHAR(255),
@@ -48,7 +48,8 @@ CREATE TABLE production (
   -- Number of levels
   depth TINYINT,
   -- SBS specific columns
-  state_id TINYINT NOT NULL,
+  -- initial state is "new"
+  state_id TINYINT NOT NULL DEFAULT 0,
   -- production number given by the erp system. We should really use
   -- this as the primary key but alas some productions are done
   -- without involving the erp system, so we need to keep our own
@@ -106,10 +107,10 @@ INSERT INTO state (id, name, next_state_id) VALUES
 (8, "deleted", NULL);
 SET FOREIGN_KEY_CHECKS=1;
 
-INSERT INTO production (title, creator, source, language, source_publisher, state_id) VALUES
-("Unter dem Deich", "Hart, Maarten", "978-3-492-05573-4", "de", "Piper", 0),
-("Aus dem Berliner Journal", "Frisch, Max", "978-3-518-42352-3", "de", "Suhrkamp", 0),
-("Info-Express, Februar 2014", "SZB Taubblinden-Beratung", "", "de", "", 0);
+INSERT INTO production (title, creator, date, source, language, source_publisher, identifier) VALUES
+("Unter dem Deich", "Hart, Maarten", "2014-12-12", "978-3-492-05573-4", "de", "Piper", "db010282-a39d-40b1-b5cf-f5285aa9b49d"),
+("Aus dem Berliner Journal", "Frisch, Max", "2014-12-6", "978-3-518-42352-3", "de", "Suhrkamp", "504f26ef-7205-4b2f-b719-f4eef883ebe1"),
+("Info-Express, Februar 2014", "SZB Taubblinden-Beratung", "2014-12-10", "", "de", "", "1492d357-6a6d-420f-b39e-b25178491b56");
 
 INSERT INTO user (username, first_name, last_name, email, password) VALUES 
 ("eglic", "Christian", "Egli", "christian.egli@sbs.ch", "$2a$10$go0rXWbX0IjhzkgjGKGf/uigHii6.bqTls.tjfQAsg9IdoSe.ouPq"),
