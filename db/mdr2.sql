@@ -9,9 +9,9 @@ DROP TABLE IF EXISTS role;
 -- State of a production
 -- a classic reference table
 CREATE TABLE state (
-  id TINYINT PRIMARY KEY,
+  id VARCHAR(16) PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
-  next_state_id TINYINT,
+  next_state_id VARCHAR(16),
   FOREIGN KEY(next_state_id) REFERENCES state(id)
 );
 
@@ -49,7 +49,7 @@ CREATE TABLE production (
   depth TINYINT,
   -- SBS specific columns
   -- initial state is "new"
-  state_id TINYINT NOT NULL DEFAULT 0,
+  state_id VARCHAR(16) NOT NULL DEFAULT "new",
   -- production number given by the erp system. We should really use
   -- this as the primary key but alas some productions are done
   -- without involving the erp system, so we need to keep our own
@@ -95,15 +95,15 @@ CREATE TABLE user_role (
 
 SET FOREIGN_KEY_CHECKS=0;
 INSERT INTO state (id, name, next_state_id) VALUES
-(0, "new", 1),
-(1, "structured", 2),
-(2, "recorded", 3),
-(3, "encoded", 4),
-(4, "cataloged", 5),
-(5, "archived", NULL),
-(6, "pending-volume-split", 3),
-(7, "failed", NULL),
-(8, "deleted", NULL);
+("new", "New", "structured"),
+("structured", "Structured", "recorded"),
+("recorded", "Recorded", "encoded"),
+("encoded", "Encoded", "cataloged"),
+("cataloged", "Cataloged", "archived"),
+("archived", "Archived", NULL),
+("pending-split", "Pending volume split", "encoded"),
+("failed", "Failed", NULL),
+("deleted", "Deleted", NULL);
 SET FOREIGN_KEY_CHECKS=1;
 
 INSERT INTO production (title, creator, date, source, language, source_publisher, identifier) VALUES
