@@ -73,8 +73,7 @@ CREATE TABLE volume (
 );
 
 CREATE TABLE user (
-  id INTEGER AUTO_INCREMENT PRIMARY KEY,
-  username VARCHAR(255) NOT NULL UNIQUE,
+  id VARCHAR(32) PRIMARY KEY,
   first_name VARCHAR(255) NOT NULL,
   last_name VARCHAR(255) NOT NULL,
   email VARCHAR(255) NOT NULL,
@@ -82,14 +81,14 @@ CREATE TABLE user (
 );
 
 CREATE TABLE role (
-  id INTEGER AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(255) NOT NULL UNIQUE
+  id VARCHAR(32) PRIMARY KEY,
+  name VARCHAR(255)
 );
 
 CREATE TABLE user_role (
-  id INTEGER AUTO_INCREMENT PRIMARY KEY,
-  user_id INTEGER NOT NULL,
-  role_id INTEGER NOT NULL,
+  user_id VARCHAR(32) NOT NULL,
+  role_id VARCHAR(32) NOT NULL,
+  PRIMARY KEY (user_id, role_id),
   FOREIGN KEY(user_id) REFERENCES user(id),
   FOREIGN KEY(role_id) REFERENCES role(id)
 );
@@ -112,17 +111,17 @@ INSERT INTO production (title, creator, date, source, language, source_publisher
 ("Aus dem Berliner Journal", "Frisch, Max", "2014-12-6", "978-3-518-42352-3", "de", "Suhrkamp", "504f26ef-7205-4b2f-b719-f4eef883ebe1"),
 ("Info-Express, Februar 2014", "SZB Taubblinden-Beratung", "2014-12-10", "", "de", "", "1492d357-6a6d-420f-b39e-b25178491b56");
 
-INSERT INTO user (username, first_name, last_name, email, password) VALUES 
+INSERT INTO user (id, first_name, last_name, email, password) VALUES
 ("eglic", "Christian", "Egli", "christian.egli@sbs.ch", "$2a$10$go0rXWbX0IjhzkgjGKGf/uigHii6.bqTls.tjfQAsg9IdoSe.ouPq"),
 ("admin", "Super", "User", "admin@sbs.ch", "$2a$10$go0rXWbX0IjhzkgjGKGf/uigHii6.bqTls.tjfQAsg9IdoSe.ouPq");
 
-INSERT INTO role (name) VALUES 
-("User"),
-("Admin");
+INSERT INTO role (id, name) VALUES
+("user", "Unprivileged User"),
+("admin", "Administrator");
 
-INSERT INTO user_role (user_id, role_id) VALUES 
-(1,1),
-(2,1),
-(2,2);
+INSERT INTO user_role (user_id, role_id) VALUES
+("eglic","user"),
+("admin","user"),
+("admin","admin");
 
 SELECT * FROM production;
