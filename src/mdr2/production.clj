@@ -87,7 +87,7 @@
 (defn find
   "Find a production given its `id`"
   [id]
-  (db/find id))
+  (db/find {:id id}))
 
 (defn find-all
   "Find all productions"
@@ -97,12 +97,17 @@
 (defn find-by-productnumber
   "Find a production given its `product_number`"
   [product_number]
-  (db/find-by-productnumber product_number))
+  (db/find-by-productnumber {:product_number product_number}))
 
 (defn find-by-state
   "Find all productions with the given `state`"
   [state]
-  (db/find-by-state state))
+  (db/find-by-state {:state state}))
+
+(defn volumes
+  "Find all volumes for a given `production`"
+  [{:id id}]
+  (db/find-volumes {:id id}))
 
 (defn delete-all-dirs
   "Delete all artifacts on the file system for a production"
@@ -112,7 +117,7 @@
 (defn delete
   "Delete a production with the given `id`"
   [id]
-  (db/delete id)
+  (db/delete {:id id})
   (delete-all-dirs {:id id}))
 
 (defn add-structure
