@@ -7,12 +7,10 @@
             [clj-time.format :as f]
             [environ.core :refer [env]]
             [mdr2.db :as db]
-            [mdr2.state :as state]
             [mdr2.production.path :as path]
             [mdr2.obi :as obi])
   (:import java.nio.file.StandardCopyOption))
 
-(def ^:private default-publisher "Swiss Library for the Blind, Visually Impaired and Print Disabled")
 (def ^:private default-date-formatter (f/formatters :date))
 
 (defn iso?
@@ -45,11 +43,8 @@
 (defn default-meta-data
   "Return default meta data"
   []
-  {:publisher default-publisher
-   :date (f/unparse default-date-formatter (t/now))
-   :identifier (uuid)
-   :language "de"
-   :state state/initial-state})
+  {:date (f/unparse default-date-formatter (t/now))
+   :identifier (uuid)})
 
 (defn add-default-meta-data
   "Add the default meta data to a production"

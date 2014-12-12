@@ -16,8 +16,6 @@
   "Inverse map to facilitate lookup from state number to state name"
   (set/map-invert states-map))
 
-(def initial-state :new)
-
 (def states-graph
   {:new [:structured]
    :structured [:recorded]
