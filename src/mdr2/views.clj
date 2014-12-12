@@ -27,7 +27,7 @@
       [:thead [:tr [:th "Title"] [:th "State"] [:th "Action"]]]
       [:tbody
        (for [{:keys [id title state_id] :as production} (prod/find-all)]
-         (let [state (db/find-state {:id state_id})]
+         (let [state (first (db/find-state {:id state_id}))]
           [:tr
            [:td (link-to (str "/production/" id) title)]
            [:td (:name state)]
@@ -55,7 +55,8 @@
                                         ; ABACUS
                             (prod/manifest? production)) ; is there a DAISY export?
                      {:disabled "disabled"})
-                   (layout/glyphicon "transfer") " " next-state]))
+                   (layout/glyphicon "transfer") " "
+                   (:name (first (db/find-state {:id next-state})))]))
                ;; (layout/dropdown (for [next (state/next-states state)]
                ;;                    (layout/menu-item "#" (state/to-str next)))
                ;;                  (layout/glyphicon "transfer"))
