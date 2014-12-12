@@ -98,12 +98,15 @@
   (if-let [bitrate (ideal-bitrate production)]
     (do
       ;; encode the production
-      (encode-production production bitrate)
-      ;; downgrade to daisy202
-
-      ;; create an iso
-      (create-iso production)
-      ;; set the state to encoded
-      (prod/update! (assoc production :state :encoded)))
+      (let [result (encode-production production bitrate)]
+        (if (not= 0 (:exit result))
+          (log/errorf "Encoding failed with %s" (:err result))
+          (do
+            ;; downgrade to daisy202
+            (downgrade production)
+            ;; create an iso
+            (create-iso production)
+            ;; set the state to encoded
+            (prod/update! (assoc production :state "encoded"))))))
     ;; otherwise move the production to state :pending-volume-split
-    (prod/update! (assoc production :state :pending-volume-split))))
+    (prod/update! (assoc production :state "pending-split"))))
