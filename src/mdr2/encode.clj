@@ -2,11 +2,13 @@
   "Create DAISY Talking Books for recorded productions"
   (:require [clojure.java.io :refer [file]]
             [clojure.java.shell :refer [sh]]
+            [clojure.tools.logging :as log]
             [me.raynes.fs :as fs]
             [mdr2.production :as prod]
             [mdr2.production.path :as path]
             [mdr2.dtb :as dtb]
-            [mdr2.pipeline1 :as pipeline]))
+            [mdr2.pipeline1 :as pipeline]
+            [mdr2.pipeline2.scripts :as pipeline2]))
 
 ;; according to wikipedia it should be 737280000 (see
 ;; http://en.wikipedia.org/wiki/CD-ROM#Capacity) but according to k3b
@@ -86,6 +88,10 @@
   [production]
   (fs/delete-dir (path/encoded-path production))
   (fs/delete-dir (path/iso-path production)))
+
+(defn downgrade
+  [production]
+  (pipeline2/daisy3-to-daisy202))
 
 (defn encode
   [production]
