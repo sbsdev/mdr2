@@ -82,7 +82,7 @@
 (defn find
   "Find a production given its `id`"
   [id]
-  (db/find {:id id}))
+  (first (db/find {:id id})))
 
 (defn find-all
   "Find all productions"
@@ -92,12 +92,12 @@
 (defn find-by-productnumber
   "Find a production given its `product_number`"
   [product_number]
-  (db/find-by-productnumber {:product_number product_number}))
+  (first (db/find-by-productnumber {:product_number product_number})))
 
 (defn find-by-state
   "Find all productions with the given `state`"
   [state]
-  (db/find-by-state {:state state}))
+  (first (db/find-by-state {:state state})))
 
 (defn volumes
   "Find all volumes for a given `production`"
