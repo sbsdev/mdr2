@@ -1,59 +1,80 @@
+-- drop all tables
+DROP TABLE IF EXISTS product;
+DROP TABLE IF EXISTS volume;
+DROP TABLE IF EXISTS production;
+DROP TABLE IF EXISTS state;
+DROP TABLE IF EXISTS user_role;
+DROP TABLE IF EXISTS user;
+DROP TABLE IF EXISTS role;
+
+-- State of a production
+-- a classic reference table
+CREATE TABLE state (
+  id TINYINT PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  next_state_id TINYINT,
+  FOREIGN KEY(next_state_id) REFERENCES state(id)
+);
+
 -- Meta data for a production
 -- see http://www.daisy.org/z3986/2005/Z3986-2005.html#PubMed
 CREATE TABLE production (
   id INTEGER AUTO_INCREMENT PRIMARY KEY,
-  title TEXT NOT NULL,
-  creator TEXT,
+  title VARCHAR(255) NOT NULL,
+  creator VARCHAR(255),
   subject TEXT,
   description TEXT,
-  publisher TEXT NOT NULL,
-  date TEXT NOT NULL,
-  type TEXT,
-  format TEXT,
-  identifier TEXT NOT NULL,
-  source TEXT,
-  language TEXT NOT NULL,
-  rights TEXT,
-  source_date TEXT,
-  source_edition TEXT,
-  source_publisher TEXT,
-  source_rights TEXT,
-  multimedia_type TEXT,
-  multimedia_content TEXT,
-  narrator TEXT,
-  producer TEXT,
-  produced_date TEXT,
-  revision TEXT,
-  revision_date TEXT,
-  revision_description TEXT,
-  total_time TEXT,
-  audio_format TEXT,
-  -- Number of CDs
-  volumes INTEGER,
+  publisher VARCHAR(255) NOT NULL,
+  date DATE NOT NULL,
+  type VARCHAR(255),
+  format VARCHAR(255),
+  identifier VARCHAR(255) NOT NULL UNIQUE,
+  source VARCHAR(255),
+  language VARCHAR(10) NOT NULL,
+  rights VARCHAR(64),
+  source_date DATE,
+  source_edition VARCHAR(255),
+  source_publisher VARCHAR(255),
+  source_rights VARCHAR(255),
+  multimedia_type VARCHAR(25),
+  multimedia_content VARCHAR(255),
+  narrator VARCHAR(255),
+  producer VARCHAR(255),
+  produced_date DATE,
+  revision VARCHAR(255),
+  revision_date DATE,
+  revision_description VARCHAR(255),
+  total_time VARCHAR(255),
+  audio_format VARCHAR(25),
   -- Number of levels
-  depth INTEGER,
+  depth TINYINT,
   -- SBS specific columns
-  state INTEGER  NOT NULL DEFAULT 0,
+  state_id TINYINT NOT NULL,
   -- production number given by the erp system. We should really use
   -- this as the primary key but alas some productions are done
   -- without involving the erp system, so we need to keep our own
   -- primary key
-  product_number TEXT,
+  product_number VARCHAR(255) UNIQUE,
   -- provisional number given to the production by the library system.
   -- There is only a libraryNumber if there is no productNumber, i.e.
   -- if this production is done behind the back of the erp system
-  library_number TEXT,
+  library_number VARCHAR(255) UNIQUE,
   -- The unique id that the library assigns to this production
-  library_signature TEXT
-  -- FIXME: seems backwards that the production system has to know the
-  -- id of the library system. Alas in order to be able to archive we
-  -- need to know it. Otherwise apparently the library cannot find
-  -- anything anymore in the archive :-/
+  library_signature VARCHAR(255) UNIQUE,
+  FOREIGN KEY(state_id) REFERENCES state(id)
+);
+
+-- each production has at least one volume
+CREATE TABLE volume (
+  id INTEGER AUTO_INCREMENT PRIMARY KEY,
+  production_id INTEGER NOT NULL,
+  sort_order TINYINT,
+  FOREIGN KEY(production_id) REFERENCES production(id)
 );
 
 CREATE TABLE product (
   id INTEGER AUTO_INCREMENT PRIMARY KEY,
-  identifier TEXT NOT NULL,
+  identifier VARCHAR(255) NOT NULL UNIQUE,
   type INTEGER NOT NULL,
   production_id INTEGER NOT NULL,
   FOREIGN KEY(production_id) REFERENCES production(id)
@@ -61,16 +82,16 @@ CREATE TABLE product (
 
 CREATE TABLE user (
   id INTEGER AUTO_INCREMENT PRIMARY KEY,
-  username TEXT NOT NULL,
-  first_name TEXT NOT NULL,
-  last_name TEXT NOT NULL,
-  email TEXT NOT NULL,
-  password TEXT NOT NULL
+  username VARCHAR(255) NOT NULL UNIQUE,
+  first_name VARCHAR(255) NOT NULL,
+  last_name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  password VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE role (
   id INTEGER AUTO_INCREMENT PRIMARY KEY,
-  name TEXT NOT NULL
+  name VARCHAR(255) NOT NULL UNIQUE
 );
 
 CREATE TABLE user_role (
@@ -81,8 +102,20 @@ CREATE TABLE user_role (
   FOREIGN KEY(role_id) REFERENCES role(id)
 );
 
+SET FOREIGN_KEY_CHECKS=0;
+INSERT INTO state (id, name, next_state_id) VALUES
+(0, "new", 1),
+(1, "structured", 2),
+(2, "recorded", 3),
+(3, "encoded", 4),
+(4, "cataloged", 5),
+(5, "archived", NULL),
+(6, "pending-volume-split", 3),
+(7, "failed", NULL),
+(8, "deleted", NULL);
+SET FOREIGN_KEY_CHECKS=1;
 
-INSERT INTO production (title, creator, source, language, source_publisher, state) VALUES
+INSERT INTO production (title, creator, source, language, source_publisher, state_id) VALUES
 ("Unter dem Deich", "Hart, Maarten", "978-3-492-05573-4", "de", "Piper", 0),
 ("Aus dem Berliner Journal", "Frisch, Max", "978-3-518-42352-3", "de", "Suhrkamp", 0),
 ("Info-Express, Februar 2014", "SZB Taubblinden-Beratung", "", "de", "", 0);
@@ -100,3 +133,4 @@ INSERT INTO user_role (user_id, role_id) VALUES
 (2,1),
 (2,2);
 
+SELECT * FROM production;
