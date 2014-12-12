@@ -49,7 +49,7 @@ CREATE TABLE production (
   depth TINYINT,
   -- SBS specific columns
   -- initial state is "new"
-  state_id VARCHAR(16) NOT NULL DEFAULT "new",
+  state VARCHAR(16) NOT NULL DEFAULT "new",
   -- production number given by the erp system. We should really use
   -- this as the primary key but alas some productions are done
   -- without involving the erp system, so we need to keep our own
@@ -61,7 +61,7 @@ CREATE TABLE production (
   library_number VARCHAR(255) UNIQUE,
   -- The unique id that the library assigns to this production
   library_signature VARCHAR(255) UNIQUE,
-  FOREIGN KEY(state_id) REFERENCES state(id)
+  FOREIGN KEY(state) REFERENCES state(id)
 );
 
 -- each production has at least one volume

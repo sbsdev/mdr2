@@ -12,7 +12,7 @@ SELECT * FROM production WHERE product_number = :product_number
 
 -- name: find-by-state
 -- Return the production for given `state`
-SELECT * FROM production WHERE state_id = :state
+SELECT * FROM production WHERE state = :state
 
 -- name: find-volumes
 -- Return all volumes for a given production `id`
