@@ -97,7 +97,7 @@
 (defn find-by-state
   "Find all productions with the given `state`"
   [state]
-  (first (db/find-by-state {:state state})))
+  (db/find-by-state {:state state}))
 
 (defn volumes
   "Find all volumes for a given `production`"
