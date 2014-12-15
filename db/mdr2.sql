@@ -11,8 +11,8 @@ DROP TABLE IF EXISTS role;
 CREATE TABLE state (
   id VARCHAR(16) PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
-  next_state_id VARCHAR(16),
-  FOREIGN KEY(next_state_id) REFERENCES state(id)
+  next_state VARCHAR(16),
+  FOREIGN KEY(next_state) REFERENCES state(id)
 );
 
 -- Meta data for a production
@@ -94,7 +94,7 @@ CREATE TABLE user_role (
 );
 
 SET FOREIGN_KEY_CHECKS=0;
-INSERT INTO state (id, name, next_state_id) VALUES
+INSERT INTO state (id, name, next_state) VALUES
 ("new", "New", "structured"),
 ("structured", "Structured", "recorded"),
 ("recorded", "Recorded", "encoded"),

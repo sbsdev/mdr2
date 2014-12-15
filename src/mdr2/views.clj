@@ -26,11 +26,11 @@
      [:table.table.table-striped
       [:thead [:tr [:th "Title"] [:th "State"] [:th "Action"]]]
       [:tbody
-       (for [{:keys [id title state_id] :as production} (prod/find-all)]
-         (let [state (first (db/find-state {:id state_id}))]
+       (for [{:keys [id title state] :as production} (prod/find-all)]
+         (let [realized-state (first (db/find-state {:id state}))]
           [:tr
            [:td (link-to (str "/production/" id) title)]
-           [:td (:name state)]
+           [:td (:name realized-state)]
            [:td
             (layout/button-group
              (remove
@@ -39,7 +39,7 @@
                               (layout/glyphicon "download"))
                (layout/button (str "/production/" id "/upload")
                               (layout/glyphicon "upload"))
-               (when-let [next-state (:next_state_id state)]
+               (when-let [next-state (:next_state realized-state)]
                  (form/form-to
                   {:class "btn-group"}
                   [:post (str "/production/" id "/state")]
@@ -50,7 +50,7 @@
                    ;; and the production has been imported from the library, i.e. is not
                    ;; handled via ABACUS
                    (when-not
-                       (and (= next-state :recorded)
+                       (and (= next-state "recorded")
                             (:library_number production) ; is the product not managed by
                                         ; ABACUS
                             (prod/manifest? production)) ; is there a DAISY export?
@@ -117,7 +117,7 @@
       [:thead [:tr [:th "Title"] [:th "Product Number"] [:th "DAM Number"] [:th "Duration"] [:th "Number of CDs"] [:th "Depth"] [:th "Narrator"] [:th "Date of Production"] [:th "Libary signature"]]]
       [:tbody
        (for [{:keys [id title product_number total_time volumes depth narrator produced_date] 
-              :as production} (prod/find-by-state :encoded)]
+              :as production} (prod/find-by-state "encoded")]
          [:tr
           [:td (link-to (str "/production/" id) title)]
           [:td product_number]
