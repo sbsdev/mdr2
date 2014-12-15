@@ -99,11 +99,6 @@
   [state]
   (db/find-by-state {:state state}))
 
-(defn volumes
-  "Find all volumes for a given `production`"
-  [{id :id}]
-  (db/find-volumes {:id id}))
-
 (defn delete-all-dirs
   "Delete all artifacts on the file system for a production"
   [production]

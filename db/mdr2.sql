@@ -1,5 +1,4 @@
 -- drop all tables
-DROP TABLE IF EXISTS volume;
 DROP TABLE IF EXISTS production;
 DROP TABLE IF EXISTS state;
 DROP TABLE IF EXISTS user_role;
@@ -48,6 +47,12 @@ CREATE TABLE production (
   -- Number of levels
   depth TINYINT,
   -- SBS specific columns
+  -- Number of volumes
+  volumes TINYINT,
+  -- when splitting a production manually we want to specify a
+  -- specific sampling_rate and bitrate
+  sampling_rate FLOAT,
+  bit_rate INTEGER,
   -- initial state is "new"
   state VARCHAR(16) NOT NULL DEFAULT "new",
   -- production number given by the erp system. We should really use
@@ -62,14 +67,6 @@ CREATE TABLE production (
   -- The unique id that the library assigns to this production
   library_signature VARCHAR(255) UNIQUE,
   FOREIGN KEY(state) REFERENCES state(id)
-);
-
--- each production has at least one volume
-CREATE TABLE volume (
-  id INTEGER AUTO_INCREMENT PRIMARY KEY,
-  production_id INTEGER NOT NULL,
-  sort_order TINYINT,
-  FOREIGN KEY(production_id) REFERENCES production(id)
 );
 
 CREATE TABLE user (
@@ -101,7 +98,8 @@ INSERT INTO state (id, name, next_state) VALUES
 ("encoded", "Encoded", "cataloged"),
 ("cataloged", "Cataloged", "archived"),
 ("archived", "Archived", NULL),
-("pending-split", "Pending volume split", "encoded"),
+("pending-split", "Pending volume split", "split"),
+("split", "Split", "encoded"),
 ("failed", "Failed", NULL),
 ("deleted", "Deleted", NULL);
 SET FOREIGN_KEY_CHECKS=1;
@@ -125,3 +123,5 @@ INSERT INTO user_role (user_id, role_id) VALUES
 ("admin","admin");
 
 SELECT * FROM production;
+UPDATE production SET state = "encoded" WHERE id = 1;
+UPDATE production SET volumes = 1 WHERE id = 1;

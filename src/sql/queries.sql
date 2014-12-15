@@ -14,10 +14,6 @@ SELECT * FROM production WHERE product_number = :product_number
 -- Return the production for given `state`
 SELECT * FROM production WHERE state = :state
 
--- name: find-volumes
--- Return all volumes for a given production `id`
-SELECT * FROM volume WHERE production_id = :id
-
 -- name: delete!
 -- Remove the production with the given `id`
 DELETE FROM production WHERE id = :id

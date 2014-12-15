@@ -116,7 +116,7 @@
      [:table.table.table-striped
       [:thead [:tr [:th "Title"] [:th "Product Number"] [:th "DAM Number"] [:th "Duration"] [:th "Number of CDs"] [:th "Depth"] [:th "Narrator"] [:th "Date of Production"] [:th "Libary signature"]]]
       [:tbody
-       (for [{:keys [id title product_number total_time volumes depth narrator produced_date] 
+       (for [{:keys [id title product_number total_time volumes depth narrator produced_date]
               :as production} (prod/find-by-state "encoded")]
          [:tr
           [:td (link-to (str "/production/" id) title)]
