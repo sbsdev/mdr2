@@ -49,10 +49,6 @@ CREATE TABLE production (
   -- SBS specific columns
   -- Number of volumes
   volumes TINYINT,
-  -- when splitting a production manually we want to specify a
-  -- specific sampling_rate and bitrate
-  sampling_rate FLOAT,
-  bit_rate INTEGER,
   -- initial state is "new"
   state VARCHAR(16) NOT NULL DEFAULT "new",
   -- production number given by the erp system. We should really use
