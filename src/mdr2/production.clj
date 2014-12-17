@@ -5,13 +5,12 @@
             [me.raynes.fs :as fs]
             [clj-time.core :as t]
             [clj-time.format :as f]
+            [clj-time.coerce :refer [to-date]]
             [environ.core :refer [env]]
             [mdr2.db :as db]
             [mdr2.production.path :as path]
             [mdr2.obi :as obi])
   (:import java.nio.file.StandardCopyOption))
-
-(def ^:private default-date-formatter (f/formatters :date))
 
 (defn iso?
   "Return true if the production has an iso export"
@@ -43,13 +42,22 @@
 (defn default-meta-data
   "Return default meta data"
   []
-  {:date (f/unparse default-date-formatter (t/now))
+  {:date (to-date (t/now))
    :identifier (uuid)})
 
 (defn add-default-meta-data
   "Add the default meta data to a production"
   [production]
   (merge (default-meta-data) production))
+
+(defn parse
+  "Return a `production` with all values parsed into their proper types,
+  e.g. dates are converted from strings to dates"
+  [production]
+  (reduce (fn [m k]
+            (if-let [value (k m)]
+              (assoc m k (to-date (f/parse value))) m))
+          production [:date :source_date :produced_date :revision_date]))
 
 (defn create
   "Create a production"

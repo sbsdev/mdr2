@@ -203,7 +203,7 @@
   [request productions]
   (let [user (friend/current-authentication request)]
     (doseq [[_ p] productions]
-      (prod/update-or-create! p))
+      (prod/update-or-create! (prod/parse p)))
     (response/redirect "/")))
 
 (defn production-set-state [request id state]
