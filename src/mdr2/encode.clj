@@ -33,14 +33,16 @@
       (:stereo sampling-rates))))
 
 (defn encode-production
-  "Encode a `production` using the given `bitrate`, i.e. convert the
-  wav files to mp3"
-  [production bitrate]
-  (let [output (path/encoded-path production)
-        manifest (path/manifest-path production)
-        stereo (if (dtb/mono? (path/recorded-path production)) "mono" "stereo")
-        sampling-rate (sampling-rate production)]
+  "Encode a `production` using the given `bitrate` and optionally
+  `volume` and sampling rate (`freq`), i.e. convert the wav files to mp3"
+  [production bitrate & [volume freq]]
+  (let [output (path/encoded-path production volume)
+        manifest (path/manifest-path production volume)
+        stereo (if (dtb/mono? (path/recorded-path production volume)) "mono" "stereo")
+        sampling-rate (or freq (sampling-rate production))]
     (fs/mkdir output)
+    (log/infof "Encoding %s (%s) with bitrate: %s" (:id production) volume bitrate)
+    (log/debugf "Encoding %s (%s) with %s, %s, %s, %s, %s" (:id production) volume bitrate manifest output stereo sampling-rate)
     (pipeline/audio-encoder (.getPath manifest) (.getPath output)
                             :bitrate bitrate :stereo stereo :freq sampling-rate)))
 
@@ -48,10 +50,10 @@
   "Pack a production in an iso file"
   [{:keys [title publisher]
     :or {title "FIXME:" publisher "FIXME:"} ; title and publisher shouldn't be empty
-    :as production}]
-  (let [encoded-path (.getPath (path/encoded-path production))
-        iso-path (path/iso-path production)
-        iso-name (.getPath (path/iso-name production))]
+    :as production} & [volume]]
+  (let [encoded-path (.getPath (path/encoded-path production volume))
+        iso-path (path/iso-path production volume)
+        iso-name (.getPath (path/iso-name production volume))]
     (fs/mkdir iso-path)
     (sh "genisoimage"
         "-quiet"
@@ -91,7 +93,9 @@
 
 (defn downgrade
   [production]
-  (pipeline2/daisy3-to-daisy202))
+  ;; FIXME: Implement properly
+  ;;(pipeline2/daisy3-to-daisy202 (path/encoded-path) downgraded-path)
+)
 
 (defn encode
   [production]
@@ -110,3 +114,18 @@
             (prod/update! (assoc production :state "encoded"))))))
     ;; otherwise move the production to state :pending-volume-split
     (prod/update! (assoc production :state "pending-split"))))
+
+(defn encode-multiple
+  [production sample-rate bitrate]
+  (dotimes [volume (:volumes production)]
+    (let [volume (inc volume) ; we want from 1..n instead of 0..n-1
+          result (encode-production production bitrate volume sample-rate)]
+      (if (not= 0 (:exit result))
+        (log/errorf "Encoding failed with %s" (:err result))
+        (do
+          ;; downgrade to daisy202
+          (downgrade production)
+          ;; create an iso
+          (create-iso production volume)))))
+  ;; set the state to encoded
+  (prod/update! (assoc production :state "encoded")))
