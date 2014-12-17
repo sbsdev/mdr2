@@ -210,7 +210,7 @@
   (let [user (friend/current-authentication request)
         p (assoc (prod/find id) :state state)]
     (prod/update! p)
-    (when (= state :recorded)
+    (when (= state "recorded")
       (msg/publish (queues/encode) p))
     (response/redirect "/")))
 
