@@ -1,7 +1,7 @@
 (ns mdr2.archive
   "Main entry point into the archive
 
-For archiving we need to interface with an existing hellish system
+For archiving we need to interface with an existing legacy system
 named agadir. It doesn't do very much in very complicated ways.
 Probably best to replace it at some point. In the mean time we try to
 stay away from it and not to change too much. From reading the source
@@ -24,11 +24,12 @@ mp3 and the whole thing is packed up in one or more iso files
 3. place this iso in the magic spool directory
 4. generate the rdf as above
 5. add an entry to a table in a database. The `sektion` should be `cdimage`
+"
+  ;; FIXME: Most likely this should be split off into a separate lib that
+  ;; replaces all of agadir at a later point in time. For instructions on
+  ;; how to do this see
+  ;; https://github.com/technomancy/leiningen/blob/stable/doc/DEPLOY.md
 
-FIXME: Most likely this should be split off into a separate lib that
-replaces all of agadir at a later point in time. For instructions on
-how to do this see
-https://github.com/technomancy/leiningen/blob/stable/doc/DEPLOY.md"
   (:require [clojure.java.jdbc :as jdbc]
             [clojure.java.io :refer [file]]
             [clojure.tools.logging :as log]
@@ -97,9 +98,9 @@ https://github.com/technomancy/leiningen/blob/stable/doc/DEPLOY.md"
   archive spool dir"
   [production]
   (let [archive-path (container-path production)]
-    (if (fs/exists? archive-path)
-      (log/error "Container-path %s already exists" archive-path)
-      (fs/copy-dir (path/recorded-path production) (container-path production)))))
+    (if-not (fs/exists? archive-path)
+      (fs/copy-dir (path/recorded-path production) (container-path production))
+      (log/error "Container-path %s already exists" archive-path))))
 
 (defn copy-distribution-master-files
   "Copy a production to the archive spool dir"
@@ -111,7 +112,7 @@ https://github.com/technomancy/leiningen/blob/stable/doc/DEPLOY.md"
         ;; FIXME: This will fail in the light of multiple isos
         iso-archive-name (str (container-id production) ".iso")
         iso-archive-path (.getPath (file archive-path iso-archive-name))]
-    (fs/copy+ (path/iso-name production) iso-archive-path)))
+    (fs/copy+ (path/iso-name production) iso-archive-path))) ; FIXME: Multi-CD
 
 (defn create-rdf
   "Create an rdf file and place it in the archive spool directory"
