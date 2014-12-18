@@ -25,6 +25,7 @@
                  [environ "1.0.0"]
                  [org.immutant/immutant "2.0.0-beta1"]
                  [ring/ring-devel "1.3.2"]
+                 [robert/hooke "1.3.0"]
                  [org.xerial/sqlite-jdbc "3.8.7"] ; just for testing
                  ]
   :repositories [["Immutant 2.x incremental builds"
@@ -40,6 +41,7 @@
   :ring {:handler mdr2.handler/app}
   :main mdr2.main
   :immutant {:war {:context-path "/"}}
-  :profiles {:dev {:dependencies [[org.xerial/sqlite-jdbc "3.8.7"]
+  :profiles {:dev {:source-paths ["dev"]
+                   :dependencies [[org.xerial/sqlite-jdbc "3.8.7"]
                                   [javax.servlet/servlet-api "2.5"]]}
              :test {:dependencies [[ring-mock "0.1.5"]]}})
