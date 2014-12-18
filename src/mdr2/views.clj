@@ -26,43 +26,44 @@
      [:table.table.table-striped
       [:thead [:tr [:th "Title"] [:th "State"] [:th "Action"]]]
       [:tbody
-       (for [{:keys [id title state] :as production} (prod/find-all)]
-         (let [realized-state (first (db/find-state {:id state}))]
-          [:tr
-           [:td (link-to (str "/production/" id) title)]
-           [:td (:name realized-state)]
-           [:td
-            (layout/button-group
-             (remove
-              nil?
-              [(layout/button (str "/production/" id ".xml")
-                              (layout/glyphicon "download"))
-               (layout/button (str "/production/" id "/upload")
-                              (layout/glyphicon "upload"))
-               (when-let [next-state (:next_state realized-state)]
-                 (form/form-to
-                  {:class "btn-group"}
-                  [:post (str "/production/" id "/state")]
-                  (form/hidden-field :state next-state)
-                  (anti-forgery-field)
-                  [:button.btn.btn-default
-                   ;; only allow setting the state to recorded if there is a DAISY export
-                   ;; and the production has been imported from the library, i.e. is not
-                   ;; handled via ABACUS
-                   (when-not
-                       (and (= next-state "recorded")
-                            (:library_number production) ; is the product not managed by
+       (let [cached-state (memoize db/find-state)]
+         (for [{:keys [id title state] :as production} (prod/find-all)]
+           (let [realized-state (first (cached-state {:id state}))]
+             [:tr
+              [:td (link-to (str "/production/" id) title)]
+              [:td (:name realized-state)]
+              [:td
+               (layout/button-group
+                (remove
+                 nil?
+                 [(layout/button (str "/production/" id ".xml")
+                                 (layout/glyphicon "download"))
+                  (layout/button (str "/production/" id "/upload")
+                                 (layout/glyphicon "upload"))
+                  (when-let [next-state (:next_state realized-state)]
+                    (form/form-to
+                     {:class "btn-group"}
+                     [:post (str "/production/" id "/state")]
+                     (form/hidden-field :state next-state)
+                     (anti-forgery-field)
+                     [:button.btn.btn-default
+                      ;; only allow setting the state to recorded if there is a DAISY export
+                      ;; and the production has been imported from the library, i.e. is not
+                      ;; handled via ABACUS
+                      (when-not
+                          (and (= next-state "recorded")
+                               (:library_number production) ; is the product not managed by
                                         ; ABACUS
-                            (prod/manifest? production)) ; is there a DAISY export?
-                     {:disabled "disabled"})
-                   (layout/glyphicon "transfer") " "
-                   (:name (first (db/find-state {:id next-state})))]))
-               ;; (layout/dropdown (for [next (state/next-states state)]
-               ;;                    (layout/menu-item "#" (state/to-str next)))
-               ;;                  (layout/glyphicon "transfer"))
-               (when (friend/authorized? #{:admin} identity)
-                 (layout/button (str "/production/" id "/delete")
-                                (layout/glyphicon "trash")))]))]]))]])))
+                               (prod/manifest? production)) ; is there a DAISY export?
+                        {:disabled "disabled"})
+                      (layout/glyphicon "transfer") " "
+                      (:name (first (cached-state {:id next-state})))]))
+                  ;; (layout/dropdown (for [next (state/next-states state)]
+                  ;;                    (layout/menu-item "#" (state/to-str next)))
+                  ;;                  (layout/glyphicon "transfer"))
+                  (when (friend/authorized? #{:admin} identity)
+                    (layout/button (str "/production/" id "/delete")
+                                   (layout/glyphicon "trash")))]))]])))]])))
 
 (defn production [request id]
   (let [p (prod/find id)
