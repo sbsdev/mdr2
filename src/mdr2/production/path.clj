@@ -55,7 +55,7 @@
   "Path to the iso of the exported DTB for given `production` and
   `volume`"
   [{id :id :as production} volume]
-  (file (iso-path production volume) (str id "_" volume ".iso")))
+  (file (iso-path production volume) (str id (when volume (str "_" volume)) ".iso")))
 
 (defn manifest-path
   "Path to the manifest of the DTB which was exported from obi for
