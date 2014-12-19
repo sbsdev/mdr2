@@ -12,10 +12,10 @@
             [mdr2.obi :as obi])
   (:import java.nio.file.StandardCopyOption))
 
-(defn iso?
-  "Return true if the production has an iso export"
+(defn multi-volume?
+  "Return true if this production has multiple volumes"
   [production]
-  (fs/exists? (path/iso-name production)))
+  (> (:volumes production) 1))
 
 (defn xml-path
   "Return the path to the meta data XML file, i.e. the DTBook file for a given production"

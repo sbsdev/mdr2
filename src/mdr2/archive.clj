@@ -56,96 +56,83 @@ mp3 and the whole thing is packed up in one or more iso files
    :flags "x"
    :transaktions_status "pending"})
 
-(defn container-id
-  ;; FIXME: this needs to be handled differently. The master needs to
-  ;; be archived with a dam-number and the distribution master, i.e.
-  ;; the iso files need to be archived with their library signature,
-  ;; i.e. ds number
-  "Return the name of a archive spool directory for a given production"
-  [{id :id :as production}]
-  (cond
-   (prod/iso? production) (str "ds" id) ; if it has an iso it is supposed to be called "ds"
-   :else (prod/dam-number production)))
+(defn- container-id
+  "Return the name of a archive spool directory for a given
+  `production` and `sektion`"
+  [production sektion]
+  (condp = sektion
+    :master (prod/dam-number production)
+    :dist-master (str "ds" (:library_signature production))))
 
-(defn container-path
-  "Return the path to the archive spool directory for a given production"
-  [production]
-  (let [id (container-id production)]
+(defn- container-path
+  "Return the path to the archive spool directory for a given
+  `production` and `sektion`"
+  [production sektion]
+  (let [id (container-id production sektion)]
     (.getPath (file spool-dir id))))
 
-(defn container-rdf-path
-  "Return the path to the rdf file in the archive spool for a given production"
-  [production]
-  (let [id (container-id production)
+(defn- container-rdf-path
+  "Return the path to the rdf file in the archive spool for a given
+  `production` and `sektion`"
+  [production sektion]
+  (let [id (container-id production sektion)
         rdf-name (str id ".rdf")]
     (.getPath (file spool-dir id rdf-name))))
 
-(defn add-to-db
-  "Insert a production into the archive db. This marks the files in
-  the spool directory as ready for archiving and concludes the
-  archiving process from the point of view of the production system."
-  [production & {sektion :sektion}]
+(defn- add-to-db
+  "Insert a `production` into the archive db for the given `sektion`.
+  This marks the files in the spool directory as ready for archiving
+  and concludes the archiving process from the point of view of the
+  production system."
+  [production sektion]
   (let [new-job
-        {:verzeichnis (container-id production)
-         ;; :id (container-id production)
-         ;; :verzeichnis (container-path production)
-         :sektion sektion}
+        {:verzeichnis (container-id production sektion)
+         :sektion (if (= sektion :master) "master" "cdimage")}
         job (merge default-job new-job)]
     (jdbc/insert! db :container job)))
 
-(defn copy-master-files
-  "Copy a production master, i.e. the DAISY3 with wav files, to the
-  archive spool dir"
-  [production]
-  (let [archive-path (container-path production)]
+(defn- copy-files
+  "Copy a `production` to the archive spool dir for the given
+  `sektion`. For a production master copy the whole DTB including wav
+  files. For a production distribution master copy the isos"
+  [production sektion]
+  (let [archive-path (container-path production sektion)]
     (if-not (fs/exists? archive-path)
-      (fs/copy-dir (path/recorded-path production) (container-path production))
-      (log/error "Container-path %s already exists" archive-path))))
+      (condp = sektion
+        :master 
+        (fs/copy-dir (path/recorded-path production) archive-path)
+        :dist-master
+        (doseq [volume (range 1 (inc (:volumes production)))]
+          (let [iso-archive-name (str (container-id production :dist-master) 
+                                      (when (prod/multi-volume?) (str  "_" volume)) 
+                                      ".iso")
+                iso-archive-path (.getPath (file archive-path iso-archive-name))]
+            (fs/copy+ (path/iso-name production (when (prod/multi-volume?) volume)) 
+                      iso-archive-path))))
+      (log/error "Archive path %s already exists" archive-path))))
 
-(defn copy-distribution-master-files
-  "Copy a production to the archive spool dir"
-  ;; FIXME: this fails if there is already an archiving in progress
-  ;; because it will create another copy inside the already existing
-  ;; dam directory
-  [production]
-  (let [archive-path (container-path production)
-        ;; FIXME: This will fail in the light of multiple isos
-        iso-archive-name (str (container-id production) ".iso")
-        iso-archive-path (.getPath (file archive-path iso-archive-name))]
-    (fs/copy+ (path/iso-name production) iso-archive-path))) ; FIXME: Multi-CD
-
-(defn create-rdf
-  "Create an rdf file and place it in the archive spool directory"
-  [production]
+(defn- create-rdf
+  "Create an rdf file and place it in the appropriate archive spool
+  directory"
+  [production sektion]
   (let [rdf (rdf/rdf production)
-        rdf-path (container-rdf-path production)]
+        rdf-path (container-rdf-path production sektion)]
     (spit rdf-path rdf)))
 
-(defn archive-master
-  "Archive a master"
-  [production]
+(defn- archive-sektion
+  "Archive a `production` for given `sektion`. For the :master sektion
+  copy the original DTB including the wav files. For the :dist-master
+  sektion copy one or more iso files"
+  [production sektion]
   ;; place all the files in the spool dir
-  (copy-master-files production)
+  (copy-files production sektion)
   ;; create an rdf file
-  (create-rdf production)
+  (create-rdf production sektion)
   ;; add it to the db so that the agadir machinery will pick it up
-  (add-to-db production :sektion "master"))
-
-(defn archive-distribution-master
-  "Archive a distribution master, .i.e. a DTB encoded with mp3 and
-  packed up in one or more iso files"
-  [production]
-  ;; place all the files in the spool dir
-  (copy-distribution-master-files production)
-  ;; create an rdf file
-  (create-rdf production)
-  ;; add it to the db so that the agadir machinery will pick it up
-  (add-to-db production :sektion "cdimage")
-  ;; remove iso and mp3s
-  (encode/clean-up))
+  (add-to-db production sektion))
 
 (defn archive
-  "Archive a production"
+  "Archive a `production`"
   [production]
-  (archive-master production)
-  (archive-distribution-master production))
+  (archive-sektion production :master)
+  (archive-sektion production :dist-master))
