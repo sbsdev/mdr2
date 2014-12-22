@@ -60,7 +60,7 @@ mp3 and the whole thing is packed up in one or more iso files
   "Return the name of a archive spool directory for a given
   `production` and `sektion`"
   [production sektion]
-  (condp = sektion
+  (case sektion
     :master (prod/dam-number production)
     :dist-master (str "ds" (:library_signature production))))
 
@@ -98,7 +98,7 @@ mp3 and the whole thing is packed up in one or more iso files
   [production sektion]
   (let [archive-path (container-path production sektion)]
     (if-not (fs/exists? archive-path)
-      (condp = sektion
+      (case sektion
         :master
         (fs/copy-dir (path/recorded-path production) archive-path)
         :dist-master
