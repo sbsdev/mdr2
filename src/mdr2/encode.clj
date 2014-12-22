@@ -117,9 +117,8 @@
 
 (defn encode-multiple
   [production sample-rate bitrate]
-  (dotimes [volume (:volumes production)]
-    (let [volume (inc volume) ; we want from 1..n instead of 0..n-1
-          result (encode-production production bitrate volume sample-rate)]
+  (doseq [volume (range 1 (inc (:volumes production)))]
+    (let [result (encode-production production bitrate volume sample-rate)]
       (if (not= 0 (:exit result))
         (log/errorf "Encoding failed with %s" (:err result))
         (do
