@@ -99,12 +99,13 @@ mp3 and the whole thing is packed up in one or more iso files
   (let [archive-path (container-path production sektion)]
     (if-not (fs/exists? archive-path)
       (condp = sektion
-        :master 
+        :master
         (fs/copy-dir (path/recorded-path production) archive-path)
         :dist-master
         (doseq [volume (range 1 (inc (:volumes production)))]
-          (let [iso-archive-name (str (container-id production :dist-master) 
-                                      (when (prod/multi-volume?) (str  "_" volume)) 
+          (let [iso-archive-name (str (container-id production :dist-master)
+                                      (when (prod/multi-volume? production)
+                                        (str  "_" volume))
                                       ".iso")
                 iso-archive-path (.getPath (file archive-path iso-archive-name))]
             (fs/copy+ (path/iso-name production (when (prod/multi-volume?) volume)) 
