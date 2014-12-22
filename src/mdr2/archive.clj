@@ -108,7 +108,8 @@ mp3 and the whole thing is packed up in one or more iso files
                                         (str  "_" volume))
                                       ".iso")
                 iso-archive-path (.getPath (file archive-path iso-archive-name))]
-            (fs/copy+ (path/iso-name production (when (prod/multi-volume?) volume)) 
+            (fs/copy+ (path/iso-name production
+                                     (when (prod/multi-volume? production) volume))
                       iso-archive-path))))
       (log/error "Archive path %s already exists" archive-path))))
 
