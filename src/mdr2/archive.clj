@@ -59,10 +59,15 @@ mp3 and the whole thing is packed up in one or more iso files
 (defn- container-id
   "Return the name of a archive spool directory for a given
   `production` and `sektion`"
-  [production sektion]
-  (case sektion
-    :master (prod/dam-number production)
-    :dist-master (str "ds" (:library_signature production))))
+  ([production sektion]
+   (container-id production sektion nil))
+  ([production sektion volume]
+   (case sektion
+     :master (prod/dam-number production)
+     :dist-master (str "ds" (:library_signature production)
+                       (when (and volume
+                                  (prod/multi-volume? production))
+                         (str "_" volume))))))
 
 (defn- container-path
   "Return the path to the archive spool directory for a given
@@ -74,10 +79,12 @@ mp3 and the whole thing is packed up in one or more iso files
 (defn- container-rdf-path
   "Return the path to the rdf file in the archive spool for a given
   `production` and `sektion`"
-  [production sektion]
-  (let [id (container-id production sektion)
-        rdf-name (str id ".rdf")]
-    (.getPath (file spool-dir id rdf-name))))
+  ([production sektion]
+   (container-rdf-path production sektion nil))
+  ([production sektion volume]
+   (let [path (container-id production sektion)
+         rdf-name (str (container-id production sektion volume) ".rdf")]
+     (.getPath (file spool-dir path rdf-name)))))
 
 (defn- add-to-db
   "Insert a `production` into the archive db for the given `sektion`.
@@ -85,11 +92,13 @@ mp3 and the whole thing is packed up in one or more iso files
   and concludes the archiving process from the point of view of the
   production system."
   [production sektion]
-  (let [new-job
-        {:verzeichnis (container-id production sektion)
-         :sektion (if (= sektion :master) "master" "cdimage")}
-        job (merge default-job new-job)]
-    (jdbc/insert! db :container job)))
+  (let [entries (case sektion :master 2 :dist-master (inc (:volumes production)))]
+    (doseq [volume (range 1 entries)]
+      (let [new-job
+            {:verzeichnis (container-id production sektion volume)
+             :sektion (case :master "master" :dist-master "cdimage")}
+            job (merge default-job new-job)]
+        (jdbc/insert! db :container job)))))
 
 (defn- copy-files
   "Copy a `production` to the archive spool dir for the given
@@ -103,10 +112,7 @@ mp3 and the whole thing is packed up in one or more iso files
         (fs/copy-dir (path/recorded-path production) archive-path)
         :dist-master
         (doseq [volume (range 1 (inc (:volumes production)))]
-          (let [iso-archive-name (str (container-id production :dist-master)
-                                      (when (prod/multi-volume? production)
-                                        (str  "_" volume))
-                                      ".iso")
+          (let [iso-archive-name (str (container-id production sektion volume) ".iso")
                 iso-archive-path (.getPath (file archive-path iso-archive-name))]
             (fs/copy+ (path/iso-name production
                                      (when (prod/multi-volume? production) volume))
@@ -118,8 +124,10 @@ mp3 and the whole thing is packed up in one or more iso files
   directory"
   [production sektion]
   (let [rdf (rdf/rdf production)
-        rdf-path (container-rdf-path production sektion)]
-    (spit rdf-path rdf)))
+        entries (case sektion :master 2 :dist-master (inc (:volumes production)))]
+    (doseq [volume (range 1 entries)]
+      (let [rdf-path (container-rdf-path production sektion volume)]
+        (spit rdf-path rdf)))))
 
 (defn- archive-sektion
   "Archive a `production` for given `sektion`. For the :master sektion
