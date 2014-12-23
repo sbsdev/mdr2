@@ -233,5 +233,5 @@
   files are overwritten"
   [{product_number :product_number :as production}]
   ;; file names are supposed to be "Ax_product_number.txt, e.g. Ax_DY15000.txt"
-  (let [file-name (.getPath (io/file export-dir "Ax_" product_number ".txt"))]
+  (let [file-name (.getPath (io/file export-dir (str "Ax_" product_number ".txt")))]
     (spit file-name (export production))))
