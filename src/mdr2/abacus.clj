@@ -106,8 +106,10 @@
     (if (and production
              (= "structured" (:state production))
              (prod/manifest? production))
-      (do (msg/publish (queues/encode) production)
-          (io/delete-file f))
+      (do
+        (prod/set-state! production "recorded")
+        (msg/publish (queues/encode) (prod/find (:id production)))
+        (io/delete-file f))
       (let [message
             (cond
              (empty? production)

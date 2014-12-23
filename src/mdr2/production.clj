@@ -8,6 +8,7 @@
             [clj-time.coerce :refer [to-date]]
             [environ.core :refer [env]]
             [mdr2.db :as db]
+            [mdr2.dtb :as dtb]
             [mdr2.production.path :as path]
             [mdr2.obi :as obi])
   (:import java.nio.file.StandardCopyOption))
@@ -106,6 +107,18 @@
   "Find all productions with the given `state`"
   [state]
   (db/find-by-state {:state state}))
+
+(defn set-state!
+  "Set `production` to `state`"
+  [production state]
+  (let [p (assoc production :state state)]
+    (case state
+      ;; once a production has been recorded update the meta data and
+      ;; set the produced date
+      "recorded" (update! (merge p
+                                 (dtb/meta-data (path/recorded-path p))
+                                 {:produced_date (to-date (t/now))}))
+      (update! p))))
 
 (defn delete-all-dirs
   "Delete all artifacts on the file system for a production"

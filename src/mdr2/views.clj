@@ -209,8 +209,8 @@
 
 (defn production-set-state [request id state]
   (let [user (friend/current-authentication request)
-        p (assoc (prod/find id) :state state)]
-    (prod/update! p)
+        production (prod/find id)]
+    (prod/set-state! production state)
     (when (= state "recorded")
       (msg/publish (queues/encode) p))
     (response/redirect "/")))
