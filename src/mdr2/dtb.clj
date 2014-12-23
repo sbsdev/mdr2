@@ -103,6 +103,18 @@
   (let [audio-files (filter wav-file? (file-seq (file dtb)))] 
     (reduce + (map file-audio-length audio-files))))
 
+(defn audio-total-time
+  "Return the total audio length for a given DAISY Talking Book in a
+  format according to
+  http://www.daisy.org/z3986/2005/Z3986-2005.html#Clock"
+  [dtb]
+  (let [duration (audio-length dtb)
+        hours (quot duration 3600)
+        minutes (quot (mod duration 3600) 60)
+        seconds (mod duration 60)
+        millis (* 1000 (mod duration 1))]
+    (format "%02.0f:%02.0f:%02.0f.%03.0f" hours minutes seconds millis)))
+
 (defn- file-audio-channels
   "Return the number of audio channels for a given audio `file`"
   [file]
@@ -141,8 +153,8 @@
 (defn meta-data
   "Return a map containing all queried meta data for a given DAISY Talking Book"
   [dtb]
-  (let [keys [:multimedia_type :audio_format :audio_length]
-        fns [multimedia-type audio-format audio-length]]
+  (let [keys [:multimedia_type :audio_format :total_time]
+        fns [multimedia-type audio-format audio-total-time]]
     ;; of course we could look up the fn using (ns-resolve ns (symbol
     ;; (name kw))) but there is a balance between readybility and
     ;; cleverness
