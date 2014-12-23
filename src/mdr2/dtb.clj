@@ -94,7 +94,7 @@
     durationInSeconds))
 
 (defn audio-length
-  "Return the audio legth for a given DAISY Talking Book in seconds"
+  "Return the audio length for a given DAISY Talking Book in seconds"
   [dtb]
   ;; unfortunatelly getting the audio length of an mp3 file doesn't
   ;; seem to be supported at the moment. You need to have the proper
