@@ -181,13 +181,6 @@
    (map import-metadata-update)
    (delete-files!)))
 
-(defn escape
-  "Escape a string `s` for ABACUS consumption"
-  [s]
-  (if (or (char? s) (string? s))
-    (str "'" s "'") ; only escape strings
-    s))
-
 (defn wrap-rows
   "Wrap an export record according to ABACUS conventions"
   [rs]
@@ -200,7 +193,7 @@
   [k v]
   (when v
     (let [section (if (= k 4) "IBF" "ADO")]
-      (list "D" section k (escape v)))))
+      (list "D" section k (format "'%s'" v))))) ; all values need to be quoted
 
 (def ^:private date-format "%1$td.%1$tm.%1$tY")
 
