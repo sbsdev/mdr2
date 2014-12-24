@@ -42,7 +42,7 @@
    :language [:MetaData :dc :language text]
    :source_publisher [:MetaData :ncc :sourcePublisher text]
    :source_edition [:MetaData :ncc :sourceDate text]
-   ;;   :volumes [:MetaData :ncc :setInfo text] ; not sure if this is reliable
+   :volumes [:MetaData :ncc :setInfo text]
    :revision_date [:MetaData :ncc :revisionDate text]
    })
 
