@@ -202,6 +202,8 @@
     (let [section (if (= k 4) "IBF" "ADO")]
       (list "D" section k (escape v)))))
 
+(def ^:private date-format "%1$td.%1$tm.%1$tY")
+
 (defn export
   "Export the state of a production as a csv-like structure, ready to
   be consumed by ABACUS"
@@ -209,27 +211,20 @@
            date id produced_date volumes] :as production}]
   (->> [(create-row 2 product_number)
         (create-row 233 total_time) ; in minutes
-        (create-row 106 state) ; Process Status Madras
-        (create-row 107 "") ; the Document Status Madras is no longer
-                            ; used but ABACUS still expects it. Just
-                            ; give it an empty string to chew on
+        (create-row 106 state)
         (create-row 276 audio_format)
         ;; FIXME: the number of CDs is only determined at the time of
         ;; archiving. Is this persisted in the db?
         (create-row 275 volumes) ; Number of CDs
         (create-row 277 multimedia_type)
-        ;; FIXME: again the date of the end of the production is only
-        ;; known once we start the archiving. Should this be persisted
-        ;; to the db?
-        (create-row 252 produced_date) ; Date of production end
-        (create-row 274 date) ; Date of production start
+        (create-row 252 (format date-format produced_date)) ; Date of production end
+        (create-row 274 (format date-format date)) ; Date of production start
         (create-row 4 (prod/dam-number production))] ; for legacy purposes
        (remove nil?) ; remove empty rows
        wrap-rows ; wrap the payload
-       (map-indexed #(conj %2 %1)) ; number each row
+       (map-indexed #(conj %2 (inc %1))) ; number each row starting at 1
        (map #(string/join "," %))
-       (map println-str)
-       (string/join)))
+       (string/join "\r\n"))) ; use cr/lf as this is consumed only on windows
 
 (defn export-file
   "Export the state of a production into a special file in
