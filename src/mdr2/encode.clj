@@ -111,9 +111,11 @@
             ;; create an iso
             (create-iso production)
             ;; set the state to encoded
-            (prod/update! (assoc production :state "encoded"))))))
+            (prod/set-state! production "encoded")
+            ;; FIXME: set the number of volumes
+            ))))
     ;; otherwise move the production to state :pending-volume-split
-    (prod/update! (assoc production :state "pending-split"))))
+    (prod/set-state! production "pending-split")))
 
 (defn encode-multiple
   [production sample-rate bitrate]
@@ -127,4 +129,4 @@
           ;; create an iso
           (create-iso production volume)))))
   ;; set the state to encoded
-  (prod/update! (assoc production :state "encoded")))
+  (prod/set-state! production "encoded"))
