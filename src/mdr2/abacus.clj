@@ -210,7 +210,7 @@
   [{:keys [product_number total_time state audio_format multimedia_type
            date id produced_date volumes] :as production}]
   (->> [(create-row 2 product_number)
-        (create-row 233 total_time) ; in minutes
+        (create-row 233 (quot total_time (* 1000 60))) ; in minutes
         (create-row 106 state)
         (create-row 276 audio_format)
         ;; FIXME: the number of CDs is only determined at the time of
