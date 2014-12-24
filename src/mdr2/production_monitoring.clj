@@ -15,7 +15,7 @@
   ;; as it happens the function that calculates the audio-length for a
   ;; DTB is so generic that it can be reused as-is for obi projects
   (let [path (path/recording-path production)]
-    (assoc production :audio-length (dtb/audio-length path))))
+    (assoc production :audio-length (quot (dtb/audio-length path) 1000))))
 
 (defn last-modified [production]
   (let [path (path/recording-path production)

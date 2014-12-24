@@ -42,7 +42,7 @@ CREATE TABLE production (
   revision VARCHAR(255),
   revision_date DATE,
   revision_description VARCHAR(255),
-  total_time VARCHAR(255),
+  total_time INTEGER, -- in milliseconds
   audio_format VARCHAR(25),
   -- Number of levels
   depth TINYINT,

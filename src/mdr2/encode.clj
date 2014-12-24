@@ -75,7 +75,7 @@
   content doesn't even fit on one CD with the lowest bitrate."
   [production]
   (let [dtb (path/recorded-path production)
-        duration (dtb/audio-length dtb)
+        duration (quot (dtb/audio-length dtb) 1000) ; convert from millisecs to secs
         sampling-ratio (if (dtb/mono? dtb) 1/2 1)
         max-bitrate (/ (* (/ max-size duration sampling-ratio) 8) 1000)]
     (loop [bitrates bitrates]

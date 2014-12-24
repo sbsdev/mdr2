@@ -94,26 +94,32 @@
     durationInSeconds))
 
 (defn audio-length
-  "Return the audio length for a given DAISY Talking Book in seconds"
+  "Return the audio length for a given DAISY Talking Book in
+  milliseconds"
   [dtb]
   ;; unfortunatelly getting the audio length of an mp3 file doesn't
   ;; seem to be supported at the moment. You need to have the proper
   ;; providers. Maybe this is a problem of openjdk? So just use wav
   ;; files for the calculation.
-  (let [audio-files (filter wav-file? (file-seq (file dtb)))] 
-    (reduce + (map file-audio-length audio-files))))
+  (let [audio-files (filter wav-file? (file-seq (file dtb)))]
+    (->> audio-files
+     (map file-audio-length)
+     (reduce +)
+     (* 1000)
+     Math/round)))
 
 (defn audio-total-time
   "Return the total audio length for a given DAISY Talking Book in a
   format according to
   http://www.daisy.org/z3986/2005/Z3986-2005.html#Clock"
   [dtb]
-  (let [duration (audio-length dtb)
-        hours (quot duration 3600)
-        minutes (quot (mod duration 3600) 60)
-        seconds (mod duration 60)
-        millis (* 1000 (mod duration 1))]
-    (format "%02.0f:%02.0f:%02.0f.%03.0f" hours minutes seconds millis)))
+  (let [duration (audio-length dtb) ; milliseconds
+        in-secs (quot duration 1000)
+        hours (quot in-secs 3600)
+        minutes (quot (mod in-secs 3600) 60)
+        seconds (mod in-secs 60)
+        millis (mod duration 1000)]
+    (format "%02d:%02d:%02d.%03d" hours minutes seconds millis)))
 
 (defn- file-audio-channels
   "Return the number of audio channels for a given audio `file`"
@@ -154,9 +160,6 @@
   "Return a map containing all queried meta data for a given DAISY Talking Book"
   [dtb]
   (let [keys [:multimedia_type :audio_format :total_time]
-        fns [multimedia-type audio-format audio-total-time]]
-    ;; of course we could look up the fn using (ns-resolve ns (symbol
-    ;; (name kw))) but there is a balance between readybility and
-    ;; cleverness
+        fns [multimedia-type audio-format audio-length]]
     (zipmap keys (map #(% dtb) fns))))
 
