@@ -210,15 +210,13 @@
   [{:keys [product_number total_time state audio_format multimedia_type
            date id produced_date volumes] :as production}]
   (->> [(create-row 2 product_number)
-        (create-row 233 (quot total_time (* 1000 60))) ; in minutes
+        (create-row 239 (quot total_time (* 1000 60))) ; in minutes
         (create-row 106 state)
-        (create-row 276 audio_format)
-        ;; FIXME: the number of CDs is only determined at the time of
-        ;; archiving. Is this persisted in the db?
-        (create-row 275 volumes) ; Number of CDs
-        (create-row 277 multimedia_type)
-        (create-row 252 (format date-format produced_date)) ; Date of production end
-        (create-row 274 (format date-format date)) ; Date of production start
+        (create-row 280 audio_format)
+        (create-row 271 volumes) ; Number of CDs
+        (create-row 281 multimedia_type)
+        (create-row 256 (format date-format produced_date)) ; Date of production end
+        (create-row 278 (format date-format date)) ; Date of production start
         (create-row 4 (prod/dam-number production))] ; for legacy purposes
        (remove nil?) ; remove empty rows
        wrap-rows ; wrap the payload
