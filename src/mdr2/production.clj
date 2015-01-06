@@ -7,6 +7,8 @@
             [clj-time.format :as f]
             [clj-time.coerce :refer [to-date]]
             [environ.core :refer [env]]
+            [immutant.messaging :as msg]
+            [mdr2.queues :as queues]
             [mdr2.db :as db]
             [mdr2.dtb :as dtb]
             [mdr2.production.path :as path]
@@ -108,17 +110,29 @@
   [state]
   (db/find-by-state {:state state}))
 
+(defn- update-meta-data
+  "Update the meta data of a `production` based on its state"
+  [{state :state :as production}]
+  (case state
+    ;; update the meta data if a production has been recorded
+    "recorded" (merge production
+                      (dtb/meta-data (path/recorded-path production))
+                      {:produced_date (to-date (t/now))})
+    production))
+
 (defn set-state!
   "Set `production` to `state`"
   [production state]
-  (let [p (assoc production :state state)]
-    (case state
-      ;; once a production has been recorded update the meta data and
-      ;; set the produced date
-      "recorded" (update! (merge p
-                                 (dtb/meta-data (path/recorded-path p))
-                                 {:produced_date (to-date (t/now))}))
-      (update! p))))
+  (let [p (-> production
+              (assoc :state state)
+              update-meta-data)]
+    (update! p)
+    (when (:product_number p)
+      ;; notify the erp of the status change
+      (msg/publish (queues/notify-abacus) p))
+    (when (= state "recorded")
+      ;; start the encoding process
+      (msg/publish (queues/encode) p))))
 
 (defn delete-all-dirs
   "Delete all artifacts on the file system for a production"

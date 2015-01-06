@@ -108,9 +108,6 @@
              (prod/manifest? production))
       (do
         (prod/set-state! production "recorded")
-        ;; FIXME: try to keep the updated production in memory instead
-        ;; of round tripping to the db (first update the read)
-        (msg/publish (queues/encode) (prod/find (:id production)))
         (io/delete-file f))
       (let [message
             (cond

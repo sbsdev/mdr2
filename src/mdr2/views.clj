@@ -211,10 +211,6 @@
   (let [user (friend/current-authentication request)
         production (prod/find id)]
     (prod/set-state! production state)
-    (when (= state "recorded")
-      ;; FIXME: try to keep the updated production in memory instead
-      ;; of round tripping to the db (first update the read)
-      (msg/publish (queues/encode) (prod/find id)))
     (response/redirect "/")))
 
 (defn production-monitoring []
