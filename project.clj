@@ -3,7 +3,7 @@
   :url "https://github.com/sbsdev/mdr2"
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [hiccup "1.0.5"]
-                 [compojure "1.2.2"]
+                 [compojure "1.3.1"]
                  [org.clojure/java.jdbc "0.3.6"]
                  [mysql/mysql-connector-java "5.1.34"]
                  [yesql "0.5.0-beta2"]
@@ -15,10 +15,10 @@
                  [org.clojure/data.codec "0.1.0"] ; for pipeline2 client
                  [crypto-random "1.2.0"] ; for pipeline2 client
                  [clj-http "1.0.1"] ; for pipeline2 client
-                 [ring/ring-defaults "0.1.2"]
+                 [ring/ring-defaults "0.1.3"]
                  [com.cemerick/friend "0.2.1"]
                  [me.raynes/fs "1.4.6"] ; to be replaced by nio.file
-                 [org.tobereplaced/nio.file "0.3.0"]
+                 [org.tobereplaced/nio.file "0.3.1"]
                  [org.clojure/data.csv "0.1.2"]
                  [com.novemberain/pantomime "2.3.0"]
                  [clj-time "0.8.0"]

@@ -96,7 +96,7 @@
 (defn move-away [f reason]
   (let [new-name (str reason "_" (.getName f))
         new-path (nio/resolve-sibling f new-name)]
-    (nio/move f new-path StandardCopyOption/REPLACE_EXISTING)))
+    (nio/move! f new-path StandardCopyOption/REPLACE_EXISTING)))
 
 (defn import-valid-recorded-production
   "Import a valid recorded production from file `f`"
