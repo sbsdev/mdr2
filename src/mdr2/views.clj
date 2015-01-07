@@ -140,13 +140,13 @@
                           [:button.btn.btn-default
                            (layout/glyphicon "transfer")]])]])]])))
 
-(defn production-catalog [request id library_signature]
-  (let [user (friend/current-authentication request)
-        p (assoc (prod/find id) 
-            :library_signature library_signature
-            ;; the state is implicitly set to :cataloged if the
-            ;; library_signature is set
-            :state "cataloged")]
+(defn production-catalog [id library_signature]
+  (let [p (assoc
+           (prod/find id)
+           :library_signature library_signature
+           ;; the state is implicitly set to :cataloged if the
+           ;; library_signature is set
+           :state "cataloged")]
     (prod/update! p)
     ;; put the production on the archive queue
     (msg/publish (queues/archive) p)
@@ -201,13 +201,12 @@
       (production-bulk-import-confirm-form request (vubis/read-file tempfile)))))
 
 (defn production-bulk-import
-  [request productions]
-  (let [user (friend/current-authentication request)]
-    (doseq [[_ p] productions]
-      (prod/update-or-create! (prod/parse p)))
-    (response/redirect "/")))
+  [productions]
+  (doseq [[_ p] productions]
+    (prod/update-or-create! (prod/parse p)))
+  (response/redirect "/"))
 
-(defn production-set-state [request id state]
+(defn production-set-state [id state]
   (let [production (prod/find id)]
     (prod/set-state! production state)
     (response/redirect "/")))

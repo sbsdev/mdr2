@@ -20,8 +20,8 @@
        (friend/authenticated (views/production-bulk-import-form request)))
   (POST "/production/upload-confirm" [file :as r]
         (friend/authenticated (views/production-bulk-import-confirm r file)))
-  (POST "/production/upload" [productions :as r]
-        (friend/authenticated (views/production-bulk-import r productions)))
+  (POST "/production/upload" [productions]
+        (friend/authenticated (views/production-bulk-import productions)))
   ;; individual productions
   (GET "/production/:id.xml" [id]
        (friend/authenticated (views/production-xml id)))
@@ -29,8 +29,8 @@
        (friend/authenticated (views/file-upload-form r id)))
   (POST "/production/:id/upload" [id file :as r]
         (friend/authenticated (views/production-add-xml r id file)))
-  (POST "/production/:id/state" [id state :as r]
-        (friend/authenticated (views/production-set-state r id state)))
+  (POST "/production/:id/state" [id state]
+        (friend/authenticated (views/production-set-state id state)))
   (GET "/production/:id/split" [id :as r]
        (friend/authenticated (views/production-split-form r id)))
   (POST "/production/:id/split" [id sample-rate bitrate]
@@ -38,8 +38,8 @@
   ;; catalog
   (GET "/catalog" request
        (friend/authenticated (views/catalog request)))
-  (POST "/catalog/:id" [id library_signature :as r]
-        (friend/authenticated (views/production-catalog r id library_signature)))
+  (POST "/catalog/:id" [id library_signature]
+        (friend/authenticated (views/production-catalog id library_signature)))
   (GET "/production/:id" [id :as r]
        (friend/authenticated (views/production r id)))
   (GET "/production/:id/delete" [id]
