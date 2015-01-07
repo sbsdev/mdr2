@@ -33,8 +33,8 @@
         (friend/authenticated (views/production-set-state id state)))
   (GET "/production/:id/split" [id :as r]
        (friend/authenticated (views/production-split-form r id)))
-  (POST "/production/:id/split" [id sample-rate bitrate]
-        (friend/authenticated (views/production-split id sample-rate bitrate)))
+  (POST "/production/:id/split" [id volumes sample-rate bitrate]
+        (friend/authenticated (views/production-split id volumes sample-rate bitrate)))
   ;; catalog
   (GET "/catalog" request
        (friend/authenticated (views/catalog request)))
