@@ -31,6 +31,10 @@
         (friend/authenticated (views/production-add-xml r id file)))
   (POST "/production/:id/state" [id state :as r]
         (friend/authenticated (views/production-set-state r id state)))
+  (GET "/production/:id/split" [id :as r]
+       (friend/authenticated (views/production-split-form r id)))
+  (POST "/production/:id/split" [id sample-rate bitrate]
+        (friend/authenticated (views/production-split id sample-rate bitrate)))
   ;; catalog
   (GET "/catalog" request
        (friend/authenticated (views/catalog request)))

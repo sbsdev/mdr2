@@ -208,9 +208,32 @@
     (response/redirect "/")))
 
 (defn production-set-state [request id state]
+  (let [production (prod/find id)]
+    (prod/set-state! production state)
+    (response/redirect "/")))
+
+(defn production-split-form [request id]
   (let [user (friend/current-authentication request)
         production (prod/find id)]
-    (prod/set-state! production state)
+    (layout/common
+     user
+     [:h1 "Encode Split Production"]
+     (form/form-to
+      [:post (str "/production/" id "/split")]
+      (anti-forgery-field)
+      [:div.form-group
+       (form/label "volumes" "Volumes:")
+       (form/drop-down {:class "form-control"} "volumes" [1 2 3 4 5 6 7 8])]
+      [:div.form-group
+       (form/label "sample-rate" "Sample Rate:")
+       (form/drop-down {:class "form-control"} "sample-rate" [11025 22050 44100 48000])]
+      [:div.form-group
+       (form/label "bitrate" "Bitrate:")
+       (form/drop-down {:class "form-control"} "bitrate" [32 48 56 64 128])]
+      (form/submit-button {:class "btn btn-default"} "Encode")))))
+
+(defn production-split [id sample-rate bitrate]
+  (let [production (prod/find id)]
     (response/redirect "/")))
 
 (defn production-monitoring []
