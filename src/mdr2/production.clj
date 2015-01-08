@@ -110,29 +110,32 @@
   [state]
   (db/find-by-state {:state state}))
 
-(defn- update-meta-data
-  "Update the meta data of a `production` based on its state"
-  [{state :state :as production}]
-  (case state
-    ;; update the meta data if a production has been recorded
-    "recorded" (merge production
-                      (dtb/meta-data (path/recorded-path production))
-                      {:produced_date (to-date (t/now))})
-    production))
-
 (defn set-state!
   "Set `production` to `state`"
   [production state]
-  (let [p (-> production
-              (assoc :state state)
-              update-meta-data)]
+  (let [p (assoc production :state state)]
     (update! p)
     (when (:product_number p)
       ;; notify the erp of the status change
       (msg/publish (queues/notify-abacus) p))
-    (when (= state "recorded")
-      ;; start the encoding process
-      (msg/publish (queues/encode) p))))
+    p))
+
+(defn set-state-recorded! [production]
+  (as-> production p
+    (merge p
+           (dtb/meta-data (path/recorded-path p))
+           {:produced_date (to-date (t/now))})
+    (set-state! p "recorded")
+    (msg/publish (queues/encode) {:production p})))
+
+(defn set-state-split! [production volumes sample-rate bitrate]
+  (as-> production p
+    (assoc p :volumes volumes)
+    (set-state! p "split")
+    (msg/publish (queues/encode)
+                 {:production p
+                  :sample-rate sample-rate
+                  :bitrate bitrate})))
 
 (defn delete-all-dirs
   "Delete all artifacts on the file system for a production"

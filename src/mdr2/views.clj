@@ -208,7 +208,9 @@
 
 (defn production-set-state [id state]
   (let [production (prod/find id)]
-    (prod/set-state! production state)
+    (case state
+      "recorded" (prod/set-state-recorded! production)
+      (prod/set-state! production state))
     (response/redirect "/")))
 
 (defn production-split-form [request id]
@@ -233,11 +235,9 @@
 
 (defn production-split [id volumes sample-rate bitrate]
   (let [production (prod/find id)]
-    (msg/publish (queues/encode-multi-volume)
-                 {:production production
-                  :sample-rate sample-rate
-                  :bitrate bitrate})
-    (response/redirect "/")))
+    (prod/set-state-split! production (Integer/parseInt volumes)
+                           (Integer/parseInt sample-rate) (Integer/parseInt bitrate)))
+  (response/redirect "/"))
 
 (defn production-monitoring []
   "Return a csv containing the total audio length of all productions"

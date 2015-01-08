@@ -107,7 +107,7 @@
              (= "structured" (:state production))
              (prod/manifest? production))
       (do
-        (prod/set-state! production "recorded")
+        (prod/set-state-recorded! production)
         (io/delete-file f))
       (let [message
             (cond
