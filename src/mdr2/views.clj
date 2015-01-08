@@ -215,23 +215,39 @@
 
 (defn production-split-form [request id]
   (let [user (friend/current-authentication request)
-        production (prod/find id)]
+        production (prod/find id)] ; FIXME: the find could return nil
     (layout/common
      user
      [:h1 "Split Production"]
      (form/form-to
+      {:class "form-horizontal"}
       [:post (str "/production/" id "/split")]
       (anti-forgery-field)
       [:div.form-group
-       (form/label :volumes "Volumes:")
-       (form/drop-down {:class "form-control"} :volumes [1 2 3 4 5 6 7 8])]
+       (form/label {:class "col-sm-2 control-label"} :volumes "Volumes:")
+       [:div.col-sm-2
+        (form/drop-down {:class "form-control"} :volumes [1 2 3 4 5 6 7 8] 2)]]
       [:div.form-group
-       (form/label :sample-rate "Sample Rate:")
-       (form/drop-down {:class "form-control"} :sample-rate [11025 22050 44100 48000])]
+       (form/label {:class "col-sm-2 control-label"} :sample-rate "Sample Rate:")
+       [:div.col-sm-2
+        (form/drop-down {:class "form-control"} :sample-rate [11025 22050 44100 48000] 22050)]]
+      ;; [:div.form-group
+      ;;  (form/label {:class "col-sm-2 control-label"} :sample-rate "Sample Rate:")
+      ;;  [:label.radio-inline
+      ;;   (form/radio-button :sample-rate false 11025) 11025]
+      ;;  [:label.radio-inline
+      ;;   (form/radio-button :sample-rate true 22050) 22050]
+      ;;  [:label.radio-inline
+      ;;   (form/radio-button :sample-rate false 44100) 44100]
+      ;;  [:label.radio-inline
+      ;;   (form/radio-button :sample-rate false 48000) 48000]]
       [:div.form-group
-       (form/label :bitrate "Bitrate:")
-       (form/drop-down {:class "form-control"} :bitrate [32 48 56 64 128])]
-      (form/submit-button {:class "btn btn-default"} "Encode")))))
+       (form/label {:class "col-sm-2 control-label"} :bitrate "Bitrate:")
+       [:div.col-sm-2
+        (form/drop-down {:class "form-control"} :bitrate [32 48 56 64 128] 56)]]
+      [:div.form-group
+       [:div {:class "col-sm-offset-2 col-sm-2"}
+       (form/submit-button {:class "btn btn-default"} "Encode")]]))))
 
 (defn production-split [id volumes sample-rate bitrate]
   (let [production (prod/find id)]
