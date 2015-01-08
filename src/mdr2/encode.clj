@@ -33,18 +33,17 @@
       (:stereo sampling-rates))))
 
 (defn encode-production
-  "Encode a `production` using the given `bitrate` and optionally
-  `volume` and sampling rate (`freq`), i.e. convert the wav files to mp3"
-  [production bitrate & [volume freq]]
+  "Encode a `production` using the given `bitrate`, `volume` and
+  `sample-rate`, i.e. convert the wav files to mp3"
+  [production bitrate volume sample-rate]
   (let [output (path/encoded-path production volume)
         manifest (path/manifest-path production volume)
-        stereo (if (dtb/mono? (path/recorded-path production volume)) "mono" "stereo")
-        sampling-rate (or freq (sampling-rate production))]
+        stereo (if (dtb/mono? (path/recorded-path production volume)) "mono" "stereo")]
     (fs/mkdir output)
     (log/infof "Encoding %s (%s) with bitrate: %s" (:id production) volume bitrate)
-    (log/debugf "Encoding %s (%s) with %s, %s, %s, %s, %s" (:id production) volume bitrate manifest output stereo sampling-rate)
+    (log/debugf "Encoding %s (%s) with %s, %s, %s, %s, %s" (:id production) volume bitrate manifest output stereo sample-rate)
     (pipeline/audio-encoder (.getPath manifest) (.getPath output)
-                            :bitrate bitrate :stereo stereo :freq sampling-rate)))
+                            :bitrate bitrate :stereo stereo :freq sample-rate)))
 
 (defn create-iso
   "Pack a production in an iso file"
@@ -98,35 +97,39 @@
 )
 
 (defn encode
-  [production]
-  (if-let [bitrate (ideal-bitrate production)]
-    (do
-      ;; encode the production
-      (let [result (encode-production production bitrate)]
-        (if (not= 0 (:exit result))
-          (log/errorf "Encoding failed with %s" (:err result))
-          (do
-            ;; downgrade to daisy202
-            (downgrade production)
-            ;; create an iso
-            (create-iso production)
-            ;; set the state to encoded
-            (prod/set-state! production "encoded")
-            ;; FIXME: set the number of volumes
-            ))))
-    ;; otherwise move the production to state :pending-volume-split
-    (prod/set-state! production "pending-split")))
+  "Encode a `production` with the given `bitrate` and optional
+  `sample-rate`"
+  ([production bitrate]
+   (encode production bitrate (sampling-rate production)))
+  ([production bitrate sample-rate]
+   (doseq [volume (range 1 (inc (:volumes production)))]
+     (let [result (encode-production production bitrate volume sample-rate)]
+       (if (not= 0 (:exit result))
+         (log/errorf "Encoding failed with %s" (:err result))
+         (do
+           ;; downgrade to daisy202
+           (downgrade production)
+           ;; create an iso
+           (create-iso production volume)))))
+   (prod/set-state! production "encoded")))
 
-(defn encode-multiple
-  [production sample-rate bitrate]
-  (doseq [volume (range 1 (inc (:volumes production)))]
-    (let [result (encode-production production bitrate volume sample-rate)]
-      (if (not= 0 (:exit result))
-        (log/errorf "Encoding failed with %s" (:err result))
-        (do
-          ;; downgrade to daisy202
-          (downgrade production)
-          ;; create an iso
-          (create-iso production volume)))))
-  ;; set the state to encoded
-  (prod/set-state! production "encoded"))
+(defn encode-or-split
+  "Encode a `production` if it either fits on one volume or it has
+  been split into multiple volumes already. Otherwise forward it to
+  manual splitting. If `bitrate` and `sample-rate` are given it is
+  expected that the production is in state \"split\""
+  ([{:keys [volumes state] :as production}]
+   (case state
+     "recorded"
+     (let [ideal-bitrate (ideal-bitrate production)]
+       (if (and (or (nil? volumes) (= volumes 1)) ideal-bitrate)
+         ;; the production has just been recorded, no specific number
+         ;; of volumes are required and it fits on one volume
+         (encode production ideal-bitrate)
+         ;; if the production doesn't fit one one volume or a specific
+         ;; number of volumes is requested forward to manual split
+         (prod/set-state! production "pending-split")))))
+  ([{:keys [state] :as production} bitrate sample-rate]
+   (case state
+     "split" (encode production bitrate sample-rate))))
+

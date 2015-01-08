@@ -15,10 +15,11 @@
 
   ;; wire up queues
   (msg/listen (queues/create) #(production/create %))
-  (msg/listen (queues/encode) #(encode/encode %))
-  (msg/listen (queues/encode-multi-volume)
-              (fn [{:keys [production sample-rate bitrate]}]
-                (encode/encode-multiple production sample-rate bitrate)))
+  (msg/listen (queues/encode)
+              (fn [{:keys [production bitrate sample-rate]}]
+                (if (and bitrate sample-rate)
+                  (encode/encode production bitrate sample-rate)
+                  (encode/encode production))))
   (msg/listen (queues/archive) #(archive/archive %))
   (msg/listen (queues/notify-abacus) #(abacus/export-file %))
   (msg/listen (queues/metadata-update) #(production/update-or-create! %))
