@@ -4,7 +4,7 @@
             [environ.core :refer [env]]))
 
 (def production-path (env :production-path))
-(def manifest-member "package.opf")
+(def manifest-member "ncc.html")
 
 (defn- multi-volume?
   "Return true if `production` has multiple volumes"

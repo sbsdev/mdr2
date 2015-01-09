@@ -16,7 +16,7 @@
       [:audiochannels 1]]
      [:export
       [:directory recorded-path]
-      [:standard "daisy3"]
+      [:standard "daisy2.02"]
       [:audioencoding "wav"]
       [:audiosamplerate 44100]
       [:audiochannels 1]
