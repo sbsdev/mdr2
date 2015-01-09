@@ -93,7 +93,7 @@
   [file]
   (file-startswith? file ["SN3_" "SN12_"]))
 
-(defn move-away [f reason]
+(defn move-away! [f reason]
   (let [new-name (str reason "_" (.getName f))
         new-path (nio/resolve-sibling f new-name)]
     (nio/move! f new-path StandardCopyOption/REPLACE_EXISTING)))
@@ -121,7 +121,7 @@
              (format "Production %s has no DAISY Export in %s"
                      product_number (path/manifest-path production)))]
         (log/warn message)
-        (move-away f "Failed")))))
+        (move-away! f "Failed")))))
 
 (defn import-recorded-production
   "Import a recorded production from file `f`"
@@ -130,7 +130,7 @@
     (import-valid-recorded-production f)
     (do
       (log/warnf "ABACUS input file %s not valid" (.getName f))
-      (move-away f "Invalid"))))
+      (move-away! f "Invalid"))))
 
 (defn import-recorded-productions
   "Import recorded productions from ABACUS and put them on the archive queue"
