@@ -41,26 +41,31 @@
                   (layout/button (str "/production/" id "/upload")
                                  (layout/glyphicon "upload"))
                   (when-let [next-state (:next_state realized-state)]
-                    (form/form-to
-                     {:class "btn-group"}
-                     [:post (str "/production/" id "/state")]
-                     (form/hidden-field :state next-state)
-                     (anti-forgery-field)
-                     [:button.btn.btn-default
-                      ;; only allow setting the state to recorded if there is a DAISY export
-                      ;; and the production has been imported from the library, i.e. is not
-                      ;; handled via ABACUS
-                      (when-not
-                          (and (= next-state "recorded")
-                               (:library_number production) ; is the product not managed by
-                                        ; ABACUS
-                               (prod/manifest? production)) ; is there a DAISY export?
-                        {:disabled "disabled"})
-                      (layout/glyphicon "transfer") " "
-                      (:name (first (cached-state {:id next-state})))]))
-                  ;; (layout/dropdown (for [next (state/next-states state)]
-                  ;;                    (layout/menu-item "#" (state/to-str next)))
-                  ;;                  (layout/glyphicon "transfer"))
+                    (cond
+                      ;; enable the "Recorded" button if the next state is "recorded",
+                      ;; there is an DAISY export and the production has been imported from
+                      ;; the libary, i.e. is not handled via ABACUS
+                      (and (= next-state "recorded")
+                             (:library_number production)
+                             (prod/manifest? production))
+                      (do
+                        (form/form-to {:class "btn-group"} [:post (str "/production/" id "/state")])
+                        (form/hidden-field :state next-state)
+                        (anti-forgery-field)
+                        [:button.btn.btn-default (layout/glyphicon "transfer") " "
+                         (:name (first (cached-state {:id next-state})))])
+                      ;; Enable the "Split" button if the next state is "split" and there
+                      ;; is a split production
+                      (and (= next-state "split") (prod/split? production))
+                      [:a.btn.btn-default
+                       {:href (str "/production/" id "/split")}
+                       (layout/glyphicon "transfer") " "
+                       (:name (first (cached-state {:id next-state})))]
+                      ;; in all other cases disable the button
+                      :else [:button.btn.btn-default
+                             {:disabled "disabled"}
+                             (layout/glyphicon "transfer") " "
+                             (:name (first (cached-state {:id next-state})))]))
                   (when (friend/authorized? #{:admin} identity)
                     (layout/button (str "/production/" id "/delete")
                                    (layout/glyphicon "trash")))]))]])))]])))

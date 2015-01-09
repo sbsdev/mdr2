@@ -32,6 +32,11 @@
   [production]
   (fs/exists? (path/manifest-path production)))
 
+(defn split?
+  "Return true if the production has a manual split"
+  [production]
+  (fs/exists? (path/split-path production 1)))
+
 (defn dam-number
   "Return an id for a production as it is expected by legacy systems"
   [{id :id}]
