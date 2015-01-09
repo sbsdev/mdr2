@@ -4,6 +4,7 @@
             [environ.core :refer [env]]))
 
 (def production-path (env :production-path))
+(def manifest-member "package.opf")
 
 (defn- multi-volume?
   "Return true if `production` has multiple volumes"
@@ -69,7 +70,7 @@
   ([production]
    (manifest-path production nil))
   ([production volume]
-   (file (recorded-path production volume) "package.opf")))
+   (file (recorded-path production volume) manifest-member)))
 
 (defn all
   "Return all the paths needed for a particular `production`"
