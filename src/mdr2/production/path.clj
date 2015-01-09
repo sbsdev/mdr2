@@ -5,6 +5,11 @@
 
 (def production-path (env :production-path))
 
+(defn- multi-volume?
+  "Return true if `production` has multiple volumes"
+  [{volumes :volumes}]
+  (> volumes 1))
+
 (defn structured-path
   "The path to the files relevant to a production that has been
   structured"
@@ -31,7 +36,7 @@
   ([{id :id}]
    (file production-path "recorded" (str id)))
   ([production volume]
-   (if volume
+   (if (and volume (multi-volume? production))
      (split-path production volume)
      (recorded-path production))))
 
@@ -55,7 +60,8 @@
   "Path to the iso of the exported DTB for given `production` and
   `volume`"
   [{id :id :as production} volume]
-  (file (iso-path production volume) (str id (when volume (str "_" volume)) ".iso")))
+  (file (iso-path production volume)
+        (str id (when (multi-volume? production) (str "_" volume)) ".iso")))
 
 (defn manifest-path
   "Path to the manifest of the DTB which was exported from obi for

@@ -122,7 +122,7 @@
    (case state
      "recorded"
      (let [ideal-bitrate (ideal-bitrate production)]
-       (if (and (or (nil? volumes) (= volumes 1)) ideal-bitrate)
+       (if (and (= volumes 1) ideal-bitrate)
          ;; the production has just been recorded, no specific number
          ;; of volumes are required and it fits on one volume
          (encode production ideal-bitrate)

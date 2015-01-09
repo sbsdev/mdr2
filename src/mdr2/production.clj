@@ -51,7 +51,8 @@
   "Return default meta data"
   []
   {:date (to-date (t/now))
-   :identifier (uuid)})
+   :identifier (uuid)
+   :volumes 1})
 
 (defn add-default-meta-data
   "Add the default meta data to a production"
