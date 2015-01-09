@@ -48,12 +48,12 @@
                       (and (= next-state "recorded")
                              (:library_number production)
                              (prod/manifest? production))
-                      (do
-                        (form/form-to {:class "btn-group"} [:post (str "/production/" id "/state")])
-                        (form/hidden-field :state next-state)
-                        (anti-forgery-field)
-                        [:button.btn.btn-default (layout/glyphicon "transfer") " "
-                         (:name (first (cached-state {:id next-state})))])
+                      (form/form-to
+                       {:class "btn-group"} [:post (str "/production/" id "/state")]
+                       (form/hidden-field :state next-state)
+                       (anti-forgery-field)
+                       [:button.btn.btn-default (layout/glyphicon "transfer") " "
+                        (:name (first (cached-state {:id next-state})))])
                       ;; Enable the "Split" button if the next state is "split" and there
                       ;; is a split production
                       (and (= next-state "split") (prod/split? production))
