@@ -18,8 +18,8 @@
   (msg/listen (queues/encode)
               (fn [{:keys [production bitrate sample-rate]}]
                 (if (and bitrate sample-rate)
-                  (encode/encode production bitrate sample-rate)
-                  (encode/encode production))))
+                  (encode/encode-or-split production bitrate sample-rate)
+                  (encode/encode-or-split production))))
   (msg/listen (queues/archive) #(archive/archive %))
   (msg/listen (queues/notify-abacus) #(abacus/export-file %))
   (msg/listen (queues/metadata-update) #(production/update-or-create! %))
