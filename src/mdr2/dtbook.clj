@@ -84,8 +84,9 @@
        [:h1 (t :end)]
        [:p]]]]))
 
-(defn- dtbook-sexp 
-  [{:keys [title creator subject description publisher date identifier source language rights 
+(defn- dtbook-sexp
+  [{:keys [title creator subject description publisher date type format identifier
+           source language rights
            source_date source_edition source_publisher source_rights source_title
            multimedia_type multimedia_content narrator produced_date
            revision revision_date revision_description
@@ -100,8 +101,8 @@
     [:meta {:name "dc:Description" :content description}]
     [:meta {:name "dc:Publisher" :content publisher}]
     [:meta {:name "dc:Date" :content date}]
-    [:meta {:name "dc:Type" :content "Text"}]
-    [:meta {:name "dc:Format" :content "ANSI/NISO Z39.86-2005"}]
+    [:meta {:name "dc:Type" :content type}]
+    [:meta {:name "dc:Format" :content format}]
     [:meta {:name "dc:Identifier" :content identifier}]
     [:meta {:name "dc:Source" :content source}]
     [:meta {:name "dc:Language" :content language}]
@@ -126,7 +127,7 @@
      (commercial-audiobook title creator language)
      (default-book title creator))])
 
-(defn dtbook 
+(defn dtbook
   "Create a minimal DTBook XML template according to [the spec](http://www.daisy.org/z3986/2005/Z3986-2005.html) for a given `production`"
   [production]
   (-> production

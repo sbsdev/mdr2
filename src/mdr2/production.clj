@@ -52,7 +52,9 @@
   []
   {:date (to-date (t/now))
    :identifier (uuid)
-   :volumes 1})
+   :volumes 1
+   :type "Text"
+   :format "ANSI/NISO Z39.86-2005"})
 
 (defn add-default-meta-data
   "Add the default meta data to a production"
