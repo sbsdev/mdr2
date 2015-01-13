@@ -1,6 +1,7 @@
 -- drop all tables
 DROP TABLE IF EXISTS production;
 DROP TABLE IF EXISTS state;
+DROP TABLE IF EXISTS production_type;
 DROP TABLE IF EXISTS user_role;
 DROP TABLE IF EXISTS user;
 DROP TABLE IF EXISTS role;
@@ -12,6 +13,13 @@ CREATE TABLE state (
   name VARCHAR(255) NOT NULL,
   next_state VARCHAR(16),
   FOREIGN KEY(next_state) REFERENCES state(id)
+);
+
+-- Type of a production
+-- a classic reference table
+CREATE TABLE production_type (
+  id VARCHAR(16) PRIMARY KEY,
+  name VARCHAR(255)
 );
 
 -- Meta data for a production
@@ -56,13 +64,22 @@ CREATE TABLE production (
   -- without involving the erp system, so we need to keep our own
   -- primary key
   product_number VARCHAR(255) UNIQUE,
+  -- type of production: can be either a regular book, a magazine or a
+  -- special order, aka a "Kleinauftrag". The difference is that not
+  -- all types of productions need to be sent to the library and they
+  -- all need different archiving
+  production_type VARCHAR(16) NOT NULL DEFAULT "book",
+  -- for periodicals we need to keep the periodical number to be able
+  -- to archive it
+  periodical_number VARCHAR(25),
   -- provisional number given to the production by the library system.
   -- There is only a libraryNumber if there is no productNumber, i.e.
   -- if this production is done behind the back of the erp system
   library_number VARCHAR(255) UNIQUE,
   -- The unique id that the library assigns to this production
   library_signature VARCHAR(255) UNIQUE,
-  FOREIGN KEY(state) REFERENCES state(id)
+  FOREIGN KEY(state) REFERENCES state(id),
+  FOREIGN KEY(production_type) REFERENCES production_type(id)
 );
 
 CREATE TABLE user (
@@ -99,6 +116,11 @@ INSERT INTO state (id, name, next_state) VALUES
 ("failed", "Failed", NULL),
 ("deleted", "Deleted", NULL);
 SET FOREIGN_KEY_CHECKS=1;
+
+INSERT INTO production_type (id, name) VALUES
+("book", "Book"),
+("periodical", "Periodical"),
+("other", "Other");
 
 INSERT INTO production (title, creator, date, source, language, source_publisher, identifier) VALUES
 ("Unter dem Deich", "Hart, Maarten", "2014-12-12", "978-3-492-05573-4", "de", "Piper", "db010282-a39d-40b1-b5cf-f5285aa9b49d"),

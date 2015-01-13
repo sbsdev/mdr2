@@ -24,13 +24,16 @@
      (layout/button-group
       [(layout/button "/production/upload" (layout/glyphicon "upload"))])
      [:table.table.table-striped
-      [:thead [:tr [:th "Title"] [:th "State"] [:th "Action"]]]
+      [:thead [:tr [:th "Title"] [:th "Type"] [:th "State"] [:th "Action"]]]
       [:tbody
-       (let [cached-state (memoize db/find-state)]
-         (for [{:keys [id title state] :as production} (prod/find-all)]
-           (let [realized-state (first (cached-state {:id state}))]
+       (let [cached-state (memoize db/find-state)
+             cached-production-type (memoize db/find-production-type)]
+         (for [{:keys [id title production_type state] :as production} (prod/find-all)]
+           (let [realized-state (first (cached-state {:id state}))
+                 realized-production-type (first (cached-production-type {:id production_type}))]
              [:tr
               [:td (link-to (str "/production/" id) title)]
+              [:td (:name realized-production-type)]
               [:td (:name realized-state)]
               [:td
                (layout/button-group

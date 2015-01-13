@@ -22,6 +22,10 @@ DELETE FROM production WHERE id = :id
 -- Return the state for given `id`
 SELECT * FROM state WHERE id = :id
 
+-- name: find-production-type
+-- Return the production type for given `id`
+SELECT * FROM production_type WHERE id = :id
+
 -- name: find-user
 -- Return the user with the given `id`
 SELECT * FROM user WHERE id = :id
