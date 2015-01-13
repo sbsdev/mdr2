@@ -44,15 +44,34 @@
    :source_edition [:MetaData :ncc :sourceDate text]
    :volumes [:MetaData :ncc :setInfo text]
    :revision_date [:MetaData :ncc :revisionDate text]
+   :mvl_only [:mvl_only text]
+   :command [(attr :command)]
+   :idVorstufe [:MetaData :sbs :idVorstufe text]
    })
+
+(defn clean-raw-production
+  "Return a proper production based on a raw production, i.e. drop
+  `:mvl_only`, `:command` and `:idVorstufe` and add `:production_type`
+  and `periodical_id`"
+  [{:keys [mvl_only command idVorstufe] :as raw-production}]
+  (let [production_type (cond
+                       (= command "mdaDocAdd_Kleinauftrag") "other"
+                       (= mvl_only "yes") "periodical"
+                       :else "book")]
+      (merge (dissoc raw-production :mvl_only :command :idVorstufe)
+             {:production_type production_type
+              :periodical_id (when (= production_type "periodical") idVorstufe)})))
 
 (defn read-file
   "Read an export file from ABACUS and return a map with all the data"
   [file]
   (let [zipper (-> file io/file xml/parse zip/xml-zip)]
-    (into {} (for [[key path] param-mapping
-                   :let [val (apply xml1-> zipper (concat root-path path))]]
-               [key val]))))
+    (->>
+     (for [[key path] param-mapping
+           :let [val (apply xml1-> zipper (concat root-path path))]]
+       [key val])
+      (into {})
+      clean-raw-production)))
 
 (defn file-startswith? [f xs]
   (some #(.startsWith (.getName f) %) xs))
