@@ -10,15 +10,15 @@ start =
       },
       element Transaction {
         element DocumentData {
-          attribute command { "mdaDocAdd" },
-          element artikel_nr { xsd:NCName },
+          attribute command { "mdaDocAdd" | "mdaDocAdd_Kleinauftrag" },
+          element artikel_nr { xsd:NCName }, # FIXME: use a pattern here for validation
           element priority { xsd:NCName },
           element deadline { xsd:date },
           title,
           element process_status { xsd:NCName },
           element document_status { xsd:NCName },
-          element is_meta { xsd:NCName },
-          element mvl_only { xsd:NCName },
+          element is_meta { "yes" | "no" },
+          element mvl_only { "yes" | "no" },
           element MetaData {
             element dc {
               title,
@@ -32,8 +32,14 @@ start =
               element printPageNumber { xsd:integer },
               element idPrint { xsd:integer },
               element kostenstelle { xsd:integer },
-              (element idZeitkurz { xsd:NCName },
-               element jahr { xsd:integer })?
+              (element ort { xsd:NCName },
+               element anrede { xsd:NCName },
+               element plz { xsd:integer },
+               element strasse { text },
+               element vorname { xsd:NCName },
+               element idZeitkurz { xsd:NCName },
+               element nachname { xsd:NCName },
+               element jahr { text })?
             },
             element ncc {
               element sourcePublisher { xsd:NCName },

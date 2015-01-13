@@ -17,11 +17,15 @@
         <element name="Transaction">
           <element name="DocumentData">
             <attribute name="command">
-              <value>mdaDocAdd</value>
+              <choice>
+                <value>mdaDocAdd</value>
+                <value>mdaDocAdd_Kleinauftrag</value>
+              </choice>
             </attribute>
             <element name="artikel_nr">
               <data type="NCName"/>
             </element>
+            <!-- FIXME: use a pattern here for validation -->
             <element name="priority">
               <data type="NCName"/>
             </element>
@@ -36,10 +40,16 @@
               <data type="NCName"/>
             </element>
             <element name="is_meta">
-              <data type="NCName"/>
+              <choice>
+                <value>yes</value>
+                <value>no</value>
+              </choice>
             </element>
             <element name="mvl_only">
-              <data type="NCName"/>
+              <choice>
+                <value>yes</value>
+                <value>no</value>
+              </choice>
             </element>
             <element name="MetaData">
               <element name="dc">
@@ -75,11 +85,29 @@
                   <data type="integer"/>
                 </element>
                 <optional>
+                  <element name="ort">
+                    <data type="NCName"/>
+                  </element>
+                  <element name="anrede">
+                    <data type="NCName"/>
+                  </element>
+                  <element name="plz">
+                    <data type="integer"/>
+                  </element>
+                  <element name="strasse">
+                    <text/>
+                  </element>
+                  <element name="vorname">
+                    <data type="NCName"/>
+                  </element>
                   <element name="idZeitkurz">
                     <data type="NCName"/>
                   </element>
+                  <element name="nachname">
+                    <data type="NCName"/>
+                  </element>
                   <element name="jahr">
-                    <data type="integer"/>
+                    <text/>
                   </element>
                 </optional>
               </element>
