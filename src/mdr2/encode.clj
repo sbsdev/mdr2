@@ -111,7 +111,7 @@
            (downgrade production)
            ;; create an iso
            (create-iso production volume)))))
-   (prod/set-state! production "encoded")))
+   (prod/set-state-encoded! production)))
 
 (defn encode-or-split
   "Encode a `production` if it either fits on one volume or it has
