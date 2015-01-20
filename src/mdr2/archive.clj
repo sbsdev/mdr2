@@ -92,11 +92,12 @@ mp3 and the whole thing is packed up in one or more iso files
   and concludes the archiving process from the point of view of the
   production system."
   [production sektion]
-  (let [entries (case sektion :master 2 :dist-master (inc (:volumes production)))]
+  (let [volumes (inc (:volumes production))
+        entries (case sektion :master 2 :dist-master volumes)]
     (doseq [volume (range 1 entries)]
       (let [new-job
             {:verzeichnis (container-id production sektion volume)
-             :sektion (case :master "master" :dist-master "cdimage")}
+             :sektion (case sektion :master "master" :dist-master "cdimage")}
             job (merge default-job new-job)]
         (jdbc/insert! db :container job)))))
 
