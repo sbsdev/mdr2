@@ -48,6 +48,14 @@ mp3 and the whole thing is packed up in one or more iso files
   productions that are to be archived"
    (env :archive-spool-dir))
 
+(def periodical-spool-dir
+  "Path to the archive spool directory for periodicals"
+  (env :archive-periodical-spool-dir))
+
+(def other-spool-dir
+  "Path to the archive spool directory for other productions"
+  (env :archive-other-spool-dir))
+
 (def ^:private default-job
   {:verzeichnis ""
    :archivar "NN"
@@ -107,7 +115,8 @@ mp3 and the whole thing is packed up in one or more iso files
   files. For a production distribution master copy the isos"
   [production sektion]
   (let [archive-path (container-path production sektion)]
-    (if-not (fs/exists? archive-path)
+    (if (fs/exists? archive-path)
+      (log/errorf "Archive path %s already exists" archive-path)
       (case sektion
         :master
         (fs/copy-dir (path/recorded-path production) archive-path)
@@ -115,8 +124,7 @@ mp3 and the whole thing is packed up in one or more iso files
         (doseq [volume (range 1 (inc (:volumes production)))]
           (let [iso-archive-name (str (container-id production sektion volume) ".iso")
                 iso-archive-path (.getPath (file archive-path iso-archive-name))]
-            (fs/copy+ (path/iso-name production volume) iso-archive-path))))
-      (log/error "Archive path %s already exists" archive-path))))
+            (fs/copy+ (path/iso-name production volume) iso-archive-path)))))))
 
 (defn- create-rdf
   "Create an rdf file and place it in the appropriate archive spool
@@ -140,8 +148,44 @@ mp3 and the whole thing is packed up in one or more iso files
   ;; add it to the db so that the agadir machinery will pick it up
   (add-to-db production sektion))
 
-(defn archive
+(defmulti archive
   "Archive a `production`"
+  (fn [production] (:production_type production))
+  :default "book")
+
+(defmethod archive "book"
   [production]
   (archive-sektion production :master)
   (archive-sektion production :dist-master))
+
+(defmethod archive "periodical"
+  [production]
+  (archive-sektion production :master)
+  ;; archive the periodical iso(s)
+  (let [dam-number (prod/dam-number production)
+        archive-path (.getPath (file periodical-spool-dir dam-number))
+        multi-volume? (prod/multi-volume? production)]
+    (if (fs/exists? archive-path)
+      (log/errorf "Archive path %s for periodical already exists" archive-path)
+      (do
+        (fs/mkdir archive-path)
+        ;; create the rdf
+        (let [rdf-path (file archive-path (str dam-number ".rdf"))
+              rdf (rdf/rdf production)]
+          (spit rdf-path rdf))
+        ;; copy all volumes
+        (doseq [volume (range 1 (inc (:volumes production)))]
+          (let [iso-archive-name (str dam-number (when multi-volume? (str "_" volume)) ".iso")
+                iso-archive-path (.getPath (file archive-path "produkt" iso-archive-name))]
+            (fs/copy+ (path/iso-name production volume) iso-archive-path)))))))
+
+(defmethod archive "other"
+  [production]
+  (archive-sektion production :master)
+  ;; place the iso in a spool directory
+  (let [product_number (:product_number production)
+        multi-volume? (prod/multi-volume? production)]
+    (doseq [volume (range 1 (inc (:volumes production)))]
+      (let [iso-archive-name (str product_number (when multi-volume? (str "_" volume)) ".iso")
+            iso-archive-path (.getPath (file other-spool-dir iso-archive-name))]
+        (fs/copy (path/iso-name production volume) iso-archive-path)))))

@@ -44,4 +44,9 @@
   :profiles {:dev {:source-paths ["dev"]
                    :dependencies [[org.xerial/sqlite-jdbc "3.8.7"]
                                   [javax.servlet/servlet-api "2.5"]]}
-             :test {:dependencies [[ring-mock "0.1.5"]]}})
+             :test {:dependencies [[ring-mock "0.1.5"]]
+                    :env {:production-path "test/testfiles"
+                          :archive-spool-dir "/tmp/mdr2/archive"
+                          :archive-periodical-spool-dir "/tmp/mdr2/periodical-archive"
+                          :archive-other-spool-dir "/tmp/mdr2/other-archive"
+                          :archive-database-url "sqlite:db/archive.db"}}})
