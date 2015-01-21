@@ -82,7 +82,7 @@ mp3 and the whole thing is packed up in one or more iso files
   `production` and `sektion`"
   [production sektion]
   (let [id (container-id production sektion)]
-    (.getPath (file spool-dir id))))
+    (.getPath (file spool-dir id "produkt"))))
 
 (defn- container-rdf-path
   "Return the path to the rdf file in the archive spool for a given
