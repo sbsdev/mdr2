@@ -87,12 +87,10 @@ mp3 and the whole thing is packed up in one or more iso files
 (defn- container-rdf-path
   "Return the path to the rdf file in the archive spool for a given
   `production` and `sektion`"
-  ([production sektion]
-   (container-rdf-path production sektion nil))
-  ([production sektion volume]
-   (let [path (container-id production sektion)
-         rdf-name (str (container-id production sektion volume) ".rdf")]
-     (.getPath (file spool-dir path rdf-name)))))
+  [production sektion]
+  (let [path (container-id production sektion)
+        rdf-name (str (container-id production sektion) ".rdf")]
+    (.getPath (file spool-dir path rdf-name))))
 
 (defn- add-to-db
   "Insert a `production` into the archive db for the given `sektion`.
@@ -100,14 +98,11 @@ mp3 and the whole thing is packed up in one or more iso files
   and concludes the archiving process from the point of view of the
   production system."
   [production sektion]
-  (let [volumes (inc (:volumes production))
-        entries (case sektion :master 2 :dist-master volumes)]
-    (doseq [volume (range 1 entries)]
-      (let [new-job
-            {:verzeichnis (container-id production sektion volume)
-             :sektion (case sektion :master "master" :dist-master "cdimage")}
-            job (merge default-job new-job)]
-        (jdbc/insert! db :container job)))))
+  (let [new-job
+        {:verzeichnis (container-id production sektion)
+         :sektion (case sektion :master "master" :dist-master "cdimage")}
+        job (merge default-job new-job)]
+    (jdbc/insert! db :container job)))
 
 (defn- copy-files
   "Copy a `production` to the archive spool dir for the given
@@ -132,9 +127,8 @@ mp3 and the whole thing is packed up in one or more iso files
   [production sektion]
   (let [rdf (rdf/rdf production)
         entries (case sektion :master 2 :dist-master (inc (:volumes production)))]
-    (doseq [volume (range 1 entries)]
-      (let [rdf-path (container-rdf-path production sektion volume)]
-        (spit rdf-path rdf)))))
+    (let [rdf-path (container-rdf-path production sektion)]
+      (spit rdf-path rdf))))
 
 (defn- archive-sektion
   "Archive a `production` for given `sektion`. For the :master sektion
