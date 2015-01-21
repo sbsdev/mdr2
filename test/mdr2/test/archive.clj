@@ -14,7 +14,8 @@
   (fs/mkdirs (env :archive-spool-dir))
   (fs/mkdirs (env :archive-periodical-spool-dir))
   (fs/mkdirs (env :archive-other-spool-dir))
-  (test-fn)
+  (with-redefs [clojure.java.jdbc/insert! mock-jdbc-insert]
+    (test-fn))
   (fs/delete-dir (env :archive-spool-dir))
   (fs/delete-dir (env :archive-periodical-spool-dir))
   (fs/delete-dir (env :archive-other-spool-dir)))
@@ -35,32 +36,30 @@
            (.getPath (file (env :archive-spool-dir) "dam123" "dam123.rdf")))))
 
   (testing "add master to db"
-    (with-redefs [clojure.java.jdbc/insert! mock-jdbc-insert]
-      (is (= (do
-               (#'mdr2.archive/add-to-db {:id 123 :volumes 1} :master)
-               @mock-db)
-             {:verzeichnis "dam123",
-              :sektion "master",
-              :aktion "save",
-              :transaktions_status "pending",
-              :abholer "NN",
-              :archivar "NN",
-              :flags "x"}))))
+    (is (= (do
+             (#'mdr2.archive/add-to-db {:id 123 :volumes 1} :master)
+             @mock-db)
+           {:verzeichnis "dam123",
+            :sektion "master",
+            :aktion "save",
+            :transaktions_status "pending",
+            :abholer "NN",
+            :archivar "NN",
+            :flags "x"})))
 
   (testing "add iso to db"
-    (with-redefs [clojure.java.jdbc/insert! mock-jdbc-insert]
-      (is (= (do
-               (#'mdr2.archive/add-to-db
-                {:id 123 :volumes 1 :library_signature 7}
-                :dist-master)
-               @mock-db)
-             {:verzeichnis "ds7",
-              :sektion "cdimage",
-              :aktion "save",
-              :transaktions_status "pending",
-              :abholer "NN",
-              :archivar "NN",
-              :flags "x"})))))
+    (is (= (do
+             (#'mdr2.archive/add-to-db
+              {:id 123 :volumes 1 :library_signature 7}
+              :dist-master)
+             @mock-db)
+           {:verzeichnis "ds7",
+            :sektion "cdimage",
+            :aktion "save",
+            :transaktions_status "pending",
+            :abholer "NN",
+            :archivar "NN",
+            :flags "x"}))))
 
 (deftest periodicals-single
   (testing "archiving of periodical single volume"
@@ -70,8 +69,9 @@
           iso-name (str dam-number ".iso")
           spool-dir (env :archive-periodical-spool-dir)]
       (archive/archive production)
-      (is (fs/exists? (fs/file spool-dir dam-number "produkt" iso-name)))
-      (is (fs/exists? (fs/file spool-dir dam-number rdf-name))))))
+      (are [file] (fs/exists? file)
+           (fs/file spool-dir dam-number "produkt" iso-name)
+           (fs/file spool-dir dam-number rdf-name)))))
 
 (deftest periodicals-multiple
   (testing "archiving of periodical multi volume"
@@ -81,8 +81,9 @@
           rdf-name (str dam-number ".rdf")
           spool-dir (env :archive-periodical-spool-dir)]
       (archive/archive production)
-      (is (fs/exists? (fs/file spool-dir dam-number "produkt" iso-name)))
-      (is (fs/exists? (fs/file spool-dir dam-number rdf-name))))))
+      (are [file] (fs/exists? file)
+           (fs/file spool-dir dam-number "produkt" iso-name)
+           (fs/file spool-dir dam-number rdf-name)))))
 
 (deftest other-single
   (testing "archiving of other production single volume"
