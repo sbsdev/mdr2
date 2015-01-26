@@ -21,8 +21,6 @@
         user (friend/current-authentication request)]
     (layout/common user
      [:h1 "Productions"]
-     (layout/button-group
-      [(layout/button "/production/upload" (layout/glyphicon "upload"))])
      [:table.table.table-striped
       [:thead [:tr [:th "Title"] [:th "Type"] [:th "State"] [:th "Action"]]]
       [:tbody

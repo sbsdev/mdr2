@@ -43,6 +43,17 @@
       [:li [:a {:href "/logout"} (glyphicon "log-out")]])
      [:li [:a {:href "/login"} (glyphicon "log-in")]])])
 
+(defn dropdown-menu
+  "Display a dropdown menu"
+  []
+  [:li.dropdown
+   [:a.dropdown-toggle
+    {:href "#" :role "button" :data-toggle "dropdown" :aria-expanded false} "Actions" [:span.caret]]
+   [:ul.dropdown-menu {:role "menu"}
+    [:li [:a {:href "/production/upload"} "Import from Vubis"]]
+    [:li [:a {:href "/catalog"} "Assign Library Signature"]]
+    [:li [:a {:href "/production/repair"} "Repair Production"]]]])
+
 (defn navbar
   "Display the navbar"
   [user]
@@ -59,8 +70,8 @@
      [:a.navbar-brand {:href "/"} "Madras 2"]]
     [:div.collapse.navbar-collapse
      {:id "navbar-collapse-target"}
-     [:ul.nav.navbar-nav.navbar-right
-      (loginbar user)]]]])
+     [:ul.nav.navbar-nav (dropdown-menu)]
+     [:ul.nav.navbar-nav.navbar-right (loginbar user)]]]])
 
 (defn common
   "Display a page using the bootstrap css"
