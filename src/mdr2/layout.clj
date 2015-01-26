@@ -39,7 +39,7 @@
   [:ul.nav.navbar-nav.navbar-right
    (if user
      (list
-      [:li [:a [:b (:username user)]]]
+      [:li [:a [:b (format "%s %s" (:first_name user) (:last_name user))]]]
       [:li [:a {:href "/logout"} (glyphicon "log-out")]])
      [:li [:a {:href "/login"} (glyphicon "log-in")]])])
 
