@@ -37,9 +37,7 @@ mp3 and the whole thing is packed up in one or more iso files
             [me.raynes.fs :as fs]
             [mdr2.production :as prod]
             [mdr2.production.path :as path]
-            [mdr2.encode :as encode]
-            [mdr2.rdf :as rdf]
-            [mdr2.pipeline1 :as pipeline]))
+            [mdr2.rdf :as rdf]))
 
 (def ^:private db (env :archive-database-url))
 
