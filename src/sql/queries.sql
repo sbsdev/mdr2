@@ -14,6 +14,15 @@ SELECT * FROM production WHERE product_number = :product_number
 -- Return the production for given `state`
 SELECT * FROM production WHERE state = :state
 
+-- name: find-by-title-or-creator
+-- Return the productions for given title or creator
+SELECT DISTINCT * FROM production
+WHERE title LIKE :term OR creator LIKE :term
+
+-- name: find-by-library-signature
+-- Return the productions for given `library_signature`
+SELECT * FROM production WHERE library_signature = :library_signature
+
 -- name: delete!
 -- Remove the production with the given `id`
 DELETE FROM production WHERE id = :id

@@ -113,6 +113,16 @@
   [product_number]
   (first (db/find-by-productnumber {:product_number product_number})))
 
+(defn find-by-title-or-creator
+  "Find productions given a search `term`. Search in title and creator"
+  [term]
+  (db/find-by-title-or-creator {:term term}))
+
+(defn find-by-library-signature
+  "Find a production given a `library_signature`"
+  [library_signature]
+  (first (db/find-by-library-signature {:library_signature library_signature})))
+
 (defn find-by-state
   "Find all productions with the given `state`"
   [state]
