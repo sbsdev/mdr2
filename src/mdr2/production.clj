@@ -156,17 +156,22 @@
                   :bitrate bitrate})))
 
 (defn set-state-encoded! [{:keys [production_type] :as production}]
-  (if (= production_type "book")
-    ;; when a normal production is encoded we set the state to encoded
-    ;; and wait for the library to assign a library
-    ;; signature (e.g. "ds123") to it
-    (set-state! production "encoded")
+  (if (or (not= production_type "book")
+           (:library_signature production))
     ;; if the production is not a book, i.e. a periodical or other it
     ;; will not be stored in the library system and hence doesn't need
     ;; a library signature. So we can go directly to archiving.
+
+    ;; When repairing a production we already have a library
+    ;; signature, so no need to ask the library for another one; go
+    ;; directly to archiving
     (as-> production p
       (set-state! p "cataloged")
-      (msg/publish (queues/archive) p))))
+      (msg/publish (queues/archive) p))
+    ;; when a normal production is encoded we set the state to encoded
+    ;; and wait for the library to assign a library
+    ;; signature (e.g. "ds123") to it
+    (set-state! production "encoded")))
 
 (defn delete-all-dirs
   "Delete all artifacts on the file system for a production"
