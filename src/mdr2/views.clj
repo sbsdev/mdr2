@@ -1,5 +1,6 @@
 (ns mdr2.views
-  (:require [ring.util.response :as response]
+  (:require [clojure.string :as string]
+            [ring.util.response :as response]
             [hiccup.form :as form]
             [hiccup.element :refer [link-to]]
             [ring.util.anti-forgery :refer [anti-forgery-field]]
@@ -14,6 +15,7 @@
             [mdr2.dtbook :refer [dtbook]]
             [mdr2.dtbook.validation :refer [validate-metadata]]
             [mdr2.production-monitoring :as psm]
+            [mdr2.repair :as repair]
             [mdr2.pipeline1 :as pipeline]))
 
 (defn home [request]
@@ -211,6 +213,65 @@
   (doseq [[_ p] productions]
     (prod/update-or-create! (prod/parse p)))
   (response/redirect "/"))
+
+(defn production-repair-form
+  [request & [errors]]
+  (let [user (friend/current-authentication request)]
+    (layout/common user
+     [:h1 "Production to repair"]
+     (when (seq errors)
+       [:p [:ul.alert.alert-danger (for [e errors] [:li e])]])
+     (form/form-to
+      [:post "/production/repair-confirm"]
+      (anti-forgery-field)
+      [:div.form-group
+       (form/label "identifier" "Search term")
+       (form/text-field {:class "form-control"} "identifier")]
+      (form/submit-button {:class "btn btn-default"} "Repair")))))
+
+(defn production-repair-confirm
+  [request identifier]
+  (if (string/blank? identifier)
+    (production-repair-form request ["Search term should not be empty"])
+    (let [productions
+          (cond
+            (repair/production-id? identifier)
+            (when-let [production (prod/find (.substring identifier 3))] [production])
+            (repair/library-signature? identifier)
+            (prod/find-by-library-signature identifier)
+            (repair/product-number? identifier)
+            (prod/find-by-productnumber identifier)
+            :else (let [search-term (str "%" identifier "%")]
+                    (prod/find-by-title-or-creator search-term)))
+          user (friend/current-authentication request)]
+      (layout/common
+       user
+       [:h1 "Productions to repair"]
+       [:table.table.table-striped
+        [:thead [:tr [:th "Title"] [:th "Creator"] [:th "Action"]]]
+        [:tbody
+         (for [p productions]
+           [:tr
+            [:td (:title p)]
+            [:td (:creator p)]
+            [:td
+             (form/form-to
+              {:class "btn-group"}
+              [:post "/production/repair"]
+              (form/hidden-field :id (:id p))
+              (anti-forgery-field)
+              [:button.btn.btn-default (layout/glyphicon "wrench") " Repair"])]])]]
+       (when (empty? productions)
+         [:div.alert.alert-warning {:role "alert"} "No Data to display"])))))
+
+(defn production-repair
+  [id]
+  (let [production (prod/find id)]
+    (repair/repair production)
+    ;; FIXME: might be worth it to set a flash message saying that the
+    ;; repair has been initiated
+    (response/redirect "/")))
+
 
 (defn production-set-state [id state]
   (let [production (prod/find id)]

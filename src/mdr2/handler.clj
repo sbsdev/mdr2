@@ -22,6 +22,13 @@
         (friend/authenticated (views/production-bulk-import-confirm r file)))
   (POST "/production/upload" [productions]
         (friend/authenticated (views/production-bulk-import productions)))
+  ;; repair productions
+  (GET "/production/repair" request
+       (friend/authenticated (views/production-repair-form request)))
+  (POST "/production/repair-confirm" [identifier :as r]
+        (friend/authenticated (views/production-repair-confirm r identifier)))
+  (POST "/production/repair" [id]
+        (friend/authenticated (views/production-repair id)))
   ;; individual productions
   (GET "/production/:id.xml" [id]
        (friend/authenticated (views/production-xml id)))
