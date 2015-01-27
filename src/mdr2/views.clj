@@ -47,10 +47,13 @@
                     (cond
                       ;; enable the "Recorded" button if the next state is "recorded",
                       ;; there is an DAISY export and the production has been imported from
-                      ;; the libary, i.e. is not handled via ABACUS
+                      ;; the libary, i.e. is not handled via ABACUS or
+                      ;; the production has already a library signatur
+                      ;; as is the case with productions that are
+                      ;; repaired
                       (and (= next-state "recorded")
-                             (:library_number production)
-                             (prod/manifest? production))
+                           (or (:library_number production) (:library_signature production))
+                           (prod/manifest? production))
                       (form/form-to
                        {:class "btn-group"} [:post (str "/production/" id "/state")]
                        (form/hidden-field :state next-state)
