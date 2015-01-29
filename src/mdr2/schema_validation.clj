@@ -21,15 +21,17 @@
         ;; claims that smil files are valid against the vubis bulk
         ;; import schema.
         factory "com.thaiopensource.relaxng.jaxp.XMLSyntaxSchemaFactory"
+        schema-stream (io/input-stream (io/resource schema))
         validator (.newValidator
                    (.newSchema
                     (SchemaFactory/newInstance language factory nil)
-                    (StreamSource. (io/file (io/resource schema)))))]
+                    (StreamSource. schema-stream)))]
     (try
       (.validate validator (StreamSource. file))
       []
       (catch SAXException e
-        [(.getMessage e)]))))
+        [(.getMessage e)])
+      (finally (.close schema-stream)))))
 
 (defn valid?
   "Check if a `file` is valid against given `schema`"
