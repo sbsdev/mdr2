@@ -67,5 +67,5 @@
        {:credential-fn (partial creds/bcrypt-credential-fn db/get-user)
         :workflows [(workflows/interactive-form)]
         :unauthorized-handler views/unauthorized})
-      (wrap-defaults site-defaults)
+      (wrap-defaults (assoc-in site-defaults [:static :resources] false))
       wrap-base-url))
