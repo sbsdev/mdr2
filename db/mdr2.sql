@@ -125,7 +125,7 @@ INSERT INTO production_type (id, name) VALUES
 ("periodical", "Periodical"),
 ("other", "Other");
 
-
+-- calculate the hash using (cemerick.friend.credentials/hash-bcrypt password)
 INSERT INTO user (id, first_name, last_name, email, password) VALUES
 ("eglic", "Christian", "Egli", "christian.egli@sbs.ch", "$2a$10$go0rXWbX0IjhzkgjGKGf/uigHii6.bqTls.tjfQAsg9IdoSe.ouPq"),
 ("admin", "Super", "User", "admin@sbs.ch", "$2a$10$go0rXWbX0IjhzkgjGKGf/uigHii6.bqTls.tjfQAsg9IdoSe.ouPq");
