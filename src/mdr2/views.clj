@@ -88,7 +88,8 @@
   (let [production (prod/find id)]
     (-> (dtbook production)
         response/response
-        (response/content-type "text/xml"))))
+        (response/content-type "text/xml")
+        (response/charset "UTF-8"))))
 
 (defn file-upload-form [request id & [errors]]
   (let [p (prod/find id)
