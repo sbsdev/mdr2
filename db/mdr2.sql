@@ -1,3 +1,6 @@
+-- make sure we are in the current century as far as encoding is concerned
+ALTER DATABASE madras3 DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_unicode_ci;
+
 -- drop all tables
 DROP TABLE IF EXISTS production;
 DROP TABLE IF EXISTS state;
@@ -143,3 +146,11 @@ INSERT INTO user_role (user_id, role_id) VALUES
 SELECT * FROM production;
 UPDATE production SET state = "encoded" WHERE id = 1;
 UPDATE production SET volumes = 1 WHERE id = 1;
+
+-- encoding woes
+SELECT DEFAULT_CHARACTER_SET_NAME, DEFAULT_COLLATION_NAME
+FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = 'madras2';
+
+SHOW VARIABLES LIKE 'character_set%';
+
+SHOW CREATE DATABASE madras2;
