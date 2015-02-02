@@ -125,10 +125,6 @@ INSERT INTO production_type (id, name) VALUES
 ("periodical", "Periodical"),
 ("other", "Other");
 
-INSERT INTO production (title, creator, date, source, language, source_publisher, identifier) VALUES
-("Unter dem Deich", "Hart, Maarten", "2014-12-12", "978-3-492-05573-4", "de", "Piper", "db010282-a39d-40b1-b5cf-f5285aa9b49d"),
-("Aus dem Berliner Journal", "Frisch, Max", "2014-12-6", "978-3-518-42352-3", "de", "Suhrkamp", "504f26ef-7205-4b2f-b719-f4eef883ebe1"),
-("Info-Express, Februar 2014", "SZB Taubblinden-Beratung", "2014-12-10", "", "de", "", "1492d357-6a6d-420f-b39e-b25178491b56");
 
 INSERT INTO user (id, first_name, last_name, email, password) VALUES
 ("eglic", "Christian", "Egli", "christian.egli@sbs.ch", "$2a$10$go0rXWbX0IjhzkgjGKGf/uigHii6.bqTls.tjfQAsg9IdoSe.ouPq"),
@@ -142,6 +138,11 @@ INSERT INTO user_role (user_id, role_id) VALUES
 ("eglic","user"),
 ("admin","user"),
 ("admin","admin");
+
+INSERT INTO production (title, creator, date, source, language, source_publisher, identifier) VALUES
+("Unter dem Deich", "Hart, Maarten", "2014-12-12", "978-3-492-05573-4", "de", "Piper", "db010282-a39d-40b1-b5cf-f5285aa9b49d"),
+("Aus dem Berliner Journal", "Frisch, Max", "2014-12-6", "978-3-518-42352-3", "de", "Suhrkamp", "504f26ef-7205-4b2f-b719-f4eef883ebe1"),
+("Info-Express, Februar 2014", "SZB Taubblinden-Beratung", "2014-12-10", "", "de", "", "1492d357-6a6d-420f-b39e-b25178491b56");
 
 SELECT * FROM production;
 UPDATE production SET state = "encoded" WHERE id = 1;
