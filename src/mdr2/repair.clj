@@ -23,12 +23,12 @@
 (defn production-id?
   "Return true if `id` is a valid production id"
   [id]
-  (re-matches #"(?i)dam\d{2,5}" id))
+  (re-matches #"(?i)dam\d{1,5}" id))
 
 (defn library-signature?
   "Return true if `id` is a valid library signature"
   [id]
-  (re-matches #"(?i)ds\d{2,5}" id))
+  (re-matches #"(?i)ds\d{1,5}" id))
 
 (defn product-number?
   "Return true if `id` is a valid product number"
