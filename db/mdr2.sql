@@ -33,7 +33,7 @@ CREATE TABLE production (
   creator VARCHAR(255),
   subject TEXT,
   description TEXT,
-  publisher VARCHAR(255) NOT NULL DEFAULT "Swiss Library for the Blind, Visually Impaired and Print Disabled",
+  publisher VARCHAR(255) NOT NULL DEFAULT "SBS Schweizerische Bibliothek für Blinde, Seh- und Lesebehinderte",
   date DATE NOT NULL,
   type VARCHAR(255),
   format VARCHAR(255),
