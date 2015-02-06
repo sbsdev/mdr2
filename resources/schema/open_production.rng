@@ -36,9 +36,6 @@
             <element name="process_status">
               <data type="NCName"/>
             </element>
-            <element name="document_status">
-              <data type="NCName"/>
-            </element>
             <element name="is_meta">
               <choice>
                 <value>yes</value>

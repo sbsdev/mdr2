@@ -16,7 +16,6 @@ start =
           element deadline { xsd:date },
           title,
           element process_status { xsd:NCName },
-          element document_status { xsd:NCName },
           element is_meta { "yes" | "no" },
           element mvl_only { "yes" | "no" },
           element MetaData {

@@ -16,9 +16,7 @@ start =
                 & element deadline { xsd:date }
                 & element priority { xsd:NCName }),
                title,
-               (element document_status { xsd:NCName }
-                & element old_document_status { xsd:NCName }
-                & element old_process_status { xsd:NCName }
+               (element old_process_status { xsd:NCName }
                 & element process_status { "recorded" }),
                element MetaData {
                   element dc {

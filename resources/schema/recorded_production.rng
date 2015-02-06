@@ -33,12 +33,6 @@
             </interleave>
             <ref name="title"/>
             <interleave>
-              <element name="document_status">
-                <data type="NCName"/>
-              </element>
-              <element name="old_document_status">
-                <data type="NCName"/>
-              </element>
               <element name="old_process_status">
                 <data type="NCName"/>
               </element>
