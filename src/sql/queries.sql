@@ -4,7 +4,7 @@ SELECT * FROM production WHERE id = :id
 
 -- name: find-all
 -- Return all productions
-SELECT * FROM production
+SELECT * FROM production ORDER BY title
 
 -- name: find-by-productnumber
 -- Return the production for given `product_number`
