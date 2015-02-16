@@ -219,7 +219,7 @@
   [{:keys [product_number total_time state audio_format multimedia_type
            date id produced_date volumes] :as production}]
   (->> [(create-row 2 product_number)
-        (create-row 239 (quot total_time (* 1000 60))) ; in minutes
+        (create-row 239 (quot (or total_time 0) (* 1000 60))) ; in minutes
         (create-row 106 state)
         (create-row 280 audio_format)
         (create-row 271 volumes) ; Number of CDs
