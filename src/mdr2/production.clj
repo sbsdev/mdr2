@@ -193,4 +193,4 @@
   ;; create a config file for obi
   (obi/config-file production)
   ;; update the status
-  (update! (assoc production :state "structured")))
+  (set-state! production "structured"))
