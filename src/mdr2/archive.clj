@@ -59,7 +59,6 @@ mp3 and the whole thing is packed up in one or more iso files
    :archivar "NN"
    :abholer "NN"
    :aktion "save"
-   :flags "x"
    :transaktions_status "pending"})
 
 (defn- container-id
