@@ -17,7 +17,7 @@ start =
                 & element priority { xsd:NCName }),
                title,
                (element old_process_status { xsd:NCName }
-                & element process_status { "recorded" }),
+                & element process_status { "Recorded" }),
                element MetaData {
                   element dc {
                      title,

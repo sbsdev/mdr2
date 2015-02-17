@@ -37,7 +37,7 @@
                 <data type="NCName"/>
               </element>
               <element name="process_status">
-                <value>recorded</value>
+                <value>Recorded</value>
               </element>
             </interleave>
             <element name="MetaData">
