@@ -147,7 +147,8 @@ mp3 and the whole thing is packed up in one or more iso files
 (defmethod archive "book"
   [production]
   (archive-sektion production :master)
-  (archive-sektion production :dist-master))
+  (archive-sektion production :dist-master)
+  (prod/set-state! production "archived"))
 
 (defmethod archive "periodical"
   [production]
@@ -168,7 +169,8 @@ mp3 and the whole thing is packed up in one or more iso files
         (doseq [volume (range 1 (inc (:volumes production)))]
           (let [iso-archive-name (str dam-number (when multi-volume? (str "_" volume)) ".iso")
                 iso-archive-path (.getPath (file archive-path "produkt" iso-archive-name))]
-            (fs/copy+ (path/iso-name production volume) iso-archive-path)))))))
+            (fs/copy+ (path/iso-name production volume) iso-archive-path)))
+        (prod/set-state! production "archived")))))
 
 (defmethod archive "other"
   [production]
@@ -179,4 +181,5 @@ mp3 and the whole thing is packed up in one or more iso files
     (doseq [volume (range 1 (inc (:volumes production)))]
       (let [iso-archive-name (str product_number (when multi-volume? (str "_" volume)) ".iso")
             iso-archive-path (.getPath (file other-spool-dir iso-archive-name))]
-        (fs/copy (path/iso-name production volume) iso-archive-path)))))
+        (fs/copy (path/iso-name production volume) iso-archive-path)))
+    (prod/set-state! production "archived")))
