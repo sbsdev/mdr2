@@ -5,10 +5,26 @@
             [clojure.string :as s]
             [mdr2.production.path :as path]))
 
+(def ^:private network-drive
+  "The windows network drive where the obi directories are mapped"
+  "Y")
+
+(defn- recording-path
+  "Return the windows specific path to where the obi project is going
+  to be created for the given production"
+  [{id :id}]
+  (format "%s:\\recording\\%s" network-drive id))
+
+(defn- recorded-path
+  "Return the windows specific path to where obi is going to export
+  the given production"
+  [{id :id}]
+  (format "%s:\\recorded\\%s" network-drive id))
+
 (defn- config-sexp
   [production]
-  (let [recording-path (path/recording-path production)
-        recorded-path (path/recorded-path production)]
+  (let [recording-path (recording-path production)
+        recorded-path (recorded-path production)]
     [:obiconfig
      [:import
       [:obiprojectdirectory recording-path]
