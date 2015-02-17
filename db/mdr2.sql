@@ -83,7 +83,8 @@ CREATE TABLE production (
   library_signature VARCHAR(255) UNIQUE,
   FOREIGN KEY(state) REFERENCES state(id),
   FOREIGN KEY(production_type) REFERENCES production_type(id)
-);
+)
+AUTO_INCREMENT = 20000;
 
 CREATE TABLE user (
   id VARCHAR(32) PRIMARY KEY,
@@ -155,3 +156,5 @@ FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = 'madras2';
 SHOW VARIABLES LIKE 'character_set%';
 
 SHOW CREATE DATABASE madras2;
+
+SHOW CREATE TABLE production;
