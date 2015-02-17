@@ -153,13 +153,10 @@
                            (layout/glyphicon "transfer")]])]])]])))
 
 (defn production-catalog [id library_signature]
-  (let [p (assoc
-           (prod/find id)
-           :library_signature library_signature
-           ;; the state is implicitly set to :cataloged if the
-           ;; library_signature is set
-           :state "cataloged")]
-    (prod/update! p)
+  (let [p (assoc (prod/find id) :library_signature library_signature)]
+    ;; the state is implicitly set to :cataloged if the
+    ;; library_signature is set
+    (prod/set-state! p "cataloged")
     ;; put the production on the archive queue
     (msg/publish (queues/archive) p)
     (response/redirect "/")))
