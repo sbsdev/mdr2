@@ -87,6 +87,14 @@
 (def rest-api
   "REST API for ABACUS handler"
   (-> api-routes
+      ;; FIXME: Serving app and api routes with different middleware
+      ;; using Ring and Compojure is not without complications, see
+      ;; http://stackoverflow.com/q/28016968. Both set of routes
+      ;; should use wrap-routes. However this seems to cause problems
+      ;; with friend. So we're just using wrap-routes for the
+      ;; api-routes and leave the app-routes as is. This seems to work
+      ;; but feels hackish. Maybe the api-routes should be split into
+      ;; a separate application.
       (wrap-routes wrap-defaults (assoc-in api-defaults [:params  :multipart] true))))
 
 (def app (routes rest-api site))
