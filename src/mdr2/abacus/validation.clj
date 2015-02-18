@@ -1,7 +1,7 @@
 (ns mdr2.abacus.validation
   "Validate XML files from ABACUS"
   (:require [clojure.java.io :as io]
-            [mdr2.schema-validation :refer [valid?]])
+            [mdr2.schema-validation :refer [validation-errors]])
   (:import javax.xml.XMLConstants
            org.xml.sax.SAXException
            javax.xml.validation.SchemaFactory
@@ -12,27 +12,30 @@
 (def ^:private metadata-schema "schema/metadata_sync.rng")
 (def ^:private status-request-schema "schema/status_request.rng")
 
-(defn valid-open?
-  "Check if an export file from ABACUS is a valid request for opening
-  a production"
+(defn open-validation-errors
+  "Check if an export `file` from ABACUS is a valid request for
+  opening a production. Return nil if the file is valid or a
+  validation error otherwise"
   [file]
-  (valid? file open-schema))
+  (validation-errors file open-schema))
 
-(defn valid-recorded?
-  "Check if an export file from ABACUS is valid request for announcing
-  that a production is recorded"
+(defn recorded-validation-errors
+  "Check if an export `file` from ABACUS is a valid request for
+  announcing that a production is recorded. Return nil if the file is
+  valid or a validation error otherwise"
   [file]
-  (valid? file recorded-schema))
+  (validation-errors file recorded-schema))
 
-(defn valid-metadata-sync?
-  "Check if an export file from ABACUS is valid request for
-  synchronizing meta data"
+(defn status-request-errors
+  "Check if an export `file` from ABACUS is a valid request for status
+  information. Return nil if the file is valid or a validation error
+  otherwise"
   [file]
-  (valid? file metadata-schema))
+  (validation-errors file status-request-schema))
 
-(defn valid-status-request?
-  "Check if an export file from ABACUS is valid request status
-  information"
+(defn metadata-sync-errors
+  "Check if an export `file` from ABACUS is a valid request for
+  synchronizing meta data. Return nil if the file is valid or a
+  validation error otherwise"
   [file]
-  (valid? file status-request-schema))
-
+  (validation-errors file metadata-schema))

@@ -78,22 +78,38 @@
         (db/insert! p)
         (doseq [dir (path/all p)] (fs/mkdirs dir))))
 
+(defn create-dirs
+  "Create all working dirs for a `production`"
+  [production]
+  (doseq [dir (path/all production)] (fs/mkdirs dir)))
+
+(defn create
+  "Create a production"
+  [production]
+  (let [p (-> production
+              add-default-meta-data
+              db/insert!)]
+    (create-dirs p)
+    p))
+
 (defn update-or-create!
   [production]
-  (as-> production p
-        (add-default-meta-data p)
-        ;; if a production doesn't have an id yet, e.g. in the case of
-        ;; a bulk import, the id is assigned in the db insert. For
-        ;; that reason we need the as-> macro to thread the result of
-        ;; the insert into the next function
-        ;; FIXME: we should delay the insert into the db until the
-        ;; dirs have been created, i.e. if anything the view fails the
-        ;; db should be rolled back. Kinda like the
-        ;; @transaction.commit_on_success annotation in Django
-        ;; FIXME: shouldn't we update the DTBook XML when the meta
-        ;; data is updated?
-        (db/update-or-insert! p)
-        (doseq [dir (path/all p)] (fs/mkdirs dir))))
+  (let [new-production
+        (as-> production p
+          (add-default-meta-data p)
+          ;; if a production doesn't have an id yet, e.g. in the case of
+          ;; a bulk import, the id is assigned in the db insert. For
+          ;; that reason we need the as-> macro to thread the result of
+          ;; the insert into the next function
+          ;; FIXME: we should delay the insert into the db until the
+          ;; dirs have been created, i.e. if anything the view fails the
+          ;; db should be rolled back. Kinda like the
+          ;; @transaction.commit_on_success annotation in Django
+          ;; FIXME: shouldn't we update the DTBook XML when the meta
+          ;; data is updated?
+          (db/update-or-insert! p))]
+    (create-dirs new-production)
+    new-production))
 
 (defn update! [production]
   (db/update! production))
@@ -139,12 +155,14 @@
     p))
 
 (defn set-state-recorded! [production]
-  (as-> production p
-    (merge p
-           (dtb/meta-data (path/recorded-path p))
-           {:produced_date (to-date (t/now))})
-    (set-state! p "recorded")
-    (msg/publish (queues/encode) {:production p})))
+  (let [new-production
+        (as-> production p
+          (merge p
+                 (dtb/meta-data (path/recorded-path p))
+                 {:produced_date (to-date (t/now))})
+          (set-state! p "recorded"))]
+    (msg/publish (queues/encode) {:production new-production})
+    new-production))
 
 (defn set-state-split! [production volumes sample-rate bitrate]
   (as-> production p

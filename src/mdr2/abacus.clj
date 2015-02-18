@@ -30,7 +30,6 @@
   (:import (java.nio.file StandardCopyOption)))
 
 (def ^:private root-path [:Task :Transaction :DocumentData])
-(def ^:private import-dir (env :abacus-import-dir))
 (def ^:private export-dir (env :abacus-export-dir))
 
 (def ^:private param-mapping
@@ -73,129 +72,50 @@
       (into {})
       clean-raw-production)))
 
-(defn file-startswith? [f xs]
-  (some #(.startsWith (.getName f) %) xs))
-
-(defn get-all-files []
-  "Return all files from the `import-dir`"
-  (filter #(.isFile %)
-          (file-seq (io/file import-dir))))
-
-(defn delete-files!
-  "Delete all given `files`"
-  [files]
-  (doseq [f files] (io/delete-file f)))
-
-(defn open-production?
-  "Is the given `file` an export for opening a production?"
-  [file]
-  (file-startswith? file ["SN1_" "SN10_"]))
-
 (defn import-new-production
   "Import a new production from file `f`"
   [f]
-  (msg/publish (queues/create) (read-file f))
-  f)
-
-(defn import-new-productions
-  "Import new productions from ABACUS and put them on the create queue"
-  []
-  (->>
-   (get-all-files)
-   (filter open-production?)
-   (filter validation/valid-open?)
-   (map import-new-production)
-   (delete-files!)))
-
-(defn recorded-production?
-  "Is the given `file` an export for a production that has been recorded?"
-  [file]
-  (file-startswith? file ["SN3_" "SN12_"]))
-
-(defn move-away! [f reason]
-  (let [new-name (str reason "_" (.getName f))
-        new-path (nio/resolve-sibling f new-name)]
-    (nio/move! f new-path StandardCopyOption/REPLACE_EXISTING)))
-
-(defn import-valid-recorded-production
-  "Import a valid recorded production from file `f`"
-  [f]
-  (let [{product_number :product_number} (read-file f)
-        production (prod/find-by-productnumber product_number)]
-    (if (and production
-             (= "structured" (:state production))
-             (prod/manifest? production))
-      (do
-        (prod/set-state-recorded! production)
-        (io/delete-file f))
-      (let [message
-            (cond
-             (empty? production)
-             (format "Non-existing product number %s in %s"
-                     product_number (.getName f))
-             (not= "structured" (:state production))
-             (format "Production %s is not structured (%s instead) in %s"
-                     product_number (:state production) (.getName f))
-             (not (prod/manifest? production))
-             (format "Production %s has no DAISY Export in %s"
-                     product_number (path/manifest-path production)))]
-        (log/warn message)
-        (move-away! f "Failed")))))
+  (if-let [error (validation/open-validation-errors f)]
+    error
+    (prod/create (read-file f))))
 
 (defn import-recorded-production
   "Import a recorded production from file `f`"
   [f]
-  (if (validation/valid-recorded? f)
-    (import-valid-recorded-production f)
-    (do
-      (log/warnf "ABACUS input file %s not valid" (.getName f))
-      (move-away! f "Invalid"))))
+  (if-let [error (validation/recorded-validation-errors f)]
+    error
+    (let [{product_number :product_number} (read-file f)
+          production (prod/find-by-productnumber product_number)]
+      (if (and production
+               (= "structured" (:state production))
+               (prod/manifest? production))
+        (prod/set-state-recorded! production)
+        (cond
+          (empty? production)
+          (format "Non-existing product number %s" product_number)
+          (not= "structured" (:state production))
+          (format "Production %s is not structured (%s instead)"
+                  product_number (:state production))
+          (not (prod/manifest? production))
+          (format "Production %s has no DAISY Export in %s"
+                  product_number (path/manifest-path production)))))))
 
-(defn import-recorded-productions
-  "Import recorded productions from ABACUS and put them on the archive queue"
-  []
-  (let [files (->> (get-all-files) (filter recorded-production?))]
-    (doseq [f files] (import-recorded-production f))))
+(defn import-status-request
+  "Import a status request from file `f`"
+  [f]
+  (if-let [error (validation/status-request-errors f)]
+    error
+    (let [{product_number :product_number} (read-file f)
+          production (prod/find-by-productnumber product_number)]
+      (msg/publish (queues/notify-abacus) production)
+      production)))
 
-(defn status-request?
-  "Is the given `file` an status request for a production?"
-  [file]
-  (file-startswith? file ["SNStatus_"]))
-
-(defn import-status-request [f]
-  (let [{product_number :product_number} (read-file f)
-        production (prod/find-by-productnumber product_number)]
-    (msg/publish (queues/notify-abacus) production)
-    f))
-
-(defn import-status-requests
-  "Import status requests from ABACUS and put them on the queue"
-  []
-  (->>
-   (get-all-files)
-   (filter status-request?)
-   (filter validation/valid-status-request?)
-   (map import-status-request)
-   (delete-files!)))
-
-(defn metadata-update?
-  "Is the given `file` an metadata update for a production?"
-  [file]
-  (file-startswith? file ["SNMeta_"]))
-
-(defn import-metadata-update [f]
-  (msg/publish (queues/metadata-update) (read-file f))
-  f)
-
-(defn import-metadata-updates
-  "Import metadata updates from ABACUS and put them on the queue"
-  []
-  (->>
-   (get-all-files)
-   (filter metadata-update?)
-   (filter validation/valid-metadata-sync?)
-   (map import-metadata-update)
-   (delete-files!)))
+(defn import-metadata-update
+  "Import a metadata update request from file `f`"
+  [f]
+  (if-let [error (validation/metadata-sync-errors f)]
+    error
+    (prod/update-or-create! (read-file f))))
 
 (defn wrap-rows
   "Wrap an export record according to ABACUS conventions"

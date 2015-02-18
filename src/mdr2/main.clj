@@ -14,19 +14,10 @@
   (web/run-dmc handler/app)
 
   ;; wire up queues
-  (msg/listen (queues/create) #(production/create %))
   (msg/listen (queues/encode)
               (fn [{:keys [production bitrate sample-rate]}]
                 (if (and bitrate sample-rate)
                   (encode/encode-or-split production bitrate sample-rate)
                   (encode/encode-or-split production))))
   (msg/listen (queues/archive) #(archive/archive %))
-  (msg/listen (queues/notify-abacus) #(abacus/export-file %))
-  (msg/listen (queues/metadata-update) #(production/update-or-create! %))
-
-  ;; set up cron jobs
-  ;; get new productions from ABACUS
-  (scheduling/schedule abacus/import-new-productions :cron "0 */10 6-20 ? * MON-FRI")
-
-  ;; get recorded productions from ABACUS
-  (scheduling/schedule abacus/import-recorded-productions :cron "0 */10 6-20 ? * MON-FRI"))
+  (msg/listen (queues/notify-abacus) #(abacus/export-file %)))

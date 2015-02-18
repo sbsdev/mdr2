@@ -18,8 +18,8 @@
 (def ^:private schema "schema/vubis_export.rng")
 
 (defn validate
-  "Returns an empty seq on successful validation of `file` as a proper
-  vubis export file or a seq of error messages otherwise"
+  "Returns nil on successful validation of `file` as a proper vubis
+  export file or an error message otherwise"
   [file]
   (validation-errors file schema))
 

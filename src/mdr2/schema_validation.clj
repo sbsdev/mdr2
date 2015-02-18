@@ -1,15 +1,15 @@
 (ns mdr2.schema-validation
   "Schema validation for XML"
-  (:require [clojure.java.io :as io])
+  (:require [clojure.java.io :as io]
+            [clojure.tools.logging :as log])
   (:import javax.xml.XMLConstants
            org.xml.sax.SAXException
            javax.xml.validation.SchemaFactory
            javax.xml.transform.stream.StreamSource))
 
 (defn validation-errors
-  "Return the validation errors when validating `file` against the
-  given Relaxng `schema`. If the file is valid an empty seq is
-  returned."
+  "Return the first validation error when validating `file` against
+  the given Relaxng `schema`. If the file is valid nil is returned."
   [file schema]
   ;; basically a minimal port of
   ;; http://stackoverflow.com/questions/15732/whats-the-best-way-to-validate-an-xml-file-against-an-xsd-file
@@ -28,12 +28,13 @@
                     (StreamSource. schema-stream)))]
     (try
       (.validate validator (StreamSource. file))
-      []
+      nil
       (catch SAXException e
-        [(.getMessage e)])
+        (log/error (.getMessage e))
+        (.getMessage e))
       (finally (.close schema-stream)))))
 
 (defn valid?
   "Check if a `file` is valid against given `schema`"
   [file schema]
-  (empty? (validation-errors file schema)))
+  (nil? (validation-errors file schema)))
