@@ -46,8 +46,7 @@
              :aktion "save",
              :transaktions_status "pending",
              :abholer "NN",
-             :archivar "NN",
-             :flags "x"}]))))
+             :archivar "NN"}]))))
 
 (deftest add-iso-to-db
   (testing "add iso to db"
@@ -61,8 +60,7 @@
              :aktion "save",
              :transaktions_status "pending",
              :abholer "NN",
-             :archivar "NN",
-             :flags "x"}]))))
+             :archivar "NN"}]))))
 
 (deftest book-single
   (testing "archiving a book with a single volume"
@@ -78,15 +76,13 @@
                         :transaktions_status "pending"
                         :abholer "NN"
                         :archivar "NN"
-                        :verzeichnis "dam14"
-                        :flags "x"}
+                        :verzeichnis "dam14"}
                        {:verzeichnis "ds15"
                         :sektion "cdimage"
                         :aktion "save"
                         :transaktions_status "pending"
                         :abholer "NN"
-                        :archivar "NN"
-                        :flags "x"}]))
+                        :archivar "NN"}]))
       (are [file] (fs/exists? file)
            ;; check if the master has been copied
            (fs/file spool-dir dam-number "produkt" "aud001.wav")
@@ -112,15 +108,13 @@
                         :transaktions_status "pending"
                         :abholer "NN"
                         :archivar "NN"
-                        :verzeichnis "dam14"
-                        :flags "x"}
+                        :verzeichnis "dam14"}
                        {:verzeichnis "ds15"
                         :sektion "cdimage"
                         :aktion "save"
                         :transaktions_status "pending"
                         :abholer "NN"
-                        :archivar "NN"
-                        :flags "x"}]))
+                        :archivar "NN"}]))
       (are [file] (fs/exists? file)
            ;; check if the master has been copied
            (fs/file spool-dir dam-number "produkt" "aud001.wav")
