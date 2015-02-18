@@ -3,6 +3,7 @@
   (:refer-clojure :exclude [find])
   (:require [clojure.java.io :refer [file]]
             [me.raynes.fs :as fs]
+            [org.tobereplaced.nio.file :as nio]
             [clj-time.core :as t]
             [clj-time.format :as f]
             [clj-time.coerce :refer [to-date]]
@@ -70,18 +71,16 @@
               (assoc m k (to-date (f/parse value))) m))
           production [:date :source_date :produced_date :revision_date]))
 
-(defn create
-  "Create a production"
-  [production]
-  (as-> production p
-        (add-default-meta-data p)
-        (db/insert! p)
-        (doseq [dir (path/all p)] (fs/mkdirs dir))))
-
 (defn create-dirs
   "Create all working dirs for a `production`"
   [production]
-  (doseq [dir (path/all production)] (fs/mkdirs dir)))
+  (doseq [dir (path/all production)]
+    (fs/mkdirs dir)
+    ;; make sure recording and recorded are group writable
+    (when (#{path/recorded-path path/recording-path} dir)
+      (let [permissions (conj (nio/posix-file-permissions dir)
+                              (nio/posix-file-permission :group-write))]
+        (nio/set-posix-file-permissions! dir permissions)))))
 
 (defn create
   "Create a production"
