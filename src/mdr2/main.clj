@@ -11,7 +11,8 @@
 
 (defn -main []
   ;; start web server
-  (web/run-dmc handler/app)
+  (web/run handler/site)
+  (web/run handler/rest-api :path "/abacus")
 
   ;; wire up queues
   (msg/listen (queues/encode)
