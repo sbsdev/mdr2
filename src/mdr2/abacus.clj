@@ -64,7 +64,8 @@
                 :periodical_number (when (= production_type "periodical") idVorstufe)}))))
 
 (defn read-file
-  "Read an export file from ABACUS and return a map with all the data"
+  "Read an export file from ABACUS and return a map with all the data,
+  i.e. a production"
   [file]
   (let [zipper (-> file io/file xml/parse zip/xml-zip)]
     (->>
@@ -72,7 +73,8 @@
            :let [val (apply xml1-> zipper (concat root-path path))]]
        [key val])
       (into {})
-      clean-raw-production)))
+      clean-raw-production
+      prod/parse)))
 
 (defn import-new-production
   "Import a new production from file `f`"
