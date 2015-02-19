@@ -49,7 +49,7 @@
                       ;; enable the "Recorded" button if the next state is "recorded",
                       ;; there is an DAISY export and the production has been imported from
                       ;; the libary, i.e. is not handled via ABACUS or
-                      ;; the production has already a library signatur
+                      ;; the production has already a library signature
                       ;; as is the case with productions that are
                       ;; repaired
                       (and (= next-state "recorded")
