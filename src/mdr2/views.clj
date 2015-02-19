@@ -122,11 +122,13 @@
         ;; and redirect to the index
         (response/redirect "/")))))
 
-(defn catalog [request]
+(defn catalog [request & error]
   (let [identity (friend/identity request)
         user (friend/current-authentication request)]
     (layout/common user
-                   [:h1 "Productions"]
+     [:h1 "Productions"]
+     (when error
+       [:p [:ul.alert.alert-danger [:li error]]])
      [:table.table.table-striped
       [:thead [:tr [:th "Title"] [:th "Product Number"] [:th "DAM Number"] [:th "Duration"] [:th "Number of CDs"] [:th "Depth"] [:th "Narrator"] [:th "Date of Production"] [:th "Libary signature"]]]
       [:tbody
@@ -153,14 +155,16 @@
                           [:button.btn.btn-default
                            (layout/glyphicon "transfer")]])]])]])))
 
-(defn production-catalog [id library_signature]
-  (let [p (assoc (prod/find id) :library_signature library_signature)]
-    ;; the state is implicitly set to :cataloged if the
-    ;; library_signature is set
-    (prod/set-state! p "cataloged")
-    ;; put the production on the archive queue
-    (msg/publish (queues/archive) p)
-    (response/redirect "/")))
+(defn production-catalog [request id library_signature]
+  (if (re-matches prod/library-signature-regexp library_signature)
+    (let [p (assoc (prod/find id) :library_signature library_signature)]
+      ;; the state is implicitly set to :cataloged if the
+      ;; library_signature is set
+      (prod/set-state! p "cataloged")
+      ;; put the production on the archive queue
+      (msg/publish (queues/archive) p)
+      (response/redirect "/catalog"))
+    (catalog request "Library signature not valid")))
 
 (defn production-delete [id]
   (prod/delete! id)
