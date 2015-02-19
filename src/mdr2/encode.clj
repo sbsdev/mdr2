@@ -119,17 +119,16 @@
   manual splitting. If `bitrate` and `sample-rate` are given it is
   expected that the production is in state \"split\""
   ([{:keys [volumes state] :as production}]
-   (case state
-     "recorded"
-     (let [ideal-bitrate (ideal-bitrate production)]
-       (if (and (= volumes 1) ideal-bitrate)
-         ;; the production has just been recorded, no specific number
-         ;; of volumes are required and it fits on one volume
-         (encode production ideal-bitrate)
-         ;; if the production doesn't fit one one volume or a specific
-         ;; number of volumes is requested forward to manual split
-         (prod/set-state! production "pending-split")))))
+   {:pre [(= state "recorded")]}
+   (let [ideal-bitrate (ideal-bitrate production)]
+     (if (and (= volumes 1) ideal-bitrate)
+       ;; the production has just been recorded, no specific number
+       ;; of volumes are required and it fits on one volume
+       (encode production ideal-bitrate)
+       ;; if the production doesn't fit one one volume or a specific
+       ;; number of volumes is requested forward to manual split
+       (prod/set-state! production "pending-split"))))
   ([{:keys [state] :as production} bitrate sample-rate]
-   (case state
-     "split" (encode production bitrate sample-rate))))
+   {:pre [(= state "split")]}
+   (encode production bitrate sample-rate)))
 
