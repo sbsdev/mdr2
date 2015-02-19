@@ -50,8 +50,8 @@
   ;; catalog
   (GET "/catalog" request
        (friend/authenticated (views/catalog request)))
-  (POST "/catalog/:id" [id library_signature]
-        (friend/authenticated (views/production-catalog id library_signature)))
+  (POST "/catalog/:id" [id library_signature :as r]
+        (friend/authenticated (views/production-catalog r id library_signature)))
   (GET "/production/:id" [id :as r]
        (friend/authenticated (views/production r id)))
   (GET "/production/:id/delete" [id]
