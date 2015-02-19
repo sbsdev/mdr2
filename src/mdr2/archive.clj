@@ -69,7 +69,7 @@ mp3 and the whole thing is packed up in one or more iso files
   ([production sektion volume]
    (case sektion
      :master (prod/dam-number production)
-     :dist-master (str "ds" (:library_signature production)
+     :dist-master (str (:library_signature production)
                        (when (and volume
                                   (prod/multi-volume? production))
                          (str "_" volume))))))
