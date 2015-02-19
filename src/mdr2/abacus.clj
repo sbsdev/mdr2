@@ -145,7 +145,8 @@
         (create-row 280 audio_format)
         (create-row 271 volumes) ; Number of CDs
         (create-row 281 multimedia_type)
-        (create-row 256 (format date-format produced_date)) ; Date of production end
+        (create-row 256 (and produced_date
+                             (format date-format produced_date))) ; Date of production end
         (create-row 278 (format date-format date)) ; Date of production start
         (create-row 4 (prod/dam-number production))] ; for legacy purposes
        (remove nil?) ; remove empty rows
