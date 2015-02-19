@@ -64,10 +64,9 @@
                       ;; Enable the "Split" button if the next state is "split" and there
                       ;; is a split production
                       (and (= next-state "split") (prod/split? production))
-                      [:a.btn.btn-default
-                       {:href (str "/production/" id "/split")}
-                       (layout/glyphicon "transfer") " "
-                       (:name (first (cached-state {:id next-state})))]
+                      (layout/button (str "/production/" id "/split")
+                                     (layout/glyphicon "transfer") " "
+                                     (:name (first (cached-state {:id next-state}))))
                       ;; in all other cases disable the button
                       :else [:button.btn.btn-default
                              {:disabled "disabled"}
