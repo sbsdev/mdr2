@@ -31,7 +31,8 @@
              cached-production-type (memoize db/find-production-type)]
          (for [{:keys [id title production_type state] :as production} (prod/find-all)]
            (let [realized-state (first (cached-state {:id state}))
-                 realized-production-type (first (cached-production-type {:id production_type}))]
+                 realized-production-type (first (cached-production-type {:id production_type}))
+                 next-state (:next_state realized-state)]
              [:tr
               [:td (link-to (str "/production/" id) title)]
               [:td (:name realized-production-type)]
@@ -42,36 +43,32 @@
                  nil?
                  [(layout/button (str "/production/" id ".xml")
                                  (layout/glyphicon "download"))
-                  (layout/button (str "/production/" id "/upload")
+                  (layout/button (when (= next-state "structured") (str "/production/" id "/upload"))
                                  (layout/glyphicon "upload"))
-                  (when-let [next-state (:next_state realized-state)]
-                    (cond
-                      ;; enable the "Recorded" button if the next state is "recorded",
-                      ;; there is an DAISY export and the production has been imported from
-                      ;; the libary, i.e. is not handled via ABACUS or
-                      ;; the production has already a library signature
-                      ;; as is the case with productions that are
-                      ;; repaired
-                      (and (= next-state "recorded")
-                           (or (:library_number production) (:library_signature production))
-                           (prod/manifest? production))
-                      (form/form-to
-                       {:class "btn-group"} [:post (str "/production/" id "/state")]
-                       (form/hidden-field :state next-state)
-                       (anti-forgery-field)
-                       [:button.btn.btn-default (layout/glyphicon "transfer") " "
-                        (:name (first (cached-state {:id next-state})))])
-                      ;; Enable the "Split" button if the next state is "split" and there
-                      ;; is a split production
-                      (and (= next-state "split") (prod/split? production))
-                      (layout/button (str "/production/" id "/split")
-                                     (layout/glyphicon "transfer") " "
-                                     (:name (first (cached-state {:id next-state}))))
-                      ;; in all other cases disable the button
-                      :else [:button.btn.btn-default
-                             {:disabled "disabled"}
-                             (layout/glyphicon "transfer") " "
-                             (:name (first (cached-state {:id next-state})))]))
+                  (cond
+                    ;; enable the "Recorded" button if the next state is "recorded", there
+                    ;; is an DAISY export and the production has been imported from the
+                    ;; libary, i.e. is not handled via ABACUS or the production has already
+                    ;; a library signature as is the case with productions that are repaired
+                    (and (= next-state "recorded")
+                         (or (:library_number production) (:library_signature production))
+                         (prod/manifest? production))
+                    (form/form-to
+                     {:class "btn-group"} [:post (str "/production/" id "/state")]
+                     (form/hidden-field :state next-state)
+                     (anti-forgery-field)
+                     [:button.btn.btn-default (layout/glyphicon "transfer") " "
+                      (:name (first (cached-state {:id next-state})))])
+                    ;; Enable the "Split" button if the next state is "split" and there is a
+                    ;; split production
+                    (and (= next-state "split") (prod/split? production))
+                    (layout/button (str "/production/" id "/split")
+                                   (layout/glyphicon "transfer") " "
+                                   (:name (first (cached-state {:id next-state}))))
+                    ;; in all other cases disable the button
+                    :else (layout/button nil
+                           (layout/glyphicon "transfer") " "
+                           (:name (first (cached-state {:id next-state})))))
                   (when (friend/authorized? #{:admin} identity)
                     (layout/button (str "/production/" id "/delete")
                                    (layout/glyphicon "trash")))]))]])))]])))

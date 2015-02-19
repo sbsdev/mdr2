@@ -14,9 +14,12 @@
 (defn glyphicon [class]
   [:span {:class (str "glyphicon glyphicon-" class)}])
 
-(defn button [href & body]
-  [:a.btn.btn-default {:href href}
-   body])
+(defn button
+  "Return a button. If the `href` is nil the button is disabled"
+  [href & body]
+  (if href
+    [:a.btn.btn-default {:href href} body]
+    [:button.btn.btn-default {:disabled "disabled"} body]))
 
 (defn menu-item [href & body]
   [:li [:a {:href href} body]])
