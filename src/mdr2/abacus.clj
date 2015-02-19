@@ -41,6 +41,7 @@
    :language [:MetaData :dc :language text]
    :source_publisher [:MetaData :ncc :sourcePublisher text]
    :source_edition [:MetaData :ncc :sourceDate text]
+   :narrator [:MetaData :ncc :narrator text]
    :volumes [:MetaData :ncc :setInfo text]
    :revision_date [:MetaData :ncc :revisionDate text]
    :mvl_only [:mvl_only text]
@@ -54,12 +55,13 @@
   and `periodical_number`"
   [{:keys [mvl_only command idVorstufe] :as raw-production}]
   (let [production_type (cond
-                       (= command "mdaDocAdd_Kleinauftrag") "other"
-                       (= mvl_only "yes") "periodical"
-                       :else "book")]
-      (merge (dissoc raw-production :mvl_only :command :idVorstufe)
-             {:production_type production_type
-              :periodical_number (when (= production_type "periodical") idVorstufe)})))
+                          (= command "mdaDocAdd_Kleinauftrag") "other"
+                          (= mvl_only "yes") "periodical"
+                          :else "book")]
+    (-> raw-production
+        (dissoc :mvl_only :command :idVorstufe)
+        (merge {:production_type production_type
+                :periodical_number (when (= production_type "periodical") idVorstufe)}))))
 
 (defn read-file
   "Read an export file from ABACUS and return a map with all the data"
@@ -77,28 +79,27 @@
   [f]
   (if-let [error (validation/open-validation-errors f)]
     error
-    (prod/create (read-file f))))
+    (prod/update-or-create! (read-file f))))
 
 (defn import-recorded-production
   "Import a recorded production from file `f`"
   [f]
   (if-let [error (validation/recorded-validation-errors f)]
     error
-    (let [{product_number :product_number} (read-file f)
+    (let [{product_number :product_number :as new-production} (read-file f)
           production (prod/find-by-productnumber product_number)]
-      (if (and production
-               (= "structured" (:state production))
-               (prod/manifest? production))
-        (prod/set-state-recorded! production)
-        (cond
-          (empty? production)
-          (format "Non-existing product number %s" product_number)
-          (not= "structured" (:state production))
-          (format "Production %s is not structured (%s instead)"
-                  product_number (:state production))
-          (not (prod/manifest? production))
-          (format "Production %s has no DAISY Export in %s"
-                  product_number (path/manifest-path production)))))))
+      (cond
+        (empty? production)
+        (format "Non-existing product number %s" product_number)
+        (not= "structured" (:state production))
+        (format "Production %s is not structured (%s instead)"
+                product_number (:state production))
+        (not (prod/manifest? production))
+        (format "Production %s has no DAISY Export in %s"
+                product_number (path/manifest-path production))
+        :else (-> production
+                  (merge new-production)
+                  prod/set-state-recorded!)))))
 
 (defn import-status-request
   "Import a status request from file `f`"
@@ -115,7 +116,7 @@
   [f]
   (if-let [error (validation/metadata-sync-errors f)]
     error
-    (prod/update-or-create! (read-file f))))
+    (prod/update! (read-file f))))
 
 (defn wrap-rows
   "Wrap an export record according to ABACUS conventions"
