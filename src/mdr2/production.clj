@@ -70,10 +70,15 @@
   "Return a `production` with all values parsed into their proper types,
   e.g. dates are converted from strings to dates"
   [production]
-  (reduce (fn [m k]
-            (if-let [value (k m)]
-              (assoc m k (to-date (f/parse value))) m))
-          production [:date :source_date :produced_date :revision_date]))
+  (reduce-kv
+   (fn [m k v]
+     (assoc m k
+      (cond
+        (#{:date :source_date :produced_date :revision_date} k)
+        (to-date (f/parse v))
+        (#{:volumes} k) (Integer/parseInt v)
+        :else v)))
+   {} production))
 
 (defn create-dirs
   "Create all working dirs for a `production`"
