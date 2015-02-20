@@ -181,6 +181,11 @@
                   :sample-rate sample-rate
                   :bitrate bitrate})))
 
+(defn set-state-cataloged! [production]
+  (as-> production p
+    (set-state! p "cataloged")
+    (msg/publish (queues/archive) p)))
+
 (defn set-state-encoded! [{:keys [production_type] :as production}]
   (if (or (not= production_type "book")
            (:library_signature production))
