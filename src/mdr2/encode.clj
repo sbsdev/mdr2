@@ -70,18 +70,16 @@
   "Calculate the ideal bitrate based on the size of a production and
   how much will generally fit on a CD-ROM. It will first try a higher
   bitrate (see `bitrates`). If the production still doesn't fit on one
-  CD it will subsequently try lesser bitrates. Return nil if the
-  content doesn't even fit on one CD with the lowest bitrate."
+  CD it will subsequently try lesser bitrates. Return 0 if the content
+  doesn't even fit on one CD with the lowest bitrate."
   [production]
   (let [dtb (path/recorded-path production)
         duration (quot (dtb/audio-length dtb) 1000) ; convert from millisecs to secs
         sampling-ratio (if (dtb/mono? dtb) 1 2)
         max-bitrate (/ (* (/ max-size duration sampling-ratio) 8) 1000)]
-    (loop [bitrates bitrates]
-      (when-first [bitrate bitrates]
-        (if (> max-bitrate bitrate)
-          bitrate
-          (recur (rest bitrates)))))))
+    (->> bitrates
+         (filter #(<= % max-bitrate))
+         (apply max 0))))
 
 (defn clean-up
   "Clean up temporary files of a production, namely the mp3 encoded
@@ -121,7 +119,7 @@
   ([{:keys [volumes state] :as production}]
    {:pre [(= state "recorded")]}
    (let [ideal-bitrate (ideal-bitrate production)]
-     (if (and (= volumes 1) ideal-bitrate)
+     (if (and (= volumes 1) (not= ideal-bitrate 0))
        ;; the production has just been recorded, no specific number
        ;; of volumes are required and it fits on one volume
        (encode production ideal-bitrate)
