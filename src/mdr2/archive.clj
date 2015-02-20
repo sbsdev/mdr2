@@ -34,6 +34,7 @@ mp3 and the whole thing is packed up in one or more iso files
             [clojure.java.io :refer [file]]
             [clojure.tools.logging :as log]
             [environ.core :refer [env]]
+            [clj-time.core :as t]
             [me.raynes.fs :as fs]
             [mdr2.production :as prod]
             [mdr2.production.path :as path]
@@ -55,11 +56,12 @@ mp3 and the whole thing is packed up in one or more iso files
   (env :archive-other-spool-dir))
 
 (def ^:private default-job
-  {:verzeichnis ""
-   :archivar "NN"
-   :abholer "NN"
+  {:archivar "Madras2"
+   :abholer ""
    :aktion "save"
-   :transaktions_status "pending"})
+   :transaktions_status "pending"
+   :container_status "ok"
+   :bemerkung ""})
 
 (defn- container-id
   "Return the name of a archive spool directory for a given
@@ -97,7 +99,8 @@ mp3 and the whole thing is packed up in one or more iso files
   [production sektion]
   (let [new-job
         {:verzeichnis (container-id production sektion)
-         :sektion (case sektion :master "master" :dist-master "cdimage")}
+         :sektion (case sektion :master "master" :dist-master "cdimage")
+         :datum (t/now)}
         job (merge default-job new-job)]
     (jdbc/insert! db :container job)))
 
