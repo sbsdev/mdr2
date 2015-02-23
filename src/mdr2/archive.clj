@@ -36,6 +36,7 @@ mp3 and the whole thing is packed up in one or more iso files
             [environ.core :refer [env]]
             [clj-time.core :as t]
             [clj-time.coerce :refer [to-date]]
+            [org.tobereplaced.nio.file :as nio]
             [me.raynes.fs :as fs]
             [mdr2.production :as prod]
             [mdr2.production.path :as path]
@@ -105,6 +106,17 @@ mp3 and the whole thing is packed up in one or more iso files
         job (merge default-job new-job)]
     (jdbc/insert! db :container job)))
 
+(defn set-file-permissions
+  "Set file permissions on `root` to g+w recursively"
+  [root]
+  (let [permissions (conj (set (nio/posix-file-permissions root))
+                          (nio/posix-file-permission :group-write))
+        visitor-fn (fn [f] (nio/set-posix-file-permissions! f permissions) nil)
+        visitor (nio/naive-visitor
+                 :pre-visit-directory visitor-fn
+                 :visit-file visitor-fn)]
+    (nio/walk-file-tree root visitor)))
+
 (defn- copy-files
   "Copy a `production` to the archive spool dir for the given
   `sektion`. For a production master copy the whole DTB including wav
@@ -115,12 +127,15 @@ mp3 and the whole thing is packed up in one or more iso files
       (log/errorf "Archive path %s already exists" archive-path)
       (case sektion
         :master
-        (fs/copy-dir (path/recorded-path production) archive-path)
+        (do (fs/copy-dir (path/recorded-path production) archive-path)
+            (set-file-permissions (file archive-path)))
         :dist-master
-        (doseq [volume (range 1 (inc (:volumes production)))]
-          (let [iso-archive-name (str (container-id production sektion volume) ".iso")
-                iso-archive-path (.getPath (file archive-path iso-archive-name))]
-            (fs/copy+ (path/iso-name production volume) iso-archive-path)))))))
+        (do
+          (doseq [volume (range 1 (inc (:volumes production)))]
+            (let [iso-archive-name (str (container-id production sektion volume) ".iso")
+                  iso-archive-path (.getPath (file archive-path iso-archive-name))]
+              (fs/copy+ (path/iso-name production volume) iso-archive-path)))
+          (set-file-permissions (file archive-path)))))))
 
 (defn- create-rdf
   "Create an rdf file and place it in the appropriate archive spool
@@ -174,6 +189,7 @@ mp3 and the whole thing is packed up in one or more iso files
           (let [iso-archive-name (str dam-number (when multi-volume? (str "_" volume)) ".iso")
                 iso-archive-path (.getPath (file archive-path "produkt" iso-archive-name))]
             (fs/copy+ (path/iso-name production volume) iso-archive-path)))
+        (set-file-permissions (file archive-path))
         (prod/set-state! production "archived")))))
 
 (defmethod archive "other"
@@ -185,5 +201,6 @@ mp3 and the whole thing is packed up in one or more iso files
     (doseq [volume (range 1 (inc (:volumes production)))]
       (let [iso-archive-name (str product_number (when multi-volume? (str "_" volume)) ".iso")
             iso-archive-path (.getPath (file other-spool-dir iso-archive-name))]
-        (fs/copy (path/iso-name production volume) iso-archive-path)))
+        (fs/copy (path/iso-name production volume) iso-archive-path)
+        (set-file-permissions (file iso-archive-path))))
     (prod/set-state! production "archived")))
