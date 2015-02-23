@@ -20,14 +20,12 @@
             [clojure.data.zip.xml :refer [xml1-> attr= attr text]]
             [clojure.string :as string]
             [clojure.tools.logging :as log]
-            [org.tobereplaced.nio.file :as nio]
             [immutant.messaging :as msg]
             [environ.core :refer [env]]
             [mdr2.queues :as queues]
             [mdr2.production :as prod]
             [mdr2.production.path :as path]
-            [mdr2.abacus.validation :as validation])
-  (:import (java.nio.file StandardCopyOption)))
+            [mdr2.abacus.validation :as validation]))
 
 (def ^:private root-path [:Task :Transaction :DocumentData])
 (def ^:private export-dir (env :abacus-export-dir))
