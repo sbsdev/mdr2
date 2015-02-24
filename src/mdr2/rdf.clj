@@ -16,7 +16,7 @@
            source_date source_edition source_publisher source_rights source_title
            multimedia_type multimedia_content narrator producer produced_date
            revision revision_date revision_description
-           total_time audio_format periodical_number]}]
+           total_time audio_format periodical_number library_signature]}]
   [:rdf:RDF {:xmlns:rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
              :xmlns:dc "http://purl.org/dc/elements/1.1/"
              :xmlns:dtb "http://www.daisy.org/z3986/2005/dtbook/"
@@ -54,7 +54,8 @@
                 :dtb:totalTime total_time
                 :dtb:audioFormat audio_format
                 :sbs:idVorstufe periodical_number
-                :sbs:idMaster (str "DAM " id)]
+                :sbs:idMaster (str "DAM " id)
+                :sbs:idAusleihe library_signature]
                (partition 2))]
       (when v [k v]))]])
 
