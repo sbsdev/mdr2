@@ -78,20 +78,26 @@ mp3 and the whole thing is packed up in one or more iso files
                                   (prod/multi-volume? production))
                          (str "_" volume))))))
 
-(defn- container-path
+(defn container-root-path
+  "Return the root container path for a given `production` and
+  `sektion`"
+  [production sektion]
+  (file spool-dir (container-id production sektion)))
+
+(defn container-path
   "Return the path to the archive spool directory for a given
   `production` and `sektion`"
   [production sektion]
-  (let [id (container-id production sektion)]
-    (.getPath (file spool-dir id "produkt"))))
+  (let [root-path (container-root-path production sektion)]
+    (.getPath (file root-path "produkt"))))
 
-(defn- container-rdf-path
+(defn container-rdf-path
   "Return the path to the rdf file in the archive spool for a given
   `production` and `sektion`"
   [production sektion]
-  (let [path (container-id production sektion)
+  (let [root-path (container-root-path production sektion)
         rdf-name (str (container-id production sektion) ".rdf")]
-    (.getPath (file spool-dir path rdf-name))))
+    (.getPath (file root-path rdf-name))))
 
 (defn- add-to-db
   "Insert a `production` into the archive db for the given `sektion`.
@@ -108,34 +114,34 @@ mp3 and the whole thing is packed up in one or more iso files
 
 (defn set-file-permissions
   "Set file permissions on `root` to g+w recursively"
-  [root]
-  (let [permissions (conj (set (nio/posix-file-permissions root))
+  [file-tree]
+  (let [permissions (conj (set (nio/posix-file-permissions file-tree))
                           (nio/posix-file-permission :group-write))
         visitor-fn (fn [f] (nio/set-posix-file-permissions! f permissions) nil)
         visitor (nio/naive-visitor
                  :pre-visit-directory visitor-fn
                  :visit-file visitor-fn)]
-    (nio/walk-file-tree root visitor)))
+    (nio/walk-file-tree file-tree visitor)))
 
 (defn- copy-files
   "Copy a `production` to the archive spool dir for the given
   `sektion`. For a production master copy the whole DTB including wav
   files. For a production distribution master copy the isos"
   [production sektion]
-  (let [archive-path (container-path production sektion)]
-    (if (fs/exists? archive-path)
-      (log/errorf "Archive path %s already exists" archive-path)
-      (case sektion
-        :master
-        (do (fs/copy-dir (path/recorded-path production) archive-path)
-            (set-file-permissions (file archive-path)))
-        :dist-master
-        (do
+  (let [archive-root-path (container-root-path production sektion)]
+    (if (fs/exists? archive-root-path)
+      (log/errorf "Archive root path %s already exists" archive-root-path)
+      (let [archive-path (container-path production sektion)]
+        (fs/mkdir archive-root-path)
+        (case sektion
+          :master
+          (fs/copy-dir (path/recorded-path production) archive-path)
+          :dist-master
           (doseq [volume (range 1 (inc (:volumes production)))]
             (let [iso-archive-name (str (container-id production sektion volume) ".iso")
                   iso-archive-path (.getPath (file archive-path iso-archive-name))]
-              (fs/copy+ (path/iso-name production volume) iso-archive-path)))
-          (set-file-permissions (file archive-path)))))))
+              (fs/copy+ (path/iso-name production volume) iso-archive-path))))
+        (set-file-permissions archive-root-path)))))
 
 (defn- create-rdf
   "Create an rdf file and place it in the appropriate archive spool
