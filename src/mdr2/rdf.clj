@@ -17,7 +17,7 @@
            multimedia_type multimedia_content narrator producer produced_date
            revision revision_date revision_description
            total_time audio_format periodical_number]}]
-  [:rdf:DRF {:xmlns:rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  [:rdf:RDF {:xmlns:rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
              :xmlns:dc "http://purl.org/dc/elements/1.1/"
              :xmlns:dtb "http://www.daisy.org/z3986/2005/dtbook/"
              :xmlns:sbs "http://www.sbszh.ch/sbs/namespace"}
