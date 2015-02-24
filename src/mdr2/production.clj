@@ -16,9 +16,10 @@
             [mdr2.obi :as obi])
   (:import java.nio.file.StandardCopyOption))
 
-(def library-signature-regexp
-  "Validation regexp for library signatures"
-  #"^ds\d{5,}$")
+(defn library-signature?
+  "Return true if `id` is a valid library signature"
+  [id]
+  (re-matches #"^ds\d{5,}$" id))
 
 (defn multi-volume?
   "Return true if this production has multiple volumes"

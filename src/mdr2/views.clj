@@ -152,7 +152,7 @@
                            (layout/glyphicon "transfer")]])]])]])))
 
 (defn production-catalog [request id library_signature]
-  (if (re-matches prod/library-signature-regexp library_signature)
+  (if (prod/library-signature? library_signature)
     (let [p (assoc (prod/find id) :library_signature library_signature)]
       (prod/set-state-cataloged! p)
       (response/redirect "/catalog"))
@@ -237,7 +237,7 @@
           (cond
             (repair/production-id? identifier)
             (when-let [production (prod/find (.substring identifier 3))] [production])
-            (repair/library-signature? identifier)
+            (prod/library-signature? identifier)
             (prod/find-by-library-signature identifier)
             (repair/product-number? identifier)
             (prod/find-by-productnumber identifier)

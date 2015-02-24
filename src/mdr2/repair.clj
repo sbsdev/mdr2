@@ -25,11 +25,6 @@
   [id]
   (re-matches #"(?i)dam\d{1,5}" id))
 
-(defn library-signature?
-  "Return true if `id` is a valid library signature"
-  [id]
-  (re-matches #"(?i)ds\d{1,5}" id))
-
 (defn product-number?
   "Return true if `id` is a valid product number"
   [id]
@@ -39,7 +34,7 @@
   "Return true if `id` is either a valid production id, i.e. a dam
   number or a valid library signature"
   [id]
-  (or (production-id? id) (library-signature? id)))
+  (or (production-id? id) (prod/library-signature? id)))
 
 (defn archive-url
   "Return the url for an archived production given a `container-id`"
