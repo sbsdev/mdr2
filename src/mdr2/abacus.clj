@@ -141,7 +141,7 @@
            date id produced_date volumes] :as production}]
   (->> [(create-row 2 product_number)
         (create-row 239 (quot (or total_time 0) (* 1000 60))) ; in minutes
-        (create-row 106 state)
+        (create-row 106 (string/capitalize state))
         (create-row 280 audio_format)
         (create-row 271 volumes) ; Number of CDs
         (create-row 281 multimedia_type)
