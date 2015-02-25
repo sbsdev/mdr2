@@ -117,7 +117,7 @@
                 </element>
                 <optional>
                   <element name="narrator">
-                    <data type="NCName"/>
+                    <data type="token"/>
                   </element>
                 </optional>
                 <!-- FIXME: could probably also be something of the form "1 of 3" -->

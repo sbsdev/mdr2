@@ -43,7 +43,7 @@ start =
             element ncc {
               element sourcePublisher { xsd:NCName },
               element sourceDate { text },
-              element narrator { xsd:NCName }?,
+              element narrator { xsd:token }?,
                # FIXME: could probably also be something of the form "1 of 3"
               element setInfo { xsd:integer }, 
               element revisionDate { xsd:date }
