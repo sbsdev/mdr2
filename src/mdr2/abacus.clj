@@ -86,7 +86,10 @@
   [f]
   (if-let [error (validation/recorded-validation-errors f)]
     error
-    (let [{product_number :product_number :as new-production} (read-file f)
+    (let [{product_number :product_number :as new-production}
+          (-> (read-file f)
+              ;; ignore production_type when importing a recorded production
+              (dissoc :production_type))
           production (prod/find-by-productnumber product_number)]
       (cond
         (empty? production)
@@ -116,7 +119,10 @@
   [f]
   (if-let [error (validation/metadata-sync-errors f)]
     error
-    (prod/update! (read-file f))))
+    (prod/update!
+     (-> (read-file f)
+         ;; ignore production_type when updating metadata
+         (dissoc :production_type)))))
 
 (defn wrap-rows
   "Wrap an export record according to ABACUS conventions"
