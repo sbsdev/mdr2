@@ -53,7 +53,7 @@
                 <ref name="title"/>
                 <optional>
                   <element name="creator">
-                    <text/>
+                    <data type="token"/>
                   </element>
                 </optional>
                 <optional>
@@ -70,8 +70,9 @@
               </element>
               <element name="sbs">
                 <element name="idVorstufe">
-                  <text/>
+                  <data type="token"/>
                 </element>
+                <!-- FIXME: use a pattern here for validation -->
                 <element name="printPageNumber">
                   <data type="integer"/>
                 </element>
@@ -83,7 +84,7 @@
                 </element>
                 <optional>
                   <element name="ort">
-                    <data type="NCName"/>
+                    <data type="token"/>
                   </element>
                   <element name="anrede">
                     <data type="NCName"/>
@@ -92,16 +93,16 @@
                     <data type="integer"/>
                   </element>
                   <element name="strasse">
-                    <text/>
+                    <data type="token"/>
                   </element>
                   <element name="vorname">
-                    <data type="NCName"/>
+                    <data type="token"/>
                   </element>
                   <element name="idZeitkurz">
                     <data type="NCName"/>
                   </element>
                   <element name="nachname">
-                    <data type="NCName"/>
+                    <data type="token"/>
                   </element>
                   <element name="jahr">
                     <text/>
@@ -110,10 +111,10 @@
               </element>
               <element name="ncc">
                 <element name="sourcePublisher">
-                  <data type="NCName"/>
+                  <data type="token"/>
                 </element>
                 <element name="sourceDate">
-                  <text/>
+                  <data type="token"/>
                 </element>
                 <optional>
                   <element name="narrator">

@@ -45,7 +45,7 @@
                 <ref name="title"/>
                 <optional>
                   <element name="creator">
-                    <text/>
+                    <data type="token"/>
                   </element>
                 </optional>
                 <optional>
@@ -64,9 +64,10 @@
               <element name="sbs">
                 <optional>
                   <element name="idVorstufe">
-                    <text/>
+                    <data type="token"/>
                   </element>
                 </optional>
+                <!-- FIXME: use a pattern here for validation -->
                 <element name="printPageNumber">
                   <data type="integer"/>
                 </element>
@@ -83,7 +84,7 @@
                 </element>
                 <optional>
                   <element name="ort">
-                    <data type="NCName"/>
+                    <data type="token"/>
                   </element>
                 </optional>
                 <optional>
@@ -98,12 +99,12 @@
                 </optional>
                 <optional>
                   <element name="strasse">
-                    <text/>
+                    <data type="token"/>
                   </element>
                 </optional>
                 <optional>
                   <element name="vorname">
-                    <data type="NCName"/>
+                    <data type="token"/>
                   </element>
                 </optional>
                 <optional>
@@ -113,7 +114,7 @@
                 </optional>
                 <optional>
                   <element name="nachname">
-                    <data type="NCName"/>
+                    <data type="token"/>
                   </element>
                 </optional>
                 <optional>
@@ -124,13 +125,13 @@
               </element>
               <element name="ncc">
                 <element name="sourcePublisher">
-                  <text/>
+                  <data type="token"/>
                 </element>
                 <element name="sourceDate">
-                  <text/>
+                  <data type="token"/>
                 </element>
                 <element name="narrator">
-                  <text/>
+                  <data type="token"/>
                 </element>
                 <element name="setInfo">
                   <data type="integer"/>

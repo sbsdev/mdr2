@@ -17,30 +17,30 @@ start =
           element MetaData {
             element dc {
               title,
-              element creator { text },
+              element creator { xsd:token },
               element source { xsd:NMTOKEN },
               element language { xsd:NCName },
               identifier,
               element date { xsd:date }
             },
             element sbs {
-              element idVorstufe { xsd:NCName },
+              element idVorstufe { xsd:token }, # FIXME: use a pattern here for validation
               element printPageNumber { xsd:integer },
               element idMaster { xsd:NCName },
               element idPrint { xsd:integer },
               element kostenstelle { xsd:integer },
-              element ort { xsd:NCName },
+              element ort { xsd:token },
               element anrede { xsd:NCName },
               element plz { xsd:integer },
-              element strasse { text },
-              element vorname { xsd:NCName },
-              element nachname { xsd:NCName },
+              element strasse { xsd:token },
+              element vorname { xsd:token },
+              element nachname { xsd:token },
               element jahr { text }
             },
             element ncc {
-              element sourcePublisher { xsd:NCName },
-              element sourceDate { text },
-              element narrator { text },
+              element sourcePublisher { xsd:token },
+              element sourceDate { xsd:token },
+              element narrator { xsd:token },
               element setInfo { xsd:integer },
               element revisionDate { xsd:date }
             }

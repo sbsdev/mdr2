@@ -28,7 +28,7 @@
               <element name="dc">
                 <ref name="title"/>
                 <element name="creator">
-                  <text/>
+                  <data type="token"/>
                 </element>
                 <element name="source">
                   <data type="NMTOKEN"/>
@@ -43,8 +43,9 @@
               </element>
               <element name="sbs">
                 <element name="idVorstufe">
-                  <data type="NCName"/>
+                  <data type="token"/>
                 </element>
+                <!-- FIXME: use a pattern here for validation -->
                 <element name="printPageNumber">
                   <data type="integer"/>
                 </element>
@@ -58,7 +59,7 @@
                   <data type="integer"/>
                 </element>
                 <element name="ort">
-                  <data type="NCName"/>
+                  <data type="token"/>
                 </element>
                 <element name="anrede">
                   <data type="NCName"/>
@@ -67,13 +68,13 @@
                   <data type="integer"/>
                 </element>
                 <element name="strasse">
-                  <text/>
+                  <data type="token"/>
                 </element>
                 <element name="vorname">
-                  <data type="NCName"/>
+                  <data type="token"/>
                 </element>
                 <element name="nachname">
-                  <data type="NCName"/>
+                  <data type="token"/>
                 </element>
                 <element name="jahr">
                   <text/>
@@ -81,13 +82,13 @@
               </element>
               <element name="ncc">
                 <element name="sourcePublisher">
-                  <data type="NCName"/>
+                  <data type="token"/>
                 </element>
                 <element name="sourceDate">
-                  <text/>
+                  <data type="token"/>
                 </element>
                 <element name="narrator">
-                  <text/>
+                  <data type="token"/>
                 </element>
                 <element name="setInfo">
                   <data type="integer"/>
