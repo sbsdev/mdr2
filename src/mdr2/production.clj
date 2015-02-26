@@ -84,7 +84,11 @@
 (defn create-dirs
   "Create all working dirs for a `production`"
   [production]
-  (doseq [dir (path/all production)]
+  (doseq [dir (->> production
+               path/all
+               ;; do not create the recording path as that is created
+               ;; by obi
+               (remove #{(path/recording-path production)}))]
     (fs/mkdirs dir)
     ;; make sure recording and recorded are group writable
     (when (#{path/recorded-path path/recording-path} dir)
