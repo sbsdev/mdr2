@@ -7,6 +7,7 @@
             [mdr2.production :as prod]
             [mdr2.production.path :as path]
             [mdr2.dtb :as dtb]
+            [mdr2.dtb.xml :as xml]
             [mdr2.pipeline1 :as pipeline]
             [mdr2.pipeline2.scripts :as pipeline2]))
 
@@ -105,6 +106,8 @@
        (if (not= 0 (:exit result))
          (log/errorf "Encoding failed with %s" (:err result))
          (do
+           ;; update meta data
+           (xml/update-meta-data! production)
            ;; downgrade to daisy202
            (downgrade production)
            ;; create an iso
