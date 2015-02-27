@@ -37,6 +37,7 @@
    (map #(merge (prod/default-meta-data) %))))
 
 (defn import!
-  "Import all productions from file `f` and insert them in the data base"
+  "Import all productions from file `f` and insert them in the data
+  base"
   [f]
   (apply jdbc/insert! db :production (productions f)))
