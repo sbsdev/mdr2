@@ -12,12 +12,12 @@ SELECT * FROM production WHERE product_number = :product_number
 
 -- name: find-by-state
 -- Return the production for given `state`
-SELECT * FROM production WHERE state = :state
+SELECT * FROM production WHERE state = :state ORDER BY title
 
 -- name: find-by-title-or-creator
 -- Return the productions for given title or creator
 SELECT DISTINCT * FROM production
-WHERE title LIKE :term OR creator LIKE :term
+WHERE title LIKE :term OR creator LIKE :term ORDER BY title
 
 -- name: find-by-library-signature
 -- Return the productions for given `library_signature`
