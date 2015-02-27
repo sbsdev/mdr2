@@ -209,14 +209,14 @@
     ;; signature (e.g. "ds123") to it
     (set-state! production "encoded")))
 
-(defn set-state-archived! [production]
-  (delete-all-dirs! production)
-  (set-state! production "archived"))
-
 (defn delete-all-dirs!
   "Delete all artifacts on the file system for a production"
   [production]
   (doseq [dir (path/all production)] (fs/delete-dir dir)))
+
+(defn set-state-archived! [production]
+  (delete-all-dirs! production)
+  (set-state! production "archived"))
 
 (defn delete!
   "Delete a production with the given `id`"
