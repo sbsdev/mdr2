@@ -173,7 +173,7 @@ mp3 and the whole thing is packed up in one or more iso files
   [production]
   (archive-sektion production :master)
   (archive-sektion production :dist-master)
-  (prod/set-state! production "archived"))
+  (prod/set-state-archived! production))
 
 (defmethod archive "periodical"
   [production]
@@ -196,7 +196,7 @@ mp3 and the whole thing is packed up in one or more iso files
                 iso-archive-path (.getPath (file archive-path "produkt" iso-archive-name))]
             (fs/copy+ (path/iso-name production volume) iso-archive-path)))
         (set-file-permissions (file archive-path))
-        (prod/set-state! production "archived")))))
+        (prod/set-state-archived! production)))))
 
 (defmethod archive "other"
   [production]
@@ -209,4 +209,4 @@ mp3 and the whole thing is packed up in one or more iso files
             iso-archive-path (.getPath (file other-spool-dir iso-archive-name))]
         (fs/copy (path/iso-name production volume) iso-archive-path)
         (set-file-permissions (file iso-archive-path))))
-    (prod/set-state! production "archived")))
+    (prod/set-state-archived! production)))

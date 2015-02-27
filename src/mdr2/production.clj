@@ -209,7 +209,11 @@
     ;; signature (e.g. "ds123") to it
     (set-state! production "encoded")))
 
-(defn delete-all-dirs
+(defn set-state-archived! [production]
+  (delete-all-dirs! production)
+  (set-state! production "archived"))
+
+(defn delete-all-dirs!
   "Delete all artifacts on the file system for a production"
   [production]
   (doseq [dir (path/all production)] (fs/delete-dir dir)))
@@ -218,7 +222,7 @@
   "Delete a production with the given `id`"
   [id]
   (db/delete! {:id id})
-  (delete-all-dirs {:id id}))
+  (delete-all-dirs! {:id id}))
 
 (defn add-structure
   "Add a DTBook XML to a `production`. This will also set the status
