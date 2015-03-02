@@ -29,7 +29,7 @@
       [:tbody
        (let [cached-state (memoize db/find-state)
              cached-production-type (memoize db/find-production-type)]
-         (for [{:keys [id title production_type state] :as production} (prod/find-all)]
+         (for [{:keys [id title production_type state] :as production} (prod/find-all-in-production)]
            (let [realized-state (first (cached-state {:id state}))
                  realized-production-type (first (cached-production-type {:id production_type}))
                  next-state (:next_state realized-state)]

@@ -132,10 +132,11 @@
   [id]
   (first (db/find {:id id})))
 
-(defn find-all
-  "Find all productions"
+(defn find-all-in-production
+  "Find all productions which are currently in production, i.e. which
+  haven't been archived or deleted"
   []
-  (db/find-all))
+  (db/find-all-in-production))
 
 (defn find-by-productnumber
   "Find a production given its `product_number`"

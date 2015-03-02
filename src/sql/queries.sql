@@ -6,6 +6,10 @@ SELECT * FROM production WHERE id = :id
 -- Return all productions
 SELECT * FROM production ORDER BY title
 
+-- name: find-all-in-production
+-- Return all productions
+SELECT * FROM production WHERE state NOT IN ('archived', 'deleted') ORDER BY title
+
 -- name: find-by-productnumber
 -- Return the production for given `product_number`
 SELECT * FROM production WHERE product_number = :product_number
