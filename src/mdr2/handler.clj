@@ -15,7 +15,7 @@
 
 (defroutes app-routes
   "Main routes for the application"
-  (GET "/" request (views/home request))
+  (GET "/" request (friend/authenticated (views/home request)))
 
   ;; bulk import of productions
   (GET "/production/upload" request
