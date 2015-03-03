@@ -3,6 +3,7 @@
   (:require [clojure.java.io :refer [file]]
             [clojure.java.shell :refer [sh]]
             [clojure.tools.logging :as log]
+            [clojure.string :as s]
             [me.raynes.fs :as fs]
             [mdr2.production :as prod]
             [mdr2.production.path :as path]
@@ -46,6 +47,11 @@
     (pipeline/audio-encoder (.getPath manifest) (.getPath output)
                             :bitrate bitrate :stereo stereo :freq sample-rate)))
 
+(defn truncate
+  "Truncate and trim string `s` to length `n`"
+  [s n]
+  (s/trim (subs s 0 (min (count s) n))))
+
 (defn create-iso
   "Pack a production in an iso file"
   [{:keys [title publisher]
@@ -58,9 +64,13 @@
     (sh "genisoimage"
         "-quiet"
         "-r"
-        "-publisher" publisher
-        "-V" title ; volume ID (volume name or label)
-        "-J" ; Generate Joliet directory records in addition to regular ISO9660 filenames.
+        "-publisher" (truncate publisher 128)
+        ;; volume ID (volume name or label). No more than 32
+        ;; characters are allowed
+        "-V" (truncate title 32)
+        ;; Generate Joliet directory records in addition to regular
+        ;; ISO9660 filenames
+        "-J"
         "-o" iso-name encoded-path)))
 
 (def bitrates
