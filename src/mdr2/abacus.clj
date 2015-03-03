@@ -88,8 +88,13 @@
     error
     (let [{product_number :product_number :as new-production}
           (-> (read-file f)
-              ;; ignore production_type when importing a recorded production
-              (dissoc :production_type))
+              ;; ignore production_type and periodical_number when
+              ;; importing a recorded production
+              ;; periodical_number is wrong because the XML exported
+              ;; for a recorded production lacks the mvl_only field
+              ;; and hence the production_type and the
+              ;; periodical_number will be wrong
+              (dissoc :production_type :periodical_number))
           production (prod/find-by-productnumber product_number)]
       (cond
         (empty? production)
