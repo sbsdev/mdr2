@@ -209,7 +209,15 @@
 (defn production-bulk-import
   [productions]
   (doseq [[_ p] productions]
-    (prod/update-or-create! (prod/parse p)))
+    (-> p
+     prod/parse
+     ;; FIXME: does it make sense to update? What if the production
+     ;; has already been archived? I think we should probably make
+     ;; sure the production is in certain valid states
+     prod/update-or-create!
+     ;; productions from vubis do not need any manual structuring.
+     ;; They get their standard structure from a default template
+     prod/set-state-structured!))
   (response/redirect "/"))
 
 (defn production-repair-form

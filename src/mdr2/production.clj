@@ -168,6 +168,11 @@
       (msg/publish (queues/notify-abacus) p))
     p))
 
+(defn set-state-structured! [production]
+  ;; create a config file for obi
+  (obi/config-file production)
+  (set-state! production "structured"))
+
 (defn set-state-recorded! [production]
   (let [new-production
         (as-> production p
@@ -231,7 +236,4 @@
   [production f]
   ;; move the file to the right place
   (fs/move f (xml-path production) StandardCopyOption/REPLACE_EXISTING)
-  ;; create a config file for obi
-  (obi/config-file production)
-  ;; update the status
-  (set-state! production "structured"))
+  (set-state-structured! production))
