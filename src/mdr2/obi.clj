@@ -24,18 +24,19 @@
 (defn- config-sexp
   [production]
   (let [recording-path (recording-path production)
-        recorded-path (recorded-path production)]
+        recorded-path (recorded-path production)
+        audiochannels (if (:library_number production) 2 1)]
     [:obiconfig
      [:import
       [:obiprojectdirectory recording-path]
       [:audiosamplerate 44100]
-      [:audiochannels 1]]
+      [:audiochannels audiochannels]]
      [:export
       [:directory recorded-path]
       [:standard "daisy2.02"]
       [:audioencoding "wav"]
       [:audiosamplerate 44100]
-      [:audiochannels 1]
+      [:audiochannels audiochannels]
       [:bitrate 64]]]))
 
 (defn config
