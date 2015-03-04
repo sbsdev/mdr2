@@ -25,7 +25,7 @@
     (layout/common user
      [:h1 "Productions"]
      [:table.table.table-striped
-      [:thead [:tr [:th "Title"] [:th "Type"] [:th "State"] [:th "Action"]]]
+      [:thead [:tr [:th "DAM"] [:th "Title"] [:th "Type"] [:th "State"] [:th "Action"]]]
       [:tbody
        (let [cached-state (memoize db/find-state)
              cached-production-type (memoize db/find-production-type)]
@@ -34,6 +34,7 @@
                  realized-production-type (first (cached-production-type {:id production_type}))
                  next-state (:next_state realized-state)]
              [:tr
+              [:td id]
               [:td (link-to (str "/production/" id) title)]
               [:td (:name realized-production-type)]
               [:td (:name realized-state)]
