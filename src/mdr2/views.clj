@@ -163,7 +163,7 @@
   (prod/delete! id)
   (response/redirect "/"))
 
-(defn production-bulk-import-form [request & errors]
+(defn production-bulk-import-form [request & [errors]]
   (let [user (friend/current-authentication request)]
     (layout/common user
      [:h1 "Upload new productions from Vubis XML"]
