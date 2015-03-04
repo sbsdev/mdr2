@@ -1,8 +1,10 @@
 (ns mdr2.dtbook
   "Functionality around [DTBook XML](http://www.daisy.org/z3986/2005/Z3986-2005.html)"
-  (:require [clojure.string :as s]
+  (:require [clojure.java.io :refer [file]]
+            [clojure.string :as s]
             [clojure.data.xml :as xml]
-            [mdr2.data.xml :as xml-new]))
+            [mdr2.data.xml :as xml-new]
+            [mdr2.production.path :as path]))
 
 ;; FIXME: we should probably use some ready made library for i18n.
 ;; There is https://github.com/ptaoussanis/tower,
@@ -134,3 +136,11 @@
       dtbook-sexp
       xml/sexp-as-element
       (xml-new/emit-str :doctype doctype)))
+
+(defn dtbook-file
+  "Write a default dtbook file to the structured-path for the given
+  `production`"
+  [production]
+  (let [file-name (str (:id production) ".xml")
+        dtbook-file-name (file (path/structured-path production) file-name)]
+    (spit dtbook-file-name (dtbook production))))

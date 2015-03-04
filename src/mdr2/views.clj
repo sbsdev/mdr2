@@ -13,7 +13,7 @@
             [mdr2.vubis :as vubis]
             [mdr2.abacus :as abacus]
             [mdr2.layout :as layout]
-            [mdr2.dtbook :refer [dtbook]]
+            [mdr2.dtbook :as dtbook]
             [mdr2.dtbook.validation :refer [validate-metadata]]
             [mdr2.production-monitoring :as psm]
             [mdr2.repair :as repair]
@@ -84,7 +84,7 @@
 
 (defn production-xml [id]
   (let [production (prod/find id)]
-    (-> (dtbook production)
+    (-> (dtbook/dtbook production)
         response/response
         (response/content-type "text/xml")
         (response/charset "UTF-8"))))
@@ -220,7 +220,9 @@
      prod/update-or-create!
      ;; productions from vubis do not need any manual structuring.
      ;; They get their standard structure from a default template
-     prod/set-state-structured!))
+     prod/set-state-structured!
+     ;; write the dtbook template file
+     dtbook/dtbook-file))
   (response/redirect "/"))
 
 (defn production-repair-form
