@@ -212,6 +212,7 @@
   (doseq [[_ p] productions]
     (-> p
      prod/parse
+     prod/add-default-meta-data
      ;; FIXME: does it make sense to update? What if the production
      ;; has already been archived? I think we should probably make
      ;; sure the production is in certain valid states
