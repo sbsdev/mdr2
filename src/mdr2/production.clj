@@ -57,6 +57,7 @@
   "Return default meta data"
   []
   {:date (to-date (t/now))
+   :language "de"
    :identifier (uuid)
    :volumes 1
    :type "Text"
