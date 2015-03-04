@@ -17,8 +17,10 @@
    :column (.getColumnNumber exception)})
 
 (defn validation-errors
-  "Return the first validation error when validating `file` against
-  the given Relaxng `schema`. If the file is valid nil is returned."
+  "Return a list of validation errors when validating `file` against
+  the given Relaxng `schema`. If the file is valid an empty list is
+  returned. The errors are returned in the form a map contaings the
+  keys :error, :line and :column"
   [file schema]
   ;; basically a minimal port of
   ;; http://stackoverflow.com/questions/15732/whats-the-best-way-to-validate-an-xml-file-against-an-xsd-file
