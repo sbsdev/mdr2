@@ -14,28 +14,28 @@
 
 (defn open-validation-errors
   "Check if an export `file` from ABACUS is a valid request for
-  opening a production. Return nil if the file is valid or a
-  validation error otherwise"
+  opening a production. Return an empty list if the file is valid or a
+  list of validation errors otherwise"
   [file]
   (validation-errors file open-schema))
 
 (defn recorded-validation-errors
   "Check if an export `file` from ABACUS is a valid request for
-  announcing that a production is recorded. Return nil if the file is
-  valid or a validation error otherwise"
+  announcing that a production is recorded. Return an empty if the
+  file is valid or a list of validation errors otherwise"
   [file]
   (validation-errors file recorded-schema))
 
 (defn status-request-errors
   "Check if an export `file` from ABACUS is a valid request for status
-  information. Return nil if the file is valid or a validation error
-  otherwise"
+  information. Return an empty list if the file is valid or a list of
+  validation errors otherwise"
   [file]
   (validation-errors file status-request-schema))
 
 (defn metadata-sync-errors
   "Check if an export `file` from ABACUS is a valid request for
-  synchronizing meta data. Return nil if the file is valid or a
-  validation error otherwise"
+  synchronizing meta data. Return an empty list if the file is valid
+  or a list of validation errors otherwise"
   [file]
   (validation-errors file metadata-schema))

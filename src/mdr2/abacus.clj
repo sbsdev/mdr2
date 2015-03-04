@@ -77,15 +77,15 @@
 (defn import-new-production
   "Import a new production from file `f`"
   [f]
-  (if-let [error (validation/open-validation-errors f)]
-    error
+  (if-let [errors (validation/open-validation-errors f)]
+    errors
     (prod/update-or-create! (read-file f))))
 
 (defn import-recorded-production
   "Import a recorded production from file `f`"
   [f]
-  (if-let [error (validation/recorded-validation-errors f)]
-    error
+  (if-let [errors (validation/recorded-validation-errors f)]
+    errors
     (let [{product_number :product_number :as new-production}
           (-> (read-file f)
               ;; ignore production_type and periodical_number when
@@ -112,8 +112,8 @@
 (defn import-status-request
   "Import a status request from file `f`"
   [f]
-  (if-let [error (validation/status-request-errors f)]
-    error
+  (if-let [errors (validation/status-request-errors f)]
+    errors
     (let [{product_number :product_number} (read-file f)
           production (prod/find-by-productnumber product_number)]
       (msg/publish (queues/notify-abacus) production)
@@ -122,8 +122,8 @@
 (defn import-metadata-update
   "Import a metadata update request from file `f`"
   [f]
-  (if-let [error (validation/metadata-sync-errors f)]
-    error
+  (if-let [errors (validation/metadata-sync-errors f)]
+    errors
     (prod/update!
      (-> (read-file f)
          ;; ignore production_type when updating metadata

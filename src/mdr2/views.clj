@@ -162,12 +162,14 @@
   (prod/delete! id)
   (response/redirect "/"))
 
-(defn production-bulk-import-form [request & error]
+(defn production-bulk-import-form [request & errors]
   (let [user (friend/current-authentication request)]
     (layout/common user
      [:h1 "Upload new productions from Vubis XML"]
-     (when error
-       [:p [:ul.alert.alert-danger [:li error]]])
+     (when errors
+       [:p [:ul.alert.alert-danger
+            (for [{:keys [error line column]} errors]
+              [:li (format "%s Line: %d Column: %d" error line column)])]])
      (form/form-to
       {:enctype "multipart/form-data"}
       [:post (str "/production/upload-confirm")]
@@ -202,7 +204,7 @@
   [request file]
   (let [{tempfile :tempfile} file
         errors (vubis/validate (.getPath tempfile))]
-    (if (nil? errors)
+    (if (empty? errors)
       (production-bulk-import-confirm-form request (vubis/read-file tempfile))
       (production-bulk-import-form request errors))))
 
@@ -335,13 +337,19 @@
   [{id :id}]
   (format "/production/%s" id))
 
+(defn print-errors [errors]
+  (->> errors
+   (map (fn [{:keys [error line column]}]
+          (format "%s Line: %d Column: %d" error line column)))
+   (string/join \newline)))
+
 (defn abacus-new [f]
   (let [tempfile (:tempfile f)
         p (abacus/import-new-production tempfile)]
     (if (map? p)
       (response/created (url-for p))
       ;; an error occured
-      (response/status (response/response (println-str p)) 400))))
+      (response/status (response/response (print-errors p)) 400))))
 
 (defn abacus-recorded [f]
   (let [tempfile (:tempfile f)
@@ -349,7 +357,7 @@
     (if (map? p)
       (response/response nil)
       ;; an error occured
-      (response/status (response/response (println-str p)) 400))))
+      (response/status (response/response (print-errors p)) 400))))
 
 (defn abacus-status [f]
   (let [tempfile (:tempfile f)
@@ -357,7 +365,7 @@
     (if (map? p)
       (response/response nil)
       ;; an error occured
-      (response/status (response/response (println-str p)) 400))))
+      (response/status (response/response (print-errors p)) 400))))
 
 (defn abacus-metadata [f]
   (let [tempfile (:tempfile f)
@@ -365,7 +373,7 @@
     (if (map? p)
       (response/created nil)
       ;; an error occured
-      (response/status (response/response (println-str p)) 400))))
+      (response/status (response/response (print-errors p)) 400))))
 
 (defn production-monitoring
   "Return a csv containing the total audio length of all productions"
