@@ -112,9 +112,11 @@
    (encode production bitrate (sampling-rate production)))
   ([production bitrate sample-rate]
    (doseq [volume (range 1 (inc (:volumes production)))]
-     (let [result (encode-production production bitrate volume sample-rate)]
-       (if (not= 0 (:exit result))
-         (log/errorf "Encoding failed with %s" (:err result))
+     (let [{exit :exit error :err} (encode-production production bitrate volume sample-rate)]
+       (if (or (not= 0 exit)
+               (not (s/blank? error)))
+         (log/errorf "Encoding of %s (%s) failed with exit %s and message \"%s\""
+                     (:id production) volume exit error)
          (do
            ;; update meta data
            (xml/update-meta-data! production)
