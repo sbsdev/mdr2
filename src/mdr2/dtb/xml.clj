@@ -82,7 +82,7 @@
   [production]
   (let [manifest (path/manifest-path production)
         updated (with-open [r (io/reader manifest)]
-                  (update-meta-data (xml/parse r)
+                  (update-meta-data (xml/parse r :support-dtd false)
                                     production handle-manifest-node))]
     (with-open [w (io/writer manifest)]
       (xml-new/emit updated w :doctype manifest-doctype))))
