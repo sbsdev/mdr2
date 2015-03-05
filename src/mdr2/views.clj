@@ -109,7 +109,7 @@
         path (.getPath tempfile)
         production (prod/find id)
         errors (concat
-                (pipeline/validate path) ; validate XML
+                (pipeline/validate path :dtbook) ; validate XML
                 (validate-metadata path production))] ; validate meta data
     (if (seq errors)
       (file-upload-form request id errors)

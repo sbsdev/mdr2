@@ -32,18 +32,22 @@
        (map #(clean-line % file))))
 
 (defn validate
-  "Invoke the validator script from for given file. Returns an empty
-  seq on successful validation or a seq of error messages otherwise"
-  [file]
-  (-> (sh "daisy-pipeline"
-          (str install-path "/verify/ConfigurableValidator.taskScript")
-          (str "--validatorInputFile=" file)
-          ;; make sure it has to be a DTBook file
-          "--validatorRequireInputType=Dtbook document"
-          ;; make sure files with a missing DOCTYPE declaration do not validate
-          "--validatorInputDelegates=org.daisy.util.fileset.validation.delegate.impl.NoDocTypeDeclarationDelegate")
-      :out
-      (filter-output file)))
+  "Invoke the validator script of `type` for given `file`. Returns an
+  empty seq on successful validation or a seq of error messages
+  otherwise. Possible types are `:dtbook` or `:daisy202`"
+  [file type]
+  (let [args ["daisy-pipeline"
+              (str install-path "/verify/ConfigurableValidator.taskScript")
+              (str "--validatorInputFile=" file)]
+        dtbook [;; make sure it is a DTBook file
+                "--validatorRequireInputType=Dtbook document"
+                ;; make sure files with a missing DOCTYPE declaration do not validate
+                "--validatorInputDelegates=org.daisy.util.fileset.validation.delegate.impl.NoDocTypeDeclarationDelegate"]
+        daisy202 [;; make sure it is a DAISY 202 file
+                  "--validatorRequireInputType=DAISY 2.02 DTB"]]
+    (-> (apply sh (concat args (case type :dtbook dtbook :daisy202 daisy202)))
+        :out
+        (filter-output file))))
 
 (defn audio-encoder
   "Invoke the audio encoder script."
