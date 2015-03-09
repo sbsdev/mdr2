@@ -90,7 +90,7 @@
 (def rest-api
   "REST API for ABACUS handler"
   (-> api-routes
-      (wrap-defaults (assoc-in api-defaults [:params  :multipart] true))
+      (wrap-defaults (assoc-in api-defaults [:params :multipart] true))
       stacktrace/wrap-stacktrace-log))
 
 
