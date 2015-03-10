@@ -117,7 +117,7 @@
         ;; add the file
         (prod/add-structure production tempfile)
         ;; and redirect to the index
-        (response/redirect "/")))))
+        (response/redirect-after-post "/")))))
 
 (defn catalog [request & error]
   (let [identity (friend/identity request)
@@ -156,12 +156,12 @@
   (if (prod/library-signature? library_signature)
     (let [p (assoc (prod/find id) :library_signature library_signature)]
       (prod/set-state-cataloged! p)
-      (response/redirect "/catalog"))
+      (response/redirect-after-post "/catalog"))
     (catalog request "Library signature not valid")))
 
 (defn production-delete [id]
   (prod/delete! id)
-  (response/redirect "/"))
+  (response/redirect-after-post "/"))
 
 (defn production-bulk-import-form [request & [errors]]
   (let [user (friend/current-authentication request)]
@@ -224,7 +224,7 @@
      prod/set-state-structured!
      ;; write the dtbook template file
      dtbook/dtbook-file))
-  (response/redirect "/"))
+  (response/redirect-after-post "/"))
 
 (defn production-repair-form
   [request & [errors]]
