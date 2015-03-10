@@ -9,6 +9,7 @@
             [immutant.messaging :as msg]
             [mdr2.queues :as queues]
             [mdr2.production :as prod]
+            [mdr2.production.path :as path]
             [mdr2.db :as db]
             [mdr2.vubis :as vubis]
             [mdr2.abacus :as abacus]
@@ -290,53 +291,79 @@
         (assoc :flash {:message "Repair has been initiated"}))))
 
 (defn production-set-state [id state]
-  (let [production (prod/find id)]
-    (case state
-      "recorded" (prod/set-state-recorded! production)
-      (prod/set-state! production state))
-    (response/redirect "/")))
+  (let [production (prod/find id)
+        resp (response/redirect-after-post "/")]
+    (if (= state "recorded")
+      ;; check if the exported production is even valid
+      (let [errors (prod/manifest-validate production)]
+        (if (seq errors)
+          ;; hm the exported production is not valid. Forget about the
+          ;; state change.
+          (-> resp
+              (assoc :flash {:errors errors}))
+          (do
+            (prod/set-state-recorded! production)
+            resp)))
+      (do
+        (prod/set-state! production state)
+        resp))))
 
-(defn production-split-form [request id]
+(defn- production-split-form-internal [id user errors]
+  (layout/common
+   user
+   [:h1 "Split Production"]
+   (when (seq errors)
+     [:p [:ul.alert.alert-danger (for [e errors] [:li e])]])
+   (form/form-to
+    {:class "form-horizontal"}
+    [:post (str "/production/" id "/split")]
+    (anti-forgery-field)
+    [:div.form-group
+     (form/label {:class "col-sm-2 control-label"} :volumes "Volumes:")
+     [:div.col-sm-2
+      (form/drop-down {:class "form-control"} :volumes [1 2 3 4 5 6 7 8] 2)]]
+    [:div.form-group
+     (form/label {:class "col-sm-2 control-label"} :sample-rate "Sample Rate:")
+     [:div.col-sm-2
+      (form/drop-down {:class "form-control"} :sample-rate [11025 22050 44100 48000] 22050)]]
+    [:div.form-group
+     (form/label {:class "col-sm-2 control-label"} :bitrate "Bitrate:")
+     [:div.col-sm-2
+      (form/drop-down {:class "form-control"} :bitrate [32 48 56 64 128] 56)]]
+    [:div.form-group
+     [:div {:class "col-sm-offset-2 col-sm-2"}
+      (form/submit-button {:class "btn btn-default"} "Encode")]])))
+
+(defn production-split-form [request id & [errors]]
   (let [user (friend/current-authentication request)
         production (prod/find id)] ; FIXME: the find could return nil
-    (layout/common
-     user
-     [:h1 "Split Production"]
-     (form/form-to
-      {:class "form-horizontal"}
-      [:post (str "/production/" id "/split")]
-      (anti-forgery-field)
-      [:div.form-group
-       (form/label {:class "col-sm-2 control-label"} :volumes "Volumes:")
-       [:div.col-sm-2
-        (form/drop-down {:class "form-control"} :volumes [1 2 3 4 5 6 7 8] 2)]]
-      [:div.form-group
-       (form/label {:class "col-sm-2 control-label"} :sample-rate "Sample Rate:")
-       [:div.col-sm-2
-        (form/drop-down {:class "form-control"} :sample-rate [11025 22050 44100 48000] 22050)]]
-      ;; [:div.form-group
-      ;;  (form/label {:class "col-sm-2 control-label"} :sample-rate "Sample Rate:")
-      ;;  [:label.radio-inline
-      ;;   (form/radio-button :sample-rate false 11025) 11025]
-      ;;  [:label.radio-inline
-      ;;   (form/radio-button :sample-rate true 22050) 22050]
-      ;;  [:label.radio-inline
-      ;;   (form/radio-button :sample-rate false 44100) 44100]
-      ;;  [:label.radio-inline
-      ;;   (form/radio-button :sample-rate false 48000) 48000]]
-      [:div.form-group
-       (form/label {:class "col-sm-2 control-label"} :bitrate "Bitrate:")
-       [:div.col-sm-2
-        (form/drop-down {:class "form-control"} :bitrate [32 48 56 64 128] 56)]]
-      [:div.form-group
-       [:div {:class "col-sm-offset-2 col-sm-2"}
-       (form/submit-button {:class "btn btn-default"} "Encode")]]))))
+    (if errors
+      ;; if we have errors then just show them in the form
+      (production-split-form-internal id user errors)
+      ;; otherwise check if the split production is even valid. Assume
+      ;; that we are going to have at least two volumes
+      (let [errors (prod/manifest-validate
+                    (if (prod/multi-volume? production)
+                      production
+                      (assoc production :volumes 2)))]
+        (if (seq errors)
+          ;; there are errors in the split production. No point in
+          ;; showing the split diealog. Just redirect to the main view
+          (-> (response/redirect-after-post "/")
+              (assoc :flash {:errors validation-errors}))
+          ;; all is well. Show the split dialog
+          (production-split-form-internal id user nil))))))
 
-(defn production-split [id volumes sample-rate bitrate]
-  (let [production (prod/find id)]
-    (prod/set-state-split! production (Integer/parseInt volumes)
-                           (Integer/parseInt sample-rate) (Integer/parseInt bitrate)))
-  (response/redirect "/"))
+(defn production-split [request id volumes sample-rate bitrate]
+  (let [production (prod/find id)
+        volumes (Integer/parseInt volumes) ;; FIXME: validate this
+        errors (prod/manifest-validate (assoc production :volumes volumes))]
+    (if (seq errors)
+      (production-split-form request id errors)
+      (do
+        (prod/set-state-split! production volumes
+                               (Integer/parseInt sample-rate) (Integer/parseInt bitrate))
+        (response/redirect-after-post "/")))))
 
 (defn url-for
   "Return the url for the given `production`"
