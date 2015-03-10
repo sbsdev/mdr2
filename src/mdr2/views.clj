@@ -343,8 +343,10 @@
 
 (defn print-errors [errors]
   (->> errors
-   (map (fn [{:keys [error line column]}]
-          (format "%s Line: %d Column: %d" error line column)))
+   (map (fn [{:keys [error line column] :as msg}]
+          (if error
+            (format "%s Line: %d Column: %d" error line column)
+            msg)))
    (string/join \newline)))
 
 (defn abacus-new [f]
