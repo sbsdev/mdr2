@@ -5,7 +5,8 @@
   path and that the pipeline scripts are installed under
   `/usr/lib/daisy-pipeline/scripts`."
   (:require [clojure.java.shell :refer [sh]]
-            [clojure.string :as s]))
+            [clojure.string :as s]
+            [me.raynes.fs :as fs]))
 
 (def ^:private install-path "/usr/lib/daisy-pipeline/scripts")
 
@@ -36,18 +37,23 @@
   empty seq on successful validation or a seq of error messages
   otherwise. Possible types are `:dtbook` or `:daisy202`"
   [file type]
-  (let [args ["daisy-pipeline"
-              (str install-path "/verify/ConfigurableValidator.taskScript")
-              (str "--validatorInputFile=" file)]
-        dtbook [;; make sure it is a DTBook file
-                "--validatorRequireInputType=Dtbook document"
-                ;; make sure files with a missing DOCTYPE declaration do not validate
-                "--validatorInputDelegates=org.daisy.util.fileset.validation.delegate.impl.NoDocTypeDeclarationDelegate"]
-        daisy202 [;; make sure it is a DAISY 202 file
-                  "--validatorRequireInputType=DAISY 2.02 DTB"]]
-    (-> (apply sh (concat args (case type :dtbook dtbook :daisy202 daisy202)))
-        :out
-        (filter-output file))))
+  ;; the pipeline1 validator is not so brilliant when it comes to
+  ;; returning error conditions. For that reason we check for
+  ;; existence of the input file before hand
+  (if (not (and (fs/exists? file) (fs/readable? file)))
+    [(format "Input file '%s' does not exist or is not readable" file)]
+    (let [args ["daisy-pipeline"
+                (str install-path "/verify/ConfigurableValidator.taskScript")
+                (str "--validatorInputFile=" file)]
+          dtbook [;; make sure it is a DTBook file
+                  "--validatorRequireInputType=Dtbook document"
+                  ;; make sure files with a missing DOCTYPE declaration do not validate
+                  "--validatorInputDelegates=org.daisy.util.fileset.validation.delegate.impl.NoDocTypeDeclarationDelegate"]
+          daisy202 [;; make sure it is a DAISY 202 file
+                    "--validatorRequireInputType=DAISY 2.02 DTB"]]
+      (-> (apply sh (concat args (case type :dtbook dtbook :daisy202 daisy202)))
+          :out
+          (filter-output file)))))
 
 (defn audio-encoder
   "Invoke the audio encoder script."
