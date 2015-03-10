@@ -77,57 +77,65 @@
 (defn import-new-production
   "Import a new production from file `f`"
   [f]
-  (if-let [errors (validation/open-validation-errors f)]
-    errors
-    (prod/update-or-create! (read-file f))))
+  (let [errors (validation/open-validation-errors f)]
+    (if (seq errors)
+      errors
+      (prod/update-or-create! (read-file f)))))
 
 (defn import-recorded-production
   "Import a recorded production from file `f`"
   [f]
-  (if-let [errors (validation/recorded-validation-errors f)]
-    errors
-    (let [{product_number :product_number :as new-production}
-          (-> (read-file f)
-              ;; ignore production_type and periodical_number when
-              ;; importing a recorded production
-              ;; periodical_number is wrong because the XML exported
-              ;; for a recorded production lacks the mvl_only field
-              ;; and hence the production_type and the
-              ;; periodical_number will be wrong
-              (dissoc :production_type :periodical_number))
-          production (prod/find-by-productnumber product_number)]
-      (cond
-        (empty? production)
-        (format "Non-existing product number %s" product_number)
-        (not= "structured" (:state production))
-        (format "Production %s is not structured (%s instead)"
-                product_number (:state production))
-        (not (prod/manifest? production))
-        (format "Production %s has no DAISY Export in %s"
-                product_number (path/manifest-path production))
-        :else (-> production
+  (let [errors (validation/recorded-validation-errors f)]
+    (if (seq errors)
+      errors
+      (let [{product_number :product_number :as new-production}
+            (-> (read-file f)
+                ;; ignore production_type and periodical_number when
+                ;; importing a recorded production
+                ;; periodical_number is wrong because the XML exported
+                ;; for a recorded production lacks the mvl_only field
+                ;; and hence the production_type and the
+                ;; periodical_number will be wrong
+                (dissoc :production_type :periodical_number))
+            production (prod/find-by-productnumber product_number)]
+        (cond
+          (empty? production)
+          [(format "Non-existing product number %s" product_number)]
+          (not= "structured" (:state production))
+          [(format "Production %s is not structured (%s instead)"
+                   product_number (:state production))]
+          (not (prod/manifest? production))
+          [(format "Production %s has no DAISY Export in %s"
+                   product_number (path/manifest-path production))]
+          :else
+          (let [errors (prod/manifest-validate production)]
+            (if (seq errors)
+              errors
+              (-> production
                   (merge new-production)
-                  prod/set-state-recorded!)))))
+                  prod/set-state-recorded!))))))))
 
 (defn import-status-request
   "Import a status request from file `f`"
   [f]
-  (if-let [errors (validation/status-request-errors f)]
-    errors
-    (let [{product_number :product_number} (read-file f)
-          production (prod/find-by-productnumber product_number)]
-      (msg/publish (queues/notify-abacus) production)
-      production)))
+  (let [errors (validation/status-request-errors f)]
+    (if (seq errors)
+      errors
+      (let [{product_number :product_number} (read-file f)
+            production (prod/find-by-productnumber product_number)]
+        (msg/publish (queues/notify-abacus) production)
+        production))))
 
 (defn import-metadata-update
   "Import a metadata update request from file `f`"
   [f]
-  (if-let [errors (validation/metadata-sync-errors f)]
-    errors
-    (prod/update!
-     (-> (read-file f)
-         ;; ignore production_type when updating metadata
-         (dissoc :production_type)))))
+  (let [errors (validation/metadata-sync-errors f)]
+    (if (seq errors)
+      errors
+      (prod/update!
+       (-> (read-file f)
+           ;; ignore production_type when updating metadata
+           (dissoc :production_type))))))
 
 (defn wrap-rows
   "Wrap an export record according to ABACUS conventions"
