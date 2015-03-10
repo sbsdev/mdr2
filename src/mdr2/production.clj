@@ -13,7 +13,8 @@
             [mdr2.db :as db]
             [mdr2.dtb :as dtb]
             [mdr2.production.path :as path]
-            [mdr2.obi :as obi])
+            [mdr2.obi :as obi]
+            [mdr2.pipeline1 :as pipeline])
   (:import java.nio.file.StandardCopyOption))
 
 (defn library-signature?
@@ -37,6 +38,25 @@
   "Return true if the production has a DAISY export"
   [production]
   (fs/exists? (path/manifest-path production)))
+
+(defn manifest-validate
+  "Return a list of validation errors for all DAISY exports of given
+  `production`. If there are no validation errors or no DAISY exports
+  returns an empty list"
+  [production]
+  (if (not (manifest? production))
+    []
+    (->> (range (:volumes production))
+         (map inc)
+         (map #(path/manifest-path production %))
+         (map #(.getPath %))
+         (map #(pipeline/validate % :daisy202))
+         (apply concat))))
+
+(defn manifest-valid?
+  "Return true if all exports for this `production` are valid"
+  [production]
+  (empty? (manifest-validate production)))
 
 (defn split?
   "Return true if the production has a manual split"
