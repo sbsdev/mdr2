@@ -135,7 +135,8 @@ mp3 and the whole thing is packed up in one or more iso files
         (fs/mkdir archive-root-path)
         (case sektion
           :master
-          (fs/copy-dir (path/recorded-path production) archive-path)
+          (fs/copy-dir (path/recorded-path production)
+                       (file archive-path (prod/dam-number production)))
           :dist-master
           (doseq [volume (range 1 (inc (:volumes production)))]
             (let [iso-archive-name (str (container-id production sektion volume) ".iso")
