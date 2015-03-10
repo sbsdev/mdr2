@@ -112,7 +112,7 @@
                (remove #{(path/recording-path production)}))]
     (fs/mkdirs dir)
     ;; make sure recording and recorded are group writable
-    (when (#{path/recorded-path path/recording-path} dir)
+    (when (#{path/recorded-path path/recording-path path/split-path} dir)
       (let [permissions (conj (nio/posix-file-permissions dir)
                               (nio/posix-file-permission :group-write))]
         (nio/set-posix-file-permissions! dir permissions)))))
