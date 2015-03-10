@@ -282,10 +282,8 @@
   [id]
   (let [production (prod/find id)]
     (repair/repair production)
-    ;; FIXME: might be worth it to set a flash message saying that the
-    ;; repair has been initiated
-    (response/redirect "/")))
-
+    (-> (response/redirect-after-post "/")
+        (assoc :flash {:message "Repair has been initiated"}))))
 
 (defn production-set-state [id state]
   (let [production (prod/find id)]
