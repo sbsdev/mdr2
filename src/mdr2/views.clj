@@ -24,6 +24,10 @@
         user (friend/current-authentication request)]
     (layout/common user
      [:h1 "Productions"]
+     (when-let [errors (:errors (:flash request))]
+       [:p [:ul.alert.alert-danger (for [e errors] [:li e])]])
+     (when-let [message (:message (:flash request))]
+       [:p.alert.alert-success message])
      [:table.table.table-striped
       [:thead [:tr [:th "DAM"] [:th "Title"] [:th "Type"] [:th "State"] [:th "Action"]]]
       [:tbody
