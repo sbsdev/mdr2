@@ -164,15 +164,26 @@
   [product_number]
   (first (db/find-by-productnumber {:product_number product_number})))
 
-(defn find-by-title-or-creator
-  "Find productions given a search `term`. Search in title and creator"
-  [term]
-  (db/find-by-title-or-creator {:term term}))
+(defn find-archived
+  "Find an archived production given its `id`"
+  [id]
+  (db/find-archived {:id id}))
 
-(defn find-by-library-signature
-  "Find a production given a `library_signature`"
+(defn find-archived-by-productnumber
+  "Find an archived production given its `product_number`"
+  [product_number]
+  (db/find-archived-by-productnumber {:product_number product_number}))
+
+(defn find-archived-by-title-or-creator
+  "Find archived productions given a search `term`. Search in title
+  and creator"
+  [term]
+  (db/find-archived-by-title-or-creator {:term term}))
+
+(defn find-archived-by-library-signature
+  "Find an archived production given a `library_signature`"
   [library_signature]
-  (first (db/find-by-library-signature {:library_signature library_signature})))
+  (db/find-archived-by-library-signature {:library_signature library_signature}))
 
 (defn find-by-state
   "Find all productions with the given `state`"

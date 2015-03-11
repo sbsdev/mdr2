@@ -18,14 +18,29 @@ SELECT * FROM production WHERE product_number = :product_number
 -- Return the production for given `state`
 SELECT * FROM production WHERE state = :state ORDER BY title
 
--- name: find-by-title-or-creator
--- Return the productions for given title or creator
-SELECT DISTINCT * FROM production
-WHERE title LIKE :term OR creator LIKE :term ORDER BY title
+-- name: find-archived
+-- Return archived production for given `id`
+SELECT * FROM production
+WHERE id = :id AND state = 'archived'
 
--- name: find-by-library-signature
--- Return the productions for given `library_signature`
-SELECT * FROM production WHERE library_signature = :library_signature
+-- name: find-archived-by-productnumber
+-- Return the production for given `product_number`
+SELECT * FROM production
+WHERE product_number = :product_number
+AND state = 'archived'
+
+-- name: find-archived-by-title-or-creator
+-- Return the archived productions for given title or creator
+SELECT DISTINCT * FROM production
+WHERE (title LIKE :term OR creator LIKE :term)
+AND state = 'archived'
+ORDER BY title
+
+-- name: find-archived-by-library-signature
+-- Return the archived productions for given `library_signature`
+SELECT * FROM production
+WHERE library_signature = :library_signature
+AND state = 'archived'
 
 -- name: delete!
 -- Remove the production with the given `id`

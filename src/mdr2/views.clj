@@ -255,13 +255,13 @@
     (let [productions
           (cond
             (repair/production-id? identifier)
-            (when-let [production (prod/find (.substring identifier 3))] [production])
+            (prod/find-archived (.substring identifier 3))
             (prod/library-signature? identifier)
-            [(prod/find-by-library-signature identifier)]
+            (prod/find-archived-by-library-signature identifier)
             (repair/product-number? identifier)
-            [(prod/find-by-productnumber identifier)]
+            (prod/find-archived-by-productnumber identifier)
             :else (let [search-term (str "%" identifier "%")]
-                    (prod/find-by-title-or-creator search-term)))
+                    (prod/find-archived-by-title-or-creator search-term)))
           user (friend/current-authentication request)]
       (layout/common
        user
