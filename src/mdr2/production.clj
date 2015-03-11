@@ -81,7 +81,7 @@
    :identifier (uuid)
    :volumes 1
    :type "Text"
-   :format "ANSI/NISO Z39.86-2005"})
+   :format "Daisy 2.02"}) ; "ANSI/NISO Z39.86-2005" for DAISY3
 
 (defn add-default-meta-data
   "Add the default meta data to a production"
