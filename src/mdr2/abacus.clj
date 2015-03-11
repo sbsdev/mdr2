@@ -69,7 +69,8 @@
   (let [zipper (-> file io/file xml/parse zip/xml-zip)]
     (->>
      (for [[key path] param-mapping
-           :let [val (apply xml1-> zipper (concat root-path path))]]
+           :let [val (apply xml1-> zipper (concat root-path path))]
+           :when (some? val)]
        [key val])
       (into {})
       clean-raw-production
