@@ -286,7 +286,7 @@
 (defn production-repair
   [id]
   (let [production (prod/find id)]
-    (repair/repair production)
+    (repair/repair production) ;; FIXME: notify the user of a failure
     (-> (response/redirect-after-post "/")
         (assoc :flash {:message "Repair has been initiated"}))))
 
