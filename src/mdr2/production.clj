@@ -117,13 +117,14 @@
                               (nio/posix-file-permission :group-write))]
         (nio/set-posix-file-permissions! dir permissions)))))
 
-(defn create
+(defn create!
   "Create a production"
   [production]
   (let [p (-> production
               add-default-meta-data
               db/insert!)]
-    (create-dirs p)
+    (when (map? p)
+      (create-dirs p))
     p))
 
 (defn update-or-create!

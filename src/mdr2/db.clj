@@ -4,7 +4,8 @@
   (:require [clojure.java.jdbc :as jdbc]
             [yesql.core :refer [defqueries]]
             [clojure.string :as s]
-            [environ.core :refer [env]]))
+            [environ.core :refer [env]])
+  (:import java.sql.SQLException))
 
 (def ^:private db (env :database-url))
 
@@ -21,9 +22,12 @@
 (defn insert!
   "Insert the given `production`"
   [production]
-  (if-let [key (get-generated-key (jdbc/insert! db :production production))]
-    (assoc production :id key)
-    production))
+  (try
+    (if-let [key (get-generated-key (jdbc/insert! db :production production))]
+      (assoc production :id key)
+      production)
+    (catch SQLException e
+      [(.getMessage e)])))
 
 (defn update!
   "Update the production with the given `id`, `product_number` or `library_number`"

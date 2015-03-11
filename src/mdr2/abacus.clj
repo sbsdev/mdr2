@@ -80,7 +80,7 @@
   (let [errors (validation/open-validation-errors f)]
     (if (seq errors)
       errors
-      (prod/update-or-create! (read-file f)))))
+      (prod/create! (read-file f)))))
 
 (defn import-recorded-production
   "Import a recorded production from file `f`"
