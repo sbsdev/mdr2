@@ -58,8 +58,9 @@
                           :else "book")]
     (-> raw-production
         (dissoc :mvl_only :command :idVorstufe)
-        (merge {:production_type production_type
-                :periodical_number (when (= production_type "periodical") idVorstufe)}))))
+        (assoc :production_type production_type)
+        (cond-> (= production_type "periodical")
+          (assoc :periodical_number idVorstufe)))))
 
 (defn read-file
   "Read an export file from ABACUS and return a map with all the data,
