@@ -376,7 +376,8 @@
           (if error
             (format "%s Line: %d Column: %d" error line column)
             msg)))
-   (string/join \newline)))
+   (string/join \newline)
+   println-str))
 
 (defn abacus-new [f]
   (let [tempfile (:tempfile f)
