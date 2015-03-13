@@ -7,6 +7,7 @@
             [yesql.core :refer [defqueries]]
             [me.raynes.fs :as fs]
             [me.raynes.fs.compression :as compress]
+            [org.tobereplaced.nio.file :as nio]
             [environ.core :refer [env]]
             [clj-http.client :as client]
             [mdr2.obi :as obi]
@@ -74,7 +75,7 @@
         (let [src-path (io/file tar-dir dam-number "produkt" dam-number)
               dest-path (path/structured-path production)]
           (doseq [f (filter #(.isFile %) (file-seq src-path))]
-            (fs/rename f (io/file dest-path (fs/base-name f)))))
+            (nio/move! f (io/file dest-path (fs/base-name f)))))
         ;; clear the temporary files
         (fs/delete tar-file)
         (fs/delete-dir tar-dir)
