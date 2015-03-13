@@ -3,6 +3,7 @@
   Books](http://www.daisy.org/daisypedia/daisy-digital-talking-book)"
   (:require [clojure.java.io :refer [file]]
             [clojure.string :as s]
+            [clojure.math.numeric-tower :as math]
             [pantomime.mime :refer [mime-type-of]])
   (:import javax.sound.sampled.AudioSystem))
 
@@ -106,7 +107,7 @@
      (map file-audio-length)
      (reduce +)
      (* 1000)
-     Math/round)))
+     math/round)))
 
 (defn audio-total-time
   "Return the total audio length for a given DAISY Talking Book in a
@@ -155,6 +156,13 @@
   (let [audio-files (filter wav-file? (file-seq (file dtb)))
         sampling-rates (map file-sampling-rate audio-files)]
     (ffirst (sort-by val (frequencies sampling-rates)))))
+
+(defn size
+  "Return the size in kBytes of a given DAISY Talking Book"
+  [dtb]
+  (let [files (filter #(.isFile %) (file-seq (file dtb)))
+        bytes (->> files (map #(.length %)) (reduce +))]
+    (-> bytes (/ 1024) math/round)))
 
 (defn meta-data
   "Return a map containing all queried meta data for a given DAISY Talking Book"

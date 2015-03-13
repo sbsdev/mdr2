@@ -9,6 +9,7 @@
                  [yesql "0.5.0-beta2"]
                  [org.clojure/data.xml "0.0.8"]
                  [org.clojure/data.zip "0.1.1"]
+                 [org.clojure/math.numeric-tower "0.0.4"]
                  [org.clojure/tools.logging "0.3.1"]
                  [com.thaiopensource/jing "20091111"]
                  [pandect "0.4.1"] ; for pipeline2 client
