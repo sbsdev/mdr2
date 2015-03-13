@@ -4,7 +4,6 @@
             [mdr2.data.xml :as xml-new]
             [clojure.walk :as w]
             [clojure.zip :as zip]
-            [clojure.data.zip.xml :as zx]
             [mdr2.production.path :as path]))
 
 (def ^:private manifest-doctype
