@@ -50,7 +50,7 @@ CREATE TABLE production (
   narrator VARCHAR(255),
   producer VARCHAR(255),
   produced_date DATE,
-  revision TINYINT NOT NULL DEFAULT 1,
+  revision TINYINT NOT NULL DEFAULT 0,
   revision_date DATE,
   revision_description VARCHAR(255),
   total_time INTEGER, -- in milliseconds

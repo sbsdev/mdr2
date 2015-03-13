@@ -81,7 +81,7 @@
    :identifier (uuid)
    :volumes 1
    :type "Sound"
-   :revision 1
+   :revision 0
    :format "Daisy 2.02"}) ; "ANSI/NISO Z39.86-2005" for DAISY3
 
 (defn add-default-meta-data
@@ -208,12 +208,14 @@
   (set-state! production "structured"))
 
 (defn set-state-recorded! [production]
-  (let [new-production
-        (as-> production p
-          (merge p
-                 (dtb/meta-data (path/recorded-path p))
-                 {:produced_date (to-date (t/now))})
-          (set-state! p "recorded"))]
+  (let [current-date (to-date (t/now))
+        new-production
+        (-> production
+         (merge (dtb/meta-data (path/recorded-path production)))
+         (assoc :produced_date current-date)
+         (assoc :revision_date current-date)
+         (update-in [:revision] inc)
+         (set-state! "recorded"))]
     (msg/publish (queues/encode) {:production new-production})
     new-production))
 
