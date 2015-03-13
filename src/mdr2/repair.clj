@@ -62,6 +62,8 @@
       (let [dam-number (prod/dam-number production)
             tar-file (io/file (fs/tmpdir) (str dam-number ".tar"))
             tar-dir (io/file (fs/tmpdir) dam-number)]
+        ;; create all dirs for this production
+        (prod/create-dirs production)
         ;; copy tar to tmpdir
         (with-open [input (:body response)
                     output (io/output-stream tar-file)]
