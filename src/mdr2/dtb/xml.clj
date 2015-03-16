@@ -79,9 +79,10 @@
     :else node))
 
 (defn handle-smil-node
-  [node {title :title}]
+  [node {:keys [title identifier]}]
   (cond
     (meta-node? node "dc:title") (update-meta-node node title)
+    (meta-node? node "dc:identifier") (update-meta-node node identifier)
     :else node))
 
 (defn update-meta-data
