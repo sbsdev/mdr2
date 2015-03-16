@@ -4,6 +4,8 @@
             [mdr2.data.xml :as xml-new]
             [clojure.walk :as w]
             [clojure.zip :as zip]
+            [clj-time.format :as f]
+            [clj-time.coerce :refer [from-date]]
             [mdr2.production.path :as path]))
 
 (def ^:private manifest-doctype
@@ -17,6 +19,9 @@
    "<!DOCTYPE smil PUBLIC "
    "\"-//W3C//DTD SMIL 1.0//EN\" "
    "\"http://www.w3.org/TR/REC-smil/SMIL10.dtd\">"))
+
+(def ^:private formatter (f/formatters :date))
+(defn- format-date [date] (f/unparse formatter (from-date date)))
 
 (defn meta-node? [node name]
   (and (= (:tag node) :meta)
@@ -55,16 +60,16 @@
     (title-node? node) (update-title-node node title)
     (meta-node? node "dc:creator") (update-meta-node node creator)
     (meta-node? node "dc:title") (update-meta-node node title)
-    (meta-node? node "dc:date") (update-meta-node node date)
+    (meta-node? node "dc:date") (update-meta-node node (format-date date))
     (meta-node? node "dc:identifier") (update-meta-node node identifier)
     (meta-node? node "dc:language") (update-meta-node node language)
     (meta-node? node "dc:publisher") (update-meta-node node publisher)
     (meta-node? node "dc:source") (update-meta-node node source)
     (meta-node? node "dc:type") (update-meta-node node type)
     (meta-node? node "ncc:narrator") (update-meta-node node narrator)
-    (meta-node? node "ncc:producedDate") (update-meta-node node produced_date)
+    (meta-node? node "ncc:producedDate") (update-meta-node node (format-date produced_date))
     (meta-node? node "ncc:producer") (update-meta-node node producer)
-    (meta-node? node "ncc:revisionDate") (update-meta-node node revision_date)
+    (meta-node? node "ncc:revisionDate") (update-meta-node node (format-date revision_date))
     (meta-node? node "ncc:sourceEdition") (update-meta-node node source_edition)
     (meta-node? node "ncc:sourcePublisher") (update-meta-node node source_publisher)
     (meta-node? node "ncc:multimediaType") (update-meta-node node multimedia_type)
