@@ -29,6 +29,9 @@
 
 (defn update-title-node [node v] (assoc-in node [:content] (list v)))
 
+(defn insert-xmlns [node]
+  (update-in node [:attrs] assoc :xmlns "http://www.w3.org/1999/xhtml"))
+
 (defn handle-manifest-node
   "Handle one node in the xml tree. Replace all content in the meta
   elements with the values from `production`"
@@ -61,6 +64,8 @@
     (meta-node? node "ncc:sourceEdition") (update-meta-node node source_edition)
     (meta-node? node "ncc:sourcePublisher") (update-meta-node node source_publisher)
     (meta-node? node "ncc:multimediaType") (update-meta-node node multimedia_type)
+    ;; FIXME: xml/parse seems to drop the xmlns attribute. We have to fudge it back in
+    (= (:tag node) :html) (insert-xmlns node)
     :else node))
 
 (defn handle-smil-node
