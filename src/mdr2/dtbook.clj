@@ -21,7 +21,8 @@
     :blurb "Klappentexte"
     :contributors "Mitwirkende"
     :enclosures "Hörbuchbeilagen"
-    :end "Ende des Buches"}
+    :end "Ende des Buches"
+    :title_creator_fmt "%s von %s"}
    :en
    {:about "About this DAISY book"
     :bib "Bibliographic information"
@@ -29,7 +30,8 @@
     :blurb "Blurbs"
     :contributors "Contributors"
     :enclosures "Talking book enclosures"
-    :end "End of book"}})
+    :end "End of book"
+    :title_creator_fmt "%s by %s"}})
 
 (def ^:private doctype
   (str
@@ -49,12 +51,22 @@
 
 (defn default-book
   "Return an default book sexp"
+  [title creator language]
+  (let [t (partial translate language)]
+    [:book
+     [:frontmatter
+      [:doctitle (format (t :title_creator_fmt) title creator)]
+      [:docauthor creator]]
+     [:bodymatter
+      [:level1 [:h1] [:p]]]]))
+
+(defn periodical
+  "Return an default periodical sexp"
   [title creator]
   [:book
    [:frontmatter
     [:doctitle title]
-    [:docauthor creator]
-    [:level1 [:p]]]
+    [:docauthor creator]]
    [:bodymatter
     [:level1 [:h1] [:p]]]])
 
@@ -97,7 +109,7 @@
            source_date source_edition source_publisher source_rights source_title
            multimedia_type multimedia_content narrator produced_date
            revision revision_date revision_description
-           total_time audio_format
+           total_time audio_format production_type
            library_number]}] ; only books imported from the libray have this
   [:dtbook {:xmlns "http://www.daisy.org/z3986/2005/dtbook/"
             :version "2005-3" :xml:lang language}
@@ -130,9 +142,10 @@
     [:meta {:name "dtb:revisionDescription" :content revision_description}]
     [:meta {:name "dtb:totalTime" :content total_time}]
     [:meta {:name "dtb:audioFormat" :content audio_format}]]
-   (if library_number
-     (commercial-audiobook title creator language)
-     (default-book title creator))])
+   (cond
+     library_number (commercial-audiobook title creator language)
+     (= production_type "periodical") (periodical title creator)
+     :else (default-book title creator language))])
 
 (defn dtbook
   "Create a minimal DTBook XML template according to [the spec](http://www.daisy.org/z3986/2005/Z3986-2005.html) for a given `production`"
