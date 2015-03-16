@@ -45,7 +45,7 @@
     (get-in translations [locale key] key)))
 
 (def ^:private formatter (f/formatters :date))
-(defn- format-date [date] (f/unparse formatter (from-date date)))
+(defn- format-date [date] (when date (f/unparse formatter (from-date date))))
 
 (defn default-book
   "Return an default book sexp"

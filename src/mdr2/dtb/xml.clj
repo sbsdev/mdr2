@@ -21,7 +21,7 @@
    "\"http://www.w3.org/TR/REC-smil/SMIL10.dtd\">"))
 
 (def ^:private formatter (f/formatters :date))
-(defn- format-date [date] (f/unparse formatter (from-date date)))
+(defn- format-date [date] (when date (f/unparse formatter (from-date date))))
 
 (defn meta-node? [node name]
   (and (= (:tag node) :meta)
