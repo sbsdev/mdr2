@@ -29,6 +29,10 @@
 
 (defn update-title-node [node v] (assoc-in node [:content] (list v)))
 
+(defn insert-kbytesize-node [node v]
+  (update-in node [:content] concat ; append
+             (list (xml/element :meta {:name "ncc:kByteSize" :content v}))))
+
 (defn insert-xmlns [node]
   (update-in node [:attrs] assoc :xmlns "http://www.w3.org/1999/xhtml"))
 
@@ -38,7 +42,7 @@
   [node {:keys [creator title date identifier language publisher
                 source type narrator produced_date producer
                 revision_date source_edition source_publisher
-                multimedia_type]
+                multimedia_type encoded_size]
          :as production}]
   (cond
     ;; FIXME: this is a gross hack using one bug to work around
@@ -64,6 +68,7 @@
     (meta-node? node "ncc:sourceEdition") (update-meta-node node source_edition)
     (meta-node? node "ncc:sourcePublisher") (update-meta-node node source_publisher)
     (meta-node? node "ncc:multimediaType") (update-meta-node node multimedia_type)
+    (= (:tag node) :head) (insert-kbytesize-node node encoded_size)
     ;; FIXME: xml/parse seems to drop the xmlns attribute. We have to fudge it back in
     (= (:tag node) :html) (insert-xmlns node)
     :else node))

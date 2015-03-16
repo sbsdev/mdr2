@@ -116,9 +116,9 @@
        (if (not (and (= 0 exit) (s/blank? error)))
          (log/errorf "Encoding of %s (%s) failed with exit %s and message \"%s\""
                      (:id production) volume exit error)
-         (do
+         (let [encoded_size (dtb/size (path/recorded-path production))]
            ;; update meta data
-           (xml/update-meta-data! production)
+           (xml/update-meta-data! (assoc production :encoded_size encoded_size))
            ;; downgrade to daisy202
            (downgrade production)
            ;; create an iso
