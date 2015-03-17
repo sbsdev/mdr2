@@ -22,7 +22,8 @@
     :contributors "Mitwirkende"
     :enclosures "Hörbuchbeilagen"
     :end "Ende des Buches"
-    :title_creator_fmt "%s von %s"}
+    :title_creator_fmt "%s von %s"
+    :unknown_title "Unbekannter Titel"}
    :en
    {:about "About this DAISY book"
     :bib "Bibliographic information"
@@ -31,7 +32,8 @@
     :contributors "Contributors"
     :enclosures "Talking book enclosures"
     :end "End of book"
-    :title_creator_fmt "%s by %s"}})
+    :title_creator_fmt "%s by %s"
+    :unknown_title "Unknown title"}})
 
 (def ^:private doctype
   (str
@@ -49,16 +51,25 @@
 (def ^:private formatter (f/formatters :date))
 (defn- format-date [date] (when date (f/unparse formatter (from-date date))))
 
+(defn- default-book-title
+  [title creator language]
+  (let [t (partial translate language)
+        present? (complement s/blank?)]
+    (cond
+      (and (present? creator) (present? title)) (format (t :title_creator_fmt) title creator)
+      (present? title) title
+      (present? creator) (format (t :title_creator_fmt) (t :unknown_title) creator)
+      :else (t :unknown_title))))
+
 (defn default-book
   "Return an default book sexp"
   [title creator language]
-  (let [t (partial translate language)]
-    [:book
-     [:frontmatter
-      [:doctitle (format (t :title_creator_fmt) title creator)]
-      [:docauthor creator]]
-     [:bodymatter
-      [:level1 [:h1] [:p]]]]))
+  [:book
+   [:frontmatter
+    [:doctitle (default-book-title title creator language)]
+    [:docauthor creator]]
+   [:bodymatter
+    [:level1 [:h1] [:p]]]])
 
 (defn periodical
   "Return an default periodical sexp"
