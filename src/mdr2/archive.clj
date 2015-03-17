@@ -40,6 +40,7 @@ mp3 and the whole thing is packed up in one or more iso files
             [me.raynes.fs :as fs]
             [mdr2.production :as prod]
             [mdr2.production.path :as path]
+            [mdr2.repair :as repair]
             [mdr2.rdf :as rdf]))
 
 (def ^:private db (env :archive-database-url))
@@ -56,14 +57,6 @@ mp3 and the whole thing is packed up in one or more iso files
 (def other-spool-dir
   "Path to the archive spool directory for other productions"
   (env :archive-other-spool-dir))
-
-(def ^:private default-job
-  {:archivar "Madras2"
-   :abholer ""
-   :aktion "save"
-   :transaktions_status "pending"
-   :container_status "ok"
-   :bemerkung ""})
 
 (defn- container-id
   "Return the name of a archive spool directory for a given
@@ -99,18 +92,34 @@ mp3 and the whole thing is packed up in one or more iso files
         rdf-name (str (container-id production sektion) ".rdf")]
     (.getPath (file root-path rdf-name))))
 
+(defn- db-job
+  "Return a map that can be used to insert a job in the archive db"
+  [verzeichnis sektion datum aktion]
+  {:archivar "Madras2"
+   :abholer ""
+   :aktion aktion
+   :transaktions_status "pending"
+   :container_status "ok"
+   :bemerkung ""
+   :verzeichnis verzeichnis
+   :sektion sektion
+   :datum datum})
+
 (defn- add-to-db
   "Insert a `production` into the archive db for the given `sektion`.
   This marks the files in the spool directory as ready for archiving
   and concludes the archiving process from the point of view of the
   production system."
   [production sektion]
-  (let [new-job
-        {:verzeichnis (container-id production sektion)
-         :sektion (case sektion :master "master" :dist-master "cdimage")
-         :datum (to-date (t/now))}
-        job (merge default-job new-job)]
-    (jdbc/insert! db :container job)))
+  (let [update (> (:revision production) 1)
+        job (db-job (container-id production sektion)
+                    (case sektion :master "master" :dist-master "cdimage")
+                    (to-date (t/now))
+                    (if update "update" "save"))]
+    (if update
+      (let [container-id (repair/container-id production)]
+        (jdbc/update! db :container job ["id = ?" container-id]))
+      (jdbc/insert! db :container job))))
 
 (defn set-file-permissions
   "Set file permissions on `root` to g+w recursively"
