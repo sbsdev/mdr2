@@ -93,17 +93,18 @@ mp3 and the whole thing is packed up in one or more iso files
     (.getPath (file root-path rdf-name))))
 
 (defn- db-job
-  "Return a map that can be used to insert a job in the archive db"
-  [verzeichnis sektion datum aktion]
+  "Return a map that can be used to insert a job in the archive db for
+  given `production` and `sektion`"
+  [production sektion]
   {:archivar "Madras2"
    :abholer ""
-   :aktion aktion
+   :aktion (if (> (:revision production) 1) "update" "save")
    :transaktions_status "pending"
    :container_status "ok"
    :bemerkung ""
-   :verzeichnis verzeichnis
-   :sektion sektion
-   :datum datum})
+   :verzeichnis (container-id production sektion)
+   :sektion (case sektion :master "master" :dist-master "cdimage")
+   :datum (to-date (t/now))})
 
 (defn- add-to-db
   "Insert a `production` into the archive db for the given `sektion`.
@@ -112,12 +113,9 @@ mp3 and the whole thing is packed up in one or more iso files
   production system."
   [production sektion]
   (let [update (> (:revision production) 1)
-        job (db-job (container-id production sektion)
-                    (case sektion :master "master" :dist-master "cdimage")
-                    (to-date (t/now))
-                    (if update "update" "save"))]
+        job (db-job production sektion)]
     (if update
-      (let [container-id (repair/container-id production)]
+      (let [container-id (repair/container-id production sektion)]
         (jdbc/update! db :container job ["id = ?" container-id]))
       (jdbc/insert! db :container job))))
 

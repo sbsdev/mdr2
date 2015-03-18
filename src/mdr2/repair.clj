@@ -46,10 +46,15 @@
           container-id))
 
 (defn container-id
-  "Return a container-id given a `production`"
-  [production]
-  (let [dam-number (prod/dam-number production)]
-    (-> {:id dam-number} production-id-to-archive-id first :id str)))
+  "Return a container-id given a `production` and optionally `sektion`
+  which can be either `:master` or `:dist-master`"
+  ([production]
+   (container-id :master))
+  ([production sektion]
+   (let [id (case sektion
+              :master (prod/dam-number production)
+              :dist-master (:library_signature production))]
+     (-> {:id id} production-id-to-archive-id first :id str))))
 
 (defn repair
   "Get a production from the archive and prepare it for repairing"
