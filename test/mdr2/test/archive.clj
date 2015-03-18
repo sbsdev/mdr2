@@ -7,15 +7,26 @@
 
 (def mock-db (atom []))
 
+(def default-container-entry
+  {:aktion "save",
+   :transaktions_status "pending",
+   :abholer "",
+   :archivar "Madras2"
+   :bemerkung ""
+   :container_status "ok"})
+
 (defn mock-jdbc-insert [db table job]
-  (swap! mock-db conj job))
+  (swap! mock-db conj (dissoc job :datum)))
+
+(defn mock-set-state-archived! [production])
 
 (defn setup-spool-dirs [test-fn]
   (fs/mkdirs (env :archive-spool-dir))
   (fs/mkdirs (env :archive-periodical-spool-dir))
   (fs/mkdirs (env :archive-other-spool-dir))
   (reset! mock-db [])
-  (with-redefs [clojure.java.jdbc/insert! mock-jdbc-insert]
+  (with-redefs [clojure.java.jdbc/insert! mock-jdbc-insert
+                mdr2.production/set-state-archived! mock-set-state-archived!]
     (test-fn))
   (fs/delete-dir (env :archive-spool-dir))
   (fs/delete-dir (env :archive-periodical-spool-dir))
@@ -39,55 +50,44 @@
 (deftest add-master-to-db
   (testing "add master to db"
     (is (= (do
-             (#'mdr2.archive/add-to-db {:id 123 :volumes 1} :master)
+             (#'mdr2.archive/add-to-db {:id 123 :volumes 1 :revision 1} :master)
              @mock-db)
-           [{:verzeichnis "dam123",
-             :sektion "master",
-             :aktion "save",
-             :transaktions_status "pending",
-             :abholer "NN",
-             :archivar "NN"}]))))
+           [(merge {:verzeichnis "dam123"
+                    :sektion "master"}
+                   default-container-entry)]))))
 
 (deftest add-iso-to-db
   (testing "add iso to db"
     (is (= (do
              (#'mdr2.archive/add-to-db
-              {:id 123 :volumes 1 :library_signature 7}
+              {:id 123 :volumes 1 :library_signature 7 :revision 1}
               :dist-master)
              @mock-db)
-           [{:verzeichnis "ds7",
-             :sektion "cdimage",
-             :aktion "save",
-             :transaktions_status "pending",
-             :abholer "NN",
-             :archivar "NN"}]))))
+           [(merge {:verzeichnis "7"
+                    :sektion "cdimage"}
+                   default-container-entry)]))))
 
 (deftest book-single
   (testing "archiving a book with a single volume"
-    (let [production {:id 14 :production_type "book" :volumes 1 :library_signature 15}
+    (let [production {:id 14 :production_type "book" :volumes 1
+                      :library_signature 15 :revision 1}
           dam-number (str "dam" (:id production))
-          ds-number (str "ds" (:library_signature production))
+          ds-number (str (:library_signature production))
           iso-name (str ds-number ".iso")
           spool-dir (env :archive-spool-dir)]
       (archive/archive production)
       ;; check the database entry
-      (is (= @mock-db [{:sektion "master"
-                        :aktion "save"
-                        :transaktions_status "pending"
-                        :abholer "NN"
-                        :archivar "NN"
-                        :verzeichnis "dam14"}
-                       {:verzeichnis "ds15"
-                        :sektion "cdimage"
-                        :aktion "save"
-                        :transaktions_status "pending"
-                        :abholer "NN"
-                        :archivar "NN"}]))
+      (is (= @mock-db [(merge {:verzeichnis dam-number
+                               :sektion "master"}
+                              default-container-entry)
+                       (merge {:verzeichnis ds-number
+                               :sektion "cdimage"}
+                              default-container-entry)]))
       (are [file] (fs/exists? file)
            ;; check if the master has been copied
-           (fs/file spool-dir dam-number "produkt" "aud001.wav")
-           (fs/file spool-dir dam-number "produkt" "ncc.html")
-           (fs/file spool-dir dam-number "produkt" "master.smil")
+           (fs/file spool-dir dam-number "produkt" dam-number "aud001.wav")
+           (fs/file spool-dir dam-number "produkt" dam-number "ncc.html")
+           (fs/file spool-dir dam-number "produkt" dam-number "master.smil")
            ;; check if the master has an rdf
            (fs/file spool-dir dam-number (str dam-number ".rdf"))
            ;; check if the distmaster has been copied...
@@ -97,29 +97,24 @@
 
 (deftest book-multiple
   (testing "archiving a book with multiple volumes"
-    (let [production {:id 14 :production_type "book" :volumes 2 :library_signature 15}
+    (let [production {:id 14 :production_type "book" :volumes 2
+                      :library_signature 15 :revision 1}
           dam-number (str "dam" (:id production))
-          ds-number (str "ds" (:library_signature production))
+          ds-number (str (:library_signature production))
           spool-dir (env :archive-spool-dir)]
       (archive/archive production)
       ;; check the database entry
-      (is (= @mock-db [{:sektion "master"
-                        :aktion "save"
-                        :transaktions_status "pending"
-                        :abholer "NN"
-                        :archivar "NN"
-                        :verzeichnis "dam14"}
-                       {:verzeichnis "ds15"
-                        :sektion "cdimage"
-                        :aktion "save"
-                        :transaktions_status "pending"
-                        :abholer "NN"
-                        :archivar "NN"}]))
+      (is (= @mock-db [(merge {:sektion "master"
+                               :verzeichnis dam-number}
+                              default-container-entry)
+                       (merge {:verzeichnis ds-number
+                               :sektion "cdimage"}
+                              default-container-entry)]))
       (are [file] (fs/exists? file)
            ;; check if the master has been copied
-           (fs/file spool-dir dam-number "produkt" "aud001.wav")
-           (fs/file spool-dir dam-number "produkt" "ncc.html")
-           (fs/file spool-dir dam-number "produkt" "master.smil")
+           (fs/file spool-dir dam-number "produkt" dam-number "aud001.wav")
+           (fs/file spool-dir dam-number "produkt" dam-number "ncc.html")
+           (fs/file spool-dir dam-number "produkt" dam-number "master.smil")
            ;; check if the master has an rdf
            (fs/file spool-dir dam-number (str dam-number ".rdf"))
            ;; check if all the distmasters have been copied...
@@ -130,7 +125,8 @@
 
 (deftest periodicals-single
   (testing "archiving of periodical single volume"
-    (let [production {:id 14 :production_type "periodical" :volumes 1}
+    (let [production {:id 14 :production_type "periodical"
+                      :volumes 1 :revision 1}
           dam-number (str "dam" (:id production))
           rdf-name (str dam-number ".rdf")
           iso-name (str dam-number ".iso")
@@ -142,7 +138,8 @@
 
 (deftest periodicals-multiple
   (testing "archiving of periodical multi volume"
-    (let [production {:id 14 :production_type "periodical" :volumes 2}
+    (let [production {:id 14 :production_type "periodical" :volumes 2
+                      :revision 1}
           dam-number (str "dam" (:id production))
           iso-name (str dam-number "_1.iso")
           rdf-name (str dam-number ".rdf")
@@ -155,7 +152,9 @@
 (deftest other-single
   (testing "archiving of other production single volume"
     (let [product_number "DY1234"
-          production {:id 14 :production_type "other" :volumes 1 :product_number product_number}
+          production {:id 14 :production_type "other" :volumes 1
+                      :product_number product_number
+                      :revision 1}
           iso-name (str product_number ".iso")
           spool-dir (env :archive-other-spool-dir)]
       (archive/archive production)
@@ -165,7 +164,9 @@
 (deftest other-multiple
   (testing "archiving of other production multi volume"
     (let [product_number "DY1234"
-          production {:id 14 :production_type "other" :volumes 2 :product_number product_number}
+          production {:id 14 :production_type "other"
+                      :volumes 2 :product_number product_number
+                      :revision 1}
           iso-name (str product_number "_1.iso")
           spool-dir (env :archive-other-spool-dir)]
       (archive/archive production)
