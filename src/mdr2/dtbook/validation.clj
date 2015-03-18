@@ -18,8 +18,7 @@
   [:book :frontmatter field text])
 
 (def ^:private param-mapping
-  {:title [(get-metadata-path "dc:Title")
-           (get-element-path :doctitle)]
+  {:title [(get-metadata-path "dc:Title")]
    :creator [(get-metadata-path "dc:Creator")
              (get-element-path :docauthor)]
    :subject [(get-metadata-path "dc:Subject")]
