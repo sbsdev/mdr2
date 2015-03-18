@@ -29,7 +29,7 @@
        [:p [:ul.alert.alert-danger (for [e errors] [:li e])]])
      (when-let [message (:message (:flash request))]
        [:p.alert.alert-success message])
-     [:table.table.table-striped
+     [:table#productions.table.table-striped
       [:thead [:tr [:th "DAM"] [:th "Title"] [:th "Type"] [:th "State"] [:th "Action"]]]
       [:tbody
        (let [cached-state (memoize db/find-state)

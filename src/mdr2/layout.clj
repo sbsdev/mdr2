@@ -1,6 +1,7 @@
 (ns mdr2.layout
   "Define the basic page structure and layout"
   (:require [clojure.string :as s]
+            [clojure.data.json :as json]
             [hiccup.page :refer [html5 include-css include-js]]))
 
 (defn key-to-label
@@ -76,17 +77,34 @@
      [:ul.nav.navbar-nav (dropdown-menu)]
      [:ul.nav.navbar-nav.navbar-right (loginbar user)]]]])
 
+(def ^:private datatable-config
+  {:paging false
+   :paginType "simple"
+   :pageLength 50
+   :lengthChange false
+   :columnDefs [{:targets -1
+                 :searchable false
+                 :orderable false}]})
+
 (defn common
   "Display a page using the bootstrap css"
   [user & body]
   (html5
     [:head
      [:title "mdr2"]
-     (include-css "/css/bootstrap.min.css")]
+     (include-css "/css/bootstrap.min.css")
+     (include-css "/css/dataTables.bootstrap.css")]
     [:body
      [:div.container
       (navbar user)
       body]
      (include-js "/js/jquery-1.11.1.min.js")
-     (include-js "/js/bootstrap.min.js")]))
+     (include-js "/js/bootstrap.min.js")
+     (include-js "/js/jquery.dataTables.min.js")
+     (include-js "/js/dataTables.bootstrap.min.js")
+     [:script
+      (format
+       "$(document).ready( function () { $('#%s').DataTable( %s ); } );"
+       "productions"
+       (json/write-str datatable-config))]]))
 
