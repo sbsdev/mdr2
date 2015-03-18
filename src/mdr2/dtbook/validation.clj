@@ -19,8 +19,7 @@
 
 (def ^:private param-mapping
   {:title [(get-metadata-path "dc:Title")]
-   :creator [(get-metadata-path "dc:Creator")
-             (get-element-path :docauthor)]
+   :creator [(get-metadata-path "dc:Creator")]
    :subject [(get-metadata-path "dc:Subject")]
    :description [(get-metadata-path "dc:Description")]
    :publisher [(get-metadata-path "dc:Publisher")]
