@@ -49,7 +49,7 @@
   "Return a container-id given a `production` and optionally `sektion`
   which can be either `:master` or `:dist-master`"
   ([production]
-   (container-id :master))
+   (container-id production :master))
   ([production sektion]
    (let [id (case sektion
               :master (prod/dam-number production)
