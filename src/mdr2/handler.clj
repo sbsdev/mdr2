@@ -92,5 +92,3 @@
   (-> api-routes
       (wrap-defaults (assoc-in api-defaults [:params :multipart] true))
       stacktrace/wrap-stacktrace-log))
-
-
