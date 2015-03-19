@@ -1,9 +1,10 @@
 (ns mdr2.test.archive
   (:use clojure.test)
-  (:require [mdr2.archive :as archive]
-            [me.raynes.fs :as fs]
-            [clojure.java.io :refer [file]]
-            [environ.core :refer [env]]))
+  (:require [clojure.java.io :refer [file]]
+            [environ.core :refer [env]]
+            [mdr2.archive :as archive]
+            [mdr2.production :as prod]
+            [me.raynes.fs :as fs]))
 
 (def mock-db (atom []))
 
@@ -140,7 +141,7 @@
   (testing "archiving of periodical multi volume"
     (let [production {:id 14 :production_type "periodical" :volumes 2
                       :revision 1}
-          dam-number (str "dam" (:id production))
+          dam-number (prod/dam-number production)
           iso-name (str dam-number "_1.iso")
           rdf-name (str dam-number ".rdf")
           spool-dir (env :archive-periodical-spool-dir)]
@@ -155,11 +156,14 @@
           production {:id 14 :production_type "other" :volumes 1
                       :product_number product_number
                       :revision 1}
-          iso-name (str product_number ".iso")
+          dam-number (prod/dam-number production)
+          iso-name (str dam-number ".iso")
+          rdf-name (str dam-number ".rdf")
           spool-dir (env :archive-other-spool-dir)]
       (archive/archive production)
-      (is (fs/exists? (fs/file spool-dir iso-name)))
-      (is (not (fs/exists? (fs/file spool-dir (str product_number ".rdf"))))))))
+      (are [file] (fs/exists? file)
+           (fs/file spool-dir dam-number "produkt" iso-name)
+           (fs/file spool-dir dam-number rdf-name)))))
 
 (deftest other-multiple
   (testing "archiving of other production multi volume"
@@ -167,8 +171,11 @@
           production {:id 14 :production_type "other"
                       :volumes 2 :product_number product_number
                       :revision 1}
-          iso-name (str product_number "_1.iso")
-          spool-dir (env :archive-other-spool-dir)]
+          spool-dir (env :archive-other-spool-dir)
+          dam-number (prod/dam-number production)
+          rdf-name (str dam-number ".rdf")]
       (archive/archive production)
-      (is (fs/exists? (fs/file spool-dir iso-name)))
-      (is (not (fs/exists? (fs/file spool-dir (str product_number ".rdf"))))))))
+      (are [file] (fs/exists? file)
+           (fs/file spool-dir dam-number "produkt" (str dam-number "_1.iso"))
+           (fs/file spool-dir dam-number "produkt" (str dam-number "_2.iso"))
+           (fs/file spool-dir dam-number rdf-name)))))

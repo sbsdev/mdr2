@@ -209,12 +209,19 @@ mp3 and the whole thing is packed up in one or more iso files
 (defmethod archive "other"
   [production]
   (archive-sektion production :master)
-  ;; place the iso in a spool directory
-  (let [product_number (:product_number production)
+  ;; place the iso(s) in a spool directory
+  (let [dam-number (prod/dam-number production)
+        archive-path (.getPath (file other-spool-dir dam-number))
         multi-volume? (prod/multi-volume? production)]
+    (fs/mkdir archive-path)
+    ;; create the rdf
+    (let [rdf-path (file archive-path (str dam-number ".rdf"))
+          rdf (rdf/rdf production)]
+      (spit rdf-path rdf))
+    ;; copy all volumes
     (doseq [volume (range 1 (inc (:volumes production)))]
-      (let [iso-archive-name (str product_number (when multi-volume? (str "_" volume)) ".iso")
-            iso-archive-path (.getPath (file other-spool-dir iso-archive-name))]
-        (fs/copy (path/iso-name production volume) iso-archive-path)
+      (let [iso-archive-name (str dam-number (when multi-volume? (str "_" volume)) ".iso")
+            iso-archive-path (.getPath (file archive-path "produkt" iso-archive-name))]
+        (fs/copy+ (path/iso-name production volume) iso-archive-path)
         (set-file-permissions (file iso-archive-path))))
     (prod/set-state-archived! production)))
