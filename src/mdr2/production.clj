@@ -6,7 +6,7 @@
             [org.tobereplaced.nio.file :as nio]
             [clj-time.core :as t]
             [clj-time.format :as f]
-            [clj-time.coerce :refer [to-date]]
+            [clj-time.coerce :refer [to-sql-date]]
             [environ.core :refer [env]]
             [immutant.messaging :as msg]
             [mdr2.queues :as queues]
@@ -76,7 +76,9 @@
 (defn default-meta-data
   "Return default meta data"
   []
-  {:date (to-date (t/now))
+  ;; we use sql date because its toString returns the format we want
+  ;; in all the output (i.e. xml, etc)
+  {:date (to-sql-date (t/now))
    :language "de"
    :identifier (uuid)
    :volumes 1
@@ -98,7 +100,7 @@
      (assoc m k
       (cond
         (#{:date :source_date :produced_date :revision_date} k)
-        (to-date (f/parse v))
+        (to-sql-date (f/parse v))
         (#{:volumes} k) (Integer/parseInt v)
         :else v)))
    {} production))
@@ -208,7 +210,7 @@
   (set-state! production "structured"))
 
 (defn set-state-recorded! [production]
-  (let [current-date (to-date (t/now))
+  (let [current-date (to-sql-date (t/now))
         new-production
         (-> production
          (merge (dtb/meta-data (path/recorded-path production)))

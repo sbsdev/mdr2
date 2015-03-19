@@ -3,8 +3,6 @@
   (:require [clojure.java.io :refer [file]]
             [clojure.string :as s]
             [clojure.data.xml :as xml]
-            [clj-time.format :as f]
-            [clj-time.coerce :refer [from-date]]
             [mdr2.data.xml :as xml-new]
             [mdr2.production.path :as path]))
 
@@ -47,9 +45,6 @@
   (let [l (keyword language)
         locale (if (contains? translations l) l :de)]
     (get-in translations [locale key] key)))
-
-(def ^:private formatter (f/formatters :date))
-(defn- format-date [date] (when date (f/unparse formatter (from-date date))))
 
 (defn- default-book-title
   [title creator language]
@@ -130,7 +125,7 @@
     [:meta {:name "dc:Subject" :content subject}]
     [:meta {:name "dc:Description" :content description}]
     [:meta {:name "dc:Publisher" :content publisher}]
-    [:meta {:name "dc:Date" :content (format-date date)}]
+    [:meta {:name "dc:Date" :content date}]
     [:meta {:name "dc:Type" :content type}]
     [:meta {:name "dc:Format" :content format}]
     [:meta {:name "dc:Identifier" :content identifier}]
@@ -138,7 +133,7 @@
     [:meta {:name "dc:Language" :content language}]
     [:meta {:name "dc:Rights" :content rights}]
     [:meta {:name "dtb:uid" :content identifier}]
-    [:meta {:name "dtb:sourceDate" :content (format-date source_date)}]
+    [:meta {:name "dtb:sourceDate" :content source_date}]
     [:meta {:name "dtb:sourceEdition" :content source_edition}]
     [:meta {:name "dtb:sourcePublisher" :content source_publisher}]
     [:meta {:name "dtb:sourceRights" :content source_rights}]
@@ -147,9 +142,9 @@
     [:meta {:name "dtb:multimediaContent" :content multimedia_content}]
     [:meta {:name "dtb:narrator" :content narrator}]
     [:meta {:name "dtb:producer" :content publisher}]
-    [:meta {:name "dtb:producedDate" :content (format-date produced_date)}]
+    [:meta {:name "dtb:producedDate" :content produced_date}]
     [:meta {:name "dtb:revision" :content revision}]
-    [:meta {:name "dtb:revisionDate" :content (format-date revision_date)}]
+    [:meta {:name "dtb:revisionDate" :content revision_date}]
     [:meta {:name "dtb:revisionDescription" :content revision_description}]
     [:meta {:name "dtb:totalTime" :content total_time}]
     [:meta {:name "dtb:audioFormat" :content audio_format}]]
