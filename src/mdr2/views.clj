@@ -27,6 +27,8 @@
      [:h1 "Productions"]
      (when-let [errors (:errors (:flash request))]
        [:p [:ul.alert.alert-danger (for [e errors] [:li e])]])
+     (when-let [warnings (:warnings (:flash request))]
+       [:p [:ul.alert.alert-warning (for [w warnings] [:li w])]])
      (when-let [message (:message (:flash request))]
        [:p.alert.alert-success message])
      [:table#productions.table.table-striped
@@ -216,20 +218,25 @@
 
 (defn production-bulk-import
   [productions]
-  (doseq [[_ p] productions]
-    (-> p
-     prod/parse
-     prod/add-default-meta-data
-     ;; FIXME: does it make sense to update? What if the production
-     ;; has already been archived? I think we should probably make
-     ;; sure the production is in certain valid states
-     prod/update-or-create!
-     ;; productions from vubis do not need any manual structuring.
-     ;; They get their standard structure from a default template
-     prod/set-state-structured!
-     ;; write the dtbook template file
-     dtbook/dtbook-file))
-  (response/redirect-after-post "/"))
+  (let [created (doall (map (fn [[_ p]]
+                              (-> p
+                                  prod/parse
+                                  prod/add-default-meta-data
+                                  prod/create!))
+                            productions))
+        errors (remove map? created)
+        new (filter map? created)]
+    (doseq [p new]
+      ;; productions from vubis do not need any manual structuring.
+      ;; They get their standard structure from a default template
+      prod/set-state-structured!
+      ;; write the dtbook template file
+      dtbook/dtbook-file)
+    (-> (response/redirect-after-post "/")
+        (cond-> (seq errors)
+          (assoc :flash {:warnings (for [e errors]
+                                     (str (re-find #"PNX \d+" (first e))
+                                          " has already been imported"))})))))
 
 (defn production-repair-form
   [request & [errors]]
