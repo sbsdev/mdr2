@@ -169,8 +169,9 @@
     (catalog request "Library signature not valid")))
 
 (defn production-delete [id]
-  (prod/delete! id)
-  (response/redirect-after-post "/"))
+  (prod/delete! (prod/find id))
+  (-> (response/redirect-after-post "/")
+      (assoc :flash {:message "Production has been deleted"})))
 
 (defn production-bulk-import-form [request & [errors]]
   (let [user (friend/current-authentication request)]

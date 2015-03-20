@@ -263,10 +263,12 @@
   (set-state! production "archived"))
 
 (defn delete!
-  "Delete a production with the given `id`"
-  [id]
-  (db/delete! {:id id})
-  (delete-all-dirs! {:id id}))
+  "Delete a `production`"
+  [production]
+  ;; we do not actually delete anything in the db
+  (-> production
+      (set-state! "deleted")
+      delete-all-dirs!))
 
 (defn add-structure
   "Add a DTBook XML to a `production`. This will also set the status
