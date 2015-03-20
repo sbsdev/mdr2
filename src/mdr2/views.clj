@@ -134,13 +134,15 @@
      (when error
        [:p [:ul.alert.alert-danger [:li error]]])
      [:table.table.table-striped
-      [:thead [:tr [:th "Title"] [:th "Product Number"] [:th "DAM Number"] [:th "Total time"] [:th "Number of CDs"] [:th "Depth"] [:th "Narrator"] [:th "Date of Production"] [:th "Libary signature"]]]
+      [:thead [:tr [:th "Title"] [:th "Product Number"] [:th "Library Number"] [:th "DAM Number"] [:th "Total time"] [:th "Number of CDs"] [:th "Depth"] [:th "Narrator"] [:th "Date of Production"] [:th "Libary signature"]]]
       [:tbody
-       (for [{:keys [id title product_number total_time volumes depth narrator produced_date]
+       (for [{:keys [id title product_number library_number
+                     total_time volumes depth narrator produced_date]
               :as production} (prod/find-by-state "encoded")]
          [:tr
           [:td (link-to (str "/production/" id) title)]
           [:td product_number]
+          [:td library_number]
           [:td (prod/dam-number production)]
           [:td (quot total_time (* 1000 60))] ; in minutes
           [:td volumes]
