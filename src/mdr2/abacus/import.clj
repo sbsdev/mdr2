@@ -1,6 +1,9 @@
 (ns mdr2.abacus.import
   "Funtionality for the initial import of the production data from
-  ABACUS to Madras2"
+  ABACUS to Madras2.
+
+  This is meant to be used only once when importing the productions
+  from ABACUS. Use from within a repl."
   (:require [clojure.java.io :as io]
             [clojure.data.csv :as csv]
             [clojure.string :as string]
@@ -11,7 +14,7 @@
 (def ^:private db (env :database-url))
 
 (defn fix-production
-  "Fix a `production`, i.e. fix some of the fields as they are coing
+  "Fix a `production`, i.e. fix some of the fields as they are coming
   from ABACUS the values as they are expected by Madras2"
   [{:keys [id periodical_number] :as production}]
   (-> production
