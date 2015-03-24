@@ -2,7 +2,8 @@
   "Define the basic page structure and layout"
   (:require [clojure.string :as s]
             [clojure.data.json :as json]
-            [hiccup.page :refer [html5 include-css include-js]]))
+            [hiccup.page :refer [html5 include-css include-js]]
+            [cemerick.friend :as friend]))
 
 (defn key-to-label
   "Return a nice string from a keyword, e.g. `:product_number` will be
@@ -39,28 +40,33 @@
 
 (defn loginbar 
   "Display a login link or information about the currently logged in user if user is non-nil"
-  [user]
-  [:ul.nav.navbar-nav.navbar-right
-   (if user
-     (list
-      [:li [:a [:b (format "%s %s" (:first_name user) (:last_name user))]]]
-      [:li [:a {:href "/logout"} (glyphicon "log-out")]])
-     [:li [:a {:href "/login"} (glyphicon "log-in")]])])
+  [identity]
+  (let [user (friend/current-authentication identity)]
+    [:ul.nav.navbar-nav.navbar-right
+     (if user
+       (list
+        [:li [:a [:b (format "%s %s" (:first_name user) (:last_name user))]]]
+        [:li [:a {:href "/logout"} (glyphicon "log-out")]])
+       [:li [:a {:href "/login"} (glyphicon "log-in")]])]))
 
 (defn dropdown-menu
   "Display a dropdown menu"
-  []
-  [:li.dropdown
-   [:a.dropdown-toggle
-    {:href "#" :role "button" :data-toggle "dropdown" :aria-expanded false} "Actions" [:span.caret]]
-   [:ul.dropdown-menu {:role "menu"}
-    [:li [:a {:href "/production/upload"} "Import from Vubis"]]
-    [:li [:a {:href "/catalog"} "Assign Library Signature"]]
-    [:li [:a {:href "/production/repair"} "Repair Production"]]]])
+  [identity]
+  (let [menu [{:href "/production/upload" :label "Import from Vubis" :roles #{:admin :it}}
+              {:href "/catalog" :label "Assign Library Signature" :roles #{:catalog :it}}
+              {:href "/production/repair" :label "Repair Production" :roles #{:admin :studio :it}}]
+        filtered (filter #(friend/authorized? (:roles %) identity) menu)]
+    (when (seq filtered)
+      [:li.dropdown
+       [:a.dropdown-toggle
+        {:href "#" :role "button" :data-toggle "dropdown" :aria-expanded false} "Actions" [:span.caret]]
+       [:ul.dropdown-menu {:role "menu"}
+        (for [{:keys [href label roles]} filtered]
+          [:li [:a {:href href} label]])]])))
 
 (defn navbar
   "Display the navbar"
-  [user]
+  [identity]
   [:div.navbar.navbar-default {:role "navigation"}
    [:div.container-fluid
     [:div.navbar-header
@@ -74,8 +80,8 @@
      [:a.navbar-brand {:href "/"} "Madras 2"]]
     [:div.collapse.navbar-collapse
      {:id "navbar-collapse-target"}
-     [:ul.nav.navbar-nav (dropdown-menu)]
-     [:ul.nav.navbar-nav.navbar-right (loginbar user)]]]])
+     [:ul.nav.navbar-nav (dropdown-menu identity)]
+     [:ul.nav.navbar-nav.navbar-right (loginbar identity)]]]])
 
 (def ^:private datatable-config
   {:paging false
@@ -88,7 +94,7 @@
 
 (defn common
   "Display a page using the bootstrap css"
-  [user & body]
+  [identity & body]
   (html5
     [:head
      [:title "mdr2"]
@@ -96,7 +102,7 @@
      (include-css "/css/dataTables.bootstrap.css")]
     [:body
      [:div.container
-      (navbar user)
+      (navbar identity)
       body]
      (include-js "/js/jquery-1.11.1.min.js")
      (include-js "/js/bootstrap.min.js")

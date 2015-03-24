@@ -1,6 +1,6 @@
 (ns mdr2.handler
   "Main entry points to the application"
-  (:require [compojure.core :refer [defroutes routes GET POST]]
+  (:require [compojure.core :refer [defroutes routes GET POST DELETE]]
             [compojure.handler :as handler]
             [hiccup.middleware :refer [wrap-base-url]]
             [compojure.route :as route]
@@ -19,43 +19,51 @@
 
   ;; bulk import of productions
   (GET "/production/upload" request
-       (friend/authenticated (views/production-bulk-import-form request)))
+       (friend/authorize #{:admin :it} (views/production-bulk-import-form request)))
   (POST "/production/upload-confirm" [file :as r]
-        (friend/authenticated (views/production-bulk-import-confirm r file)))
+        (friend/authorize #{:admin :it} (views/production-bulk-import-confirm r file)))
   (POST "/production/upload" [productions]
-        (friend/authenticated (views/production-bulk-import productions)))
+        (friend/authorize #{:admin :it} (views/production-bulk-import productions)))
 
   ;; repair productions
   (GET "/production/repair" request
-       (friend/authenticated (views/production-repair-form request)))
+       (friend/authorize #{:admin :studio :it} (views/production-repair-form request)))
   (POST "/production/repair-confirm" [identifier :as r]
-        (friend/authenticated (views/production-repair-confirm r identifier)))
+        (friend/authorize #{:admin :studio :it} (views/production-repair-confirm r identifier)))
   (POST "/production/repair" [id]
-        (friend/authenticated (views/production-repair id)))
+        (friend/authorize #{:admin :studio :it} (views/production-repair id)))
 
-  ;; individual productions
+  ;; individual productions read-only
+  (GET "/production/:id" [id :as r]
+       (friend/authenticated (views/production r id)))
   (GET "/production/:id.xml" [id]
        (friend/authenticated (views/production-xml id)))
+
+  ;; delete individual production
+  (DELETE "/production/:id" [id]
+       (friend/authorize #{:admin :it} (views/production-delete id)))
+
+  ;; upload structure for individual production
   (GET "/production/:id/upload" [id :as r]
-       (friend/authenticated (views/file-upload-form r id)))
+       (friend/authorize #{:admin :etext :it} (views/file-upload-form r id)))
   (POST "/production/:id/upload" [id file :as r]
-        (friend/authenticated (views/production-add-xml r id file)))
+        (friend/authorize #{:admin :etext :it} (views/production-add-xml r id file)))
+
+  ;; modify state of an individual production
   (POST "/production/:id/state" [id state]
-        (friend/authenticated (views/production-set-state id state)))
+        (friend/authorize #{:admin :it} (views/production-set-state id state)))
+
+  ;; split an individual production
   (GET "/production/:id/split" [id :as r]
-       (friend/authenticated (views/production-split-form r id)))
+       (friend/authorize #{:admin :it} (views/production-split-form r id)))
   (POST "/production/:id/split" [id volumes sample-rate bitrate :as r]
-        (friend/authenticated (views/production-split r id volumes sample-rate bitrate)))
+        (friend/authorize #{:admin :it} (views/production-split r id volumes sample-rate bitrate)))
 
   ;; catalog
   (GET "/catalog" request
-       (friend/authenticated (views/catalog request)))
+       (friend/authorize #{:catalog :it} (views/catalog request)))
   (POST "/catalog/:id" [id library_signature :as r]
-        (friend/authenticated (views/production-catalog r id library_signature)))
-  (GET "/production/:id" [id :as r]
-       (friend/authenticated (views/production r id)))
-  (GET "/production/:id/delete" [id]
-       (friend/authorize #{:admin} (views/production-delete id)))
+        (friend/authorize #{:catalog :it} (views/production-catalog r id library_signature)))
 
   ;; production monitoring
   (GET "/psm.csv" [] (views/production-monitoring))

@@ -21,9 +21,8 @@
             [mdr2.pipeline1 :as pipeline]))
 
 (defn home [request]
-  (let [identity (friend/identity request)
-        user (friend/current-authentication request)]
-    (layout/common user
+  (let [identity (friend/identity request)]
+    (layout/common identity
      [:h1 "Productions"]
      (when-let [errors (:errors (:flash request))]
        [:p [:ul.alert.alert-danger (for [e errors] [:li e])]])
@@ -32,7 +31,8 @@
      (when-let [message (:message (:flash request))]
        [:p.alert.alert-success message])
      [:table#productions.table.table-striped
-      [:thead [:tr [:th "DAM"] [:th "Title"] [:th "Type"] [:th "State"] [:th "Action"]]]
+      [:thead [:tr [:th "DAM"] [:th "Title"] [:th "Type"] [:th "State"]
+               (when (friend/authorized? #{:admin :etext :it} identity) [:th "Action"])]]
       [:tbody
        (let [cached-state (memoize db/find-state)
              cached-production-type (memoize db/find-production-type)]
@@ -45,46 +45,55 @@
               [:td (link-to (str "/production/" id) title)]
               [:td (:name realized-production-type)]
               [:td (:name realized-state)]
-              [:td
-               (layout/button-group
-                (remove
-                 nil?
-                 [(layout/button (str "/production/" id ".xml")
-                                 (layout/glyphicon "download"))
-                  (layout/button (when (= next-state "structured") (str "/production/" id "/upload"))
-                                 (layout/glyphicon "upload"))
-                  (cond
-                    ;; enable the "Recorded" button if the next state is "recorded", there
-                    ;; is an DAISY export and the production has been imported from the
-                    ;; libary, i.e. is not handled via ABACUS or the production has already
-                    ;; a library signature as is the case with productions that are repaired
-                    (and (= next-state "recorded")
-                         (or (:library_number production) (:library_signature production))
-                         (prod/manifest? production))
-                    (form/form-to
-                     {:class "btn-group"} [:post (str "/production/" id "/state")]
-                     (form/hidden-field :state next-state)
-                     (anti-forgery-field)
-                     [:button.btn.btn-default (layout/glyphicon "transfer") " "
-                      (:name (first (cached-state {:id next-state})))])
-                    ;; Enable the "Split" button if the next state is "split" and there is a
-                    ;; split production
-                    (and (= next-state "split") (prod/split? production))
-                    (layout/button (str "/production/" id "/split")
-                                   (layout/glyphicon "transfer") " "
-                                   (:name (first (cached-state {:id next-state}))))
-                    ;; in all other cases disable the button
-                    :else (layout/button nil
-                           (layout/glyphicon "transfer") " "
-                           (:name (first (cached-state {:id next-state})))))
-                  (when (friend/authorized? #{:admin} identity)
-                    (layout/button (str "/production/" id "/delete")
-                                   (layout/glyphicon "trash")))]))]])))]])))
+              (when (friend/authorized? #{:admin :etext :it} identity)
+                [:td
+                 (layout/button-group
+                  (remove
+                   nil?
+                   [;; show the download button if the next state is structured and the user
+                    ;; is authorized
+                    (when (= next-state "structured")
+                      (layout/button (str "/production/" id ".xml") (layout/glyphicon "download")))
+                    ;; show the upload button if the next state is structured and the user
+                    ;; is authorized
+                    (when (= next-state "structured")
+                      (layout/button (str "/production/" id "/upload") (layout/glyphicon "upload")))
+                    (cond
+                      ;; show the "Recorded" button if the next state is "recorded", the
+                      ;; user is authorized, there is an DAISY export and the production has
+                      ;; been imported from the libary, i.e. is not handled via ABACUS or the
+                      ;; production has already a library signature as is the case with
+                      ;; productions that are repaired
+                      (and (= next-state "recorded")
+                           (or (:library_number production) (:library_signature production))
+                           (prod/manifest? production)
+                           (friend/authorized? #{:admin :it} identity))
+                      (form/form-to
+                       {:class "btn-group"} [:post (str "/production/" id "/state")]
+                       (form/hidden-field :state next-state)
+                       (anti-forgery-field)
+                       [:button.btn.btn-default (layout/glyphicon "transfer") " "
+                        (:name (first (cached-state {:id next-state})))])
+                      ;; show the "Split" button if the next state is "split", the user is
+                      ;; authorized and there is a split production
+                      (and (= next-state "split")
+                           (prod/split? production)
+                           (friend/authorized? #{:admin :it} identity))
+                      (layout/button (str "/production/" id "/split")
+                                     (layout/glyphicon "transfer") " "
+                                     (:name (first (cached-state {:id next-state})))))
+                    ;; show the delete button if the user is authorized
+                    (when (friend/authorized? #{:admin :it} identity)
+                      (form/form-to
+                       {:class "btn-group"} [:post (str "/production/" id)]
+                       (form/hidden-field :_method "DELETE") ; fake a delete request
+                       (anti-forgery-field)
+                       [:button.btn.btn-default (layout/glyphicon "trash")]))]))])])))]])))
 
 (defn production [request id]
   (let [p (prod/find id)
-        user (friend/current-authentication request)]
-    (layout/common user
+        identity (friend/identity request)]
+    (layout/common identity
      [:h1 (str "Production: " (:title p))]
      (for [[k v] (sort-by first (seq p))]
        [:p [:b (layout/key-to-label k) ":"] " " v]))))
@@ -98,8 +107,8 @@
 
 (defn file-upload-form [request id & [errors]]
   (let [p (prod/find id)
-        user (friend/current-authentication request)]
-    (layout/common user
+        identity (friend/identity request)]
+    (layout/common identity
      [:h1 "Upload"]
      [:p (str "Upload structure for " (:title p))]
      (when (seq errors)
@@ -127,9 +136,8 @@
         (response/redirect-after-post "/")))))
 
 (defn catalog [request & error]
-  (let [identity (friend/identity request)
-        user (friend/current-authentication request)]
-    (layout/common user
+  (let [identity (friend/identity request)]
+    (layout/common identity
      [:h1 "Productions"]
      (when error
        [:p [:ul.alert.alert-danger [:li error]]])
@@ -174,8 +182,8 @@
       (assoc :flash {:message "Production has been deleted"})))
 
 (defn production-bulk-import-form [request & [errors]]
-  (let [user (friend/current-authentication request)]
-    (layout/common user
+  (let [identity (friend/identity request)]
+    (layout/common identity
      [:h1 "Upload new productions from Vubis XML"]
      (when errors
        [:p [:ul.alert.alert-danger
@@ -189,10 +197,9 @@
       (form/submit-button "Upload")))))
 
 (defn production-bulk-import-confirm-form [request productions]
-  (let [user (friend/current-authentication request)
+  (let [identity (friend/identity request)
         keys [:title :creator :source :description :library_number :source_publisher :source_date]]
-    (layout/common
-     user
+    (layout/common identity
      [:h1 "Productions to import"]
      [:table.table.table-striped
       [:thead [:tr (for [k keys]
@@ -243,8 +250,8 @@
 
 (defn production-repair-form
   [request & [errors]]
-  (let [user (friend/current-authentication request)]
-    (layout/common user
+  (let [identity (friend/identity request)]
+    (layout/common identity
      [:h1 "Production to repair"]
      (when (seq errors)
        [:p [:ul.alert.alert-danger (for [e errors] [:li e])]])
@@ -272,9 +279,8 @@
             (prod/find-archived-by-productnumber identifier)
             :else (let [search-term (str "%" identifier "%")]
                     (prod/find-archived-by-title-or-creator search-term)))
-          user (friend/current-authentication request)]
-      (layout/common
-       user
+          identity (friend/identity request)]
+      (layout/common identity
        [:h1 "Productions to repair"]
        [:table.table.table-striped
         [:thead [:tr [:th "Title"] [:th "Creator"] [:th "Action"]]]
@@ -318,9 +324,8 @@
         (prod/set-state! production state)
         resp))))
 
-(defn- production-split-form-internal [id user errors]
-  (layout/common
-   user
+(defn- production-split-form-internal [id identity errors]
+  (layout/common identity
    [:h1 "Split Production"]
    (when (seq errors)
      [:p [:ul.alert.alert-danger (for [e errors] [:li e])]])
@@ -345,11 +350,11 @@
       (form/submit-button {:class "btn btn-default"} "Encode")]])))
 
 (defn production-split-form [request id & [errors]]
-  (let [user (friend/current-authentication request)
+  (let [identity (friend/identity request)
         production (prod/find id)] ; FIXME: the find could return nil
     (if errors
       ;; if we have errors then just show them in the form
-      (production-split-form-internal id user errors)
+      (production-split-form-internal id identity errors)
       ;; otherwise check if the split production is even valid. Assume
       ;; that we are going to have at least two volumes
       (let [errors (prod/manifest-validate
@@ -362,7 +367,7 @@
           (-> (response/redirect-after-post "/")
               (assoc :flash {:errors errors}))
           ;; all is well. Show the split dialog
-          (production-split-form-internal id user nil))))))
+          (production-split-form-internal id identity nil))))))
 
 (defn production-split [request id volumes sample-rate bitrate]
   (let [production (prod/find id)
@@ -441,9 +446,9 @@
     (form/submit-button {:class "btn btn-default"} "Login"))))
 
 (defn unauthorized [request]
-  (let [user (friend/current-authentication request)]
+  (let [identity (friend/identity request)]
     (->
-     (layout/common user
+     (layout/common identity
       [:h2
        [:div.alert.alert-danger
         "Sorry, you do not have sufficient privileges to access "
