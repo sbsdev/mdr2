@@ -34,10 +34,10 @@
         (friend/authorize #{:admin :studio :it} (views/production-repair id)))
 
   ;; individual productions read-only
-  (GET "/production/:id" [id :as r]
-       (friend/authenticated (views/production r id)))
   (GET "/production/:id.xml" [id]
        (friend/authenticated (views/production-xml id)))
+  (GET "/production/:id" [id :as r]
+       (friend/authenticated (views/production r id)))
 
   ;; delete individual production
   (DELETE "/production/:id" [id]
