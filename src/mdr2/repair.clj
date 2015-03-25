@@ -4,6 +4,7 @@
   This mostly entails functionality to fetch a production from the archive."
   (:require [clojure.java.io :as io]
             [clojure.tools.logging :as log]
+            [immutant.transactions.jdbc :refer [factory]]
             [yesql.core :refer [defqueries]]
             [me.raynes.fs :as fs]
             [me.raynes.fs.compression :as compress]
@@ -14,7 +15,7 @@
             [mdr2.production :as prod]
             [mdr2.production.path :as path]))
 
-(def ^:private db (env :archive-database-url))
+(def ^:private db {:factory factory :name "java:jboss/datasources/archive"})
 (def ^:private archive-web-root (env :archive-web-root))
 (def ^:private archive-web-user (env :archive-web-user))
 (def ^:private archive-web-password (env :archive-web-password))

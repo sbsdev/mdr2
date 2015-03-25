@@ -9,9 +9,10 @@
             [clojure.string :as string]
             [clojure.java.jdbc :as jdbc]
             [environ.core :refer [env]]
-            [mdr2.production :as prod]))
+            [mdr2.production :as prod]
+            [immutant.transactions.jdbc :refer [factory]]))
 
-(def ^:private db (env :database-url))
+(def ^:private db {:factory factory :name "java:jboss/datasources/productions"})
 
 (defn fix-production
   "Fix a `production`, i.e. fix some of the fields as they are coming

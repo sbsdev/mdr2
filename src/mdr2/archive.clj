@@ -33,6 +33,7 @@ mp3 and the whole thing is packed up in one or more iso files
   (:require [clojure.java.jdbc :as jdbc]
             [clojure.java.io :refer [file]]
             [clojure.tools.logging :as log]
+            [immutant.transactions.jdbc :refer [factory]]
             [environ.core :refer [env]]
             [clj-time.core :as t]
             [clj-time.coerce :refer [to-date]]
@@ -43,7 +44,7 @@ mp3 and the whole thing is packed up in one or more iso files
             [mdr2.repair :as repair]
             [mdr2.rdf :as rdf]))
 
-(def ^:private db (env :archive-database-url))
+(def ^:private db {:factory factory :name "java:jboss/datasources/archive"})
 
 (def spool-dir
   "Path to the archive spool directory, i.e. where to place incoming
