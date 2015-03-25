@@ -2,7 +2,6 @@
   "Functionality for productions"
   (:refer-clojure :exclude [find])
   (:require [clojure.java.io :refer [file]]
-            [me.raynes.fs :as fs]
             [org.tobereplaced.nio.file :as nio]
             [clj-time.core :as t]
             [clj-time.format :as f]
@@ -15,7 +14,8 @@
             [mdr2.dtb :as dtb]
             [mdr2.production.path :as path]
             [mdr2.obi :as obi]
-            [mdr2.pipeline1 :as pipeline])
+            [mdr2.pipeline1 :as pipeline]
+            [mdr2.util :as util])
   (:import java.nio.file.StandardCopyOption))
 
 (defn library-signature?
@@ -38,7 +38,7 @@
 (defn manifest?
   "Return true if the production has a DAISY export"
   [production]
-  (fs/exists? (path/manifest-path production)))
+  (nio/exists? (path/manifest-path production)))
 
 (defn manifest-validate
   "Return a list of validation errors for all DAISY exports of given
@@ -62,7 +62,7 @@
 (defn split?
   "Return true if the production has a manual split"
   [production]
-  (fs/exists? (path/split-path production 1)))
+  (nio/exists? (path/split-path production 1)))
 
 (defn dam-number
   "Return an id for a production as it is expected by legacy systems"
@@ -114,7 +114,7 @@
                ;; do not create the recording path as that is created
                ;; by obi
                (remove #{(path/recording-path production)}))]
-    (fs/mkdirs dir)
+    (nio/create-directories! dir)
     ;; make sure recording and recorded are group writable
     (when (#{path/recorded-path path/recording-path path/split-path} dir)
       (let [permissions (conj (nio/posix-file-permissions dir)
@@ -245,7 +245,7 @@
 (defn delete-all-dirs!
   "Delete all artifacts on the file system for a production"
   [production]
-  (doseq [dir (path/all production)] (fs/delete-dir dir)))
+  (doseq [dir (path/all production)] (util/delete-directory! dir)))
 
 (defn set-state-archived! [production]
   (transaction
@@ -265,5 +265,5 @@
   to :structured"
   [production f]
   ;; move the file to the right place
-  (fs/move f (xml-path production) StandardCopyOption/REPLACE_EXISTING)
+  (nio/move! f (xml-path production) StandardCopyOption/REPLACE_EXISTING)
   (set-state-structured! production))
