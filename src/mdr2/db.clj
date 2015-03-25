@@ -38,28 +38,6 @@
                         library_number ["library_number = ?" library_number]
                         product_number ["product_number = ?" product_number]))))
 
-(defn- update-or-insert-internal!
-  "Updates columns or inserts a new row in the specified table"
-  [db table row where-clause]
-  (jdbc/with-db-transaction [t-con db]
-    (let [result (jdbc/update! t-con table row where-clause)]
-      (if (zero? (first result))
-        (jdbc/insert! t-con table row)
-        result))))
-
-(defn update-or-insert!
-  "Update or insert the given `production`. Return it possibly updated
-  with an `:id` in the case of an insert"
-  [{library_number :library_number product_number :product_number :as production}]
-  (if-let [key (get-generated-key
-                (if (or product_number library_number)
-                  (update-or-insert-internal! db :production production
-                   (cond library_number ["library_number = ?" library_number]
-                         product_number ["product_number = ?" product_number]))
-                  (jdbc/insert! db :production production)))]
-    (assoc production :id key)
-    production))
-
 (defn get-user
   "Return the user with the given `username`"
   [username]
