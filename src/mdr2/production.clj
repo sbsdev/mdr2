@@ -9,6 +9,7 @@
             [clj-time.coerce :refer [to-sql-date]]
             [environ.core :refer [env]]
             [immutant.messaging :as msg]
+            [immutant.transactions :refer [transaction]]
             [mdr2.queues :as queues]
             [mdr2.db :as db]
             [mdr2.dtb :as dtb]
@@ -123,12 +124,14 @@
 (defn create!
   "Create a production"
   [production]
-  (let [p (-> production
-              add-default-meta-data
-              db/insert!)]
-    (when (map? p)
-      (create-dirs p))
-    p))
+  ;; make sure nothing is inserted in the db if we cannot create the dirs
+  (transaction
+   (let [p (-> production
+               add-default-meta-data
+               db/insert!)]
+     (when (map? p)
+       (create-dirs p))
+     p)))
 
 (defn update! [production]
   (db/update! production))
@@ -179,10 +182,11 @@
   "Set `production` to `state`"
   [production state]
   (let [p (assoc production :state state)]
-    (update! p)
-    (when (:product_number p)
-      ;; notify the erp of the status change
-      (msg/publish (queues/notify-abacus) p))
+    (transaction
+     (update! p)
+     (when (:product_number p)
+       ;; notify the erp of the status change
+       (msg/publish (queues/notify-abacus) p)))
     p))
 
 (defn set-state-structured! [production]
@@ -191,30 +195,33 @@
   (set-state! production "structured"))
 
 (defn set-state-recorded! [production]
-  (let [current-date (to-sql-date (t/now))
-        new-production
-        (-> production
-         (merge (dtb/meta-data (path/recorded-path production)))
-         (assoc :produced_date current-date)
-         (assoc :revision_date current-date)
-         (update-in [:revision] inc)
-         (set-state! "recorded"))]
-    (msg/publish (queues/encode) {:production new-production})
-    new-production))
+  (transaction
+   (let [current-date (to-sql-date (t/now))
+         new-production
+         (-> production
+             (merge (dtb/meta-data (path/recorded-path production)))
+             (assoc :produced_date current-date)
+             (assoc :revision_date current-date)
+             (update-in [:revision] inc)
+             (set-state! "recorded"))]
+     (msg/publish (queues/encode) {:production new-production})
+     new-production)))
 
 (defn set-state-split! [production volumes sample-rate bitrate]
-  (as-> production p
-    (assoc p :volumes volumes)
-    (set-state! p "split")
-    (msg/publish (queues/encode)
-                 {:production p
-                  :sample-rate sample-rate
-                  :bitrate bitrate})))
+  (transaction
+   (as-> production p
+     (assoc p :volumes volumes)
+     (set-state! p "split")
+     (msg/publish (queues/encode)
+                  {:production p
+                   :sample-rate sample-rate
+                   :bitrate bitrate}))))
 
 (defn set-state-cataloged! [production]
-  (as-> production p
-    (set-state! p "cataloged")
-    (msg/publish (queues/archive) p)))
+  (transaction
+   (as-> production p
+     (set-state! p "cataloged")
+     (msg/publish (queues/archive) p))))
 
 (defn set-state-encoded! [{:keys [production_type] :as production}]
   (if (or (not= production_type "book")
@@ -226,9 +233,10 @@
     ;; When repairing a production we already have a library
     ;; signature, so no need to ask the library for another one; go
     ;; directly to archiving
-    (as-> production p
-      (set-state! p "cataloged")
-      (msg/publish (queues/archive) p))
+    (transaction
+     (as-> production p
+       (set-state! p "cataloged")
+       (msg/publish (queues/archive) p)))
     ;; when a normal production is encoded we set the state to encoded
     ;; and wait for the library to assign a library
     ;; signature (e.g. "ds123") to it
@@ -240,8 +248,9 @@
   (doseq [dir (path/all production)] (fs/delete-dir dir)))
 
 (defn set-state-archived! [production]
-  (delete-all-dirs! production)
-  (set-state! production "archived"))
+  (transaction
+   (delete-all-dirs! production)
+   (set-state! production "archived")))
 
 (defn delete!
   "Delete a `production`"
