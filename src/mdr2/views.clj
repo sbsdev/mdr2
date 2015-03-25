@@ -83,7 +83,7 @@
                                      (layout/glyphicon "transfer") " "
                                      (:name (first (cached-state {:id next-state})))))
                     ;; show the delete button if the user is authorized
-                    (when (friend/authorized? #{:admin :it} identity)
+                    (when (friend/authorized? #{:it} identity)
                       (form/form-to
                        {:class "btn-group"} [:post (str "/production/" id)]
                        (form/hidden-field :_method "DELETE") ; fake a delete request

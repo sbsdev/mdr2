@@ -41,7 +41,7 @@
 
   ;; delete individual production
   (DELETE "/production/:id" [id]
-       (friend/authorize #{:admin :it} (views/production-delete id)))
+       (friend/authorize #{:it} (views/production-delete id)))
 
   ;; upload structure for individual production
   (GET "/production/:id/upload" [id :as r]
