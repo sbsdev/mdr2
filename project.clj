@@ -28,7 +28,6 @@
                  [ring/ring-defaults "0.1.4"]
                  [ring/ring-core "1.3.2"]
                  [ring/ring-devel "1.3.2"]
-                 [robert/hooke "1.3.0"]
                  [yesql "0.5.0-rc2"]
                  ]
   :repositories [["Immutant 2.x incremental builds"
