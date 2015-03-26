@@ -4,7 +4,8 @@
             [environ.core :refer [env]]
             [mdr2.archive :as archive]
             [mdr2.production :as prod]
-            [me.raynes.fs :as fs]))
+            [org.tobereplaced.nio.file :as nio]
+            [mdr2.util :as util]))
 
 (def mock-db (atom []))
 
@@ -22,16 +23,16 @@
 (defn mock-set-state-archived! [production])
 
 (defn setup-spool-dirs [test-fn]
-  (fs/mkdirs (env :archive-spool-dir))
-  (fs/mkdirs (env :archive-periodical-spool-dir))
-  (fs/mkdirs (env :archive-other-spool-dir))
+  (nio/create-directories! (env :archive-spool-dir))
+  (nio/create-directories! (env :archive-periodical-spool-dir))
+  (nio/create-directories! (env :archive-other-spool-dir))
   (reset! mock-db [])
   (with-redefs [clojure.java.jdbc/insert! mock-jdbc-insert
                 mdr2.production/set-state-archived! mock-set-state-archived!]
     (test-fn))
-  (fs/delete-dir (env :archive-spool-dir))
-  (fs/delete-dir (env :archive-periodical-spool-dir))
-  (fs/delete-dir (env :archive-other-spool-dir)))
+  (util/delete-directory! (env :archive-spool-dir))
+  (util/delete-directory! (env :archive-periodical-spool-dir))
+  (util/delete-directory! (env :archive-other-spool-dir)))
 
 (use-fixtures :each setup-spool-dirs)
 
@@ -84,17 +85,17 @@
                        (merge {:verzeichnis ds-number
                                :sektion "cdimage"}
                               default-container-entry)]))
-      (are [file] (fs/exists? file)
+      (are [f] (nio/exists? f)
            ;; check if the master has been copied
-           (fs/file spool-dir dam-number "produkt" dam-number "aud001.wav")
-           (fs/file spool-dir dam-number "produkt" dam-number "ncc.html")
-           (fs/file spool-dir dam-number "produkt" dam-number "master.smil")
+           (file spool-dir dam-number "produkt" dam-number "aud001.wav")
+           (file spool-dir dam-number "produkt" dam-number "ncc.html")
+           (file spool-dir dam-number "produkt" dam-number "master.smil")
            ;; check if the master has an rdf
-           (fs/file spool-dir dam-number (str dam-number ".rdf"))
+           (file spool-dir dam-number (str dam-number ".rdf"))
            ;; check if the distmaster has been copied...
-           (fs/file spool-dir ds-number "produkt" iso-name)
+           (file spool-dir ds-number "produkt" iso-name)
            ;; ...and that it has an rdf
-           (fs/file spool-dir ds-number (str ds-number ".rdf"))))))
+           (file spool-dir ds-number (str ds-number ".rdf"))))))
 
 (deftest book-multiple
   (testing "archiving a book with multiple volumes"
@@ -111,18 +112,18 @@
                        (merge {:verzeichnis ds-number
                                :sektion "cdimage"}
                               default-container-entry)]))
-      (are [file] (fs/exists? file)
+      (are [f] (nio/exists? f)
            ;; check if the master has been copied
-           (fs/file spool-dir dam-number "produkt" dam-number "aud001.wav")
-           (fs/file spool-dir dam-number "produkt" dam-number "ncc.html")
-           (fs/file spool-dir dam-number "produkt" dam-number "master.smil")
+           (file spool-dir dam-number "produkt" dam-number "aud001.wav")
+           (file spool-dir dam-number "produkt" dam-number "ncc.html")
+           (file spool-dir dam-number "produkt" dam-number "master.smil")
            ;; check if the master has an rdf
-           (fs/file spool-dir dam-number (str dam-number ".rdf"))
+           (file spool-dir dam-number (str dam-number ".rdf"))
            ;; check if all the distmasters have been copied...
-           (fs/file spool-dir ds-number "produkt" (str ds-number "_1.iso"))
-           (fs/file spool-dir ds-number "produkt" (str ds-number "_2.iso"))
+           (file spool-dir ds-number "produkt" (str ds-number "_1.iso"))
+           (file spool-dir ds-number "produkt" (str ds-number "_2.iso"))
            ;; ...and that it has an rdf
-           (fs/file spool-dir ds-number (str ds-number ".rdf"))))))
+           (file spool-dir ds-number (str ds-number ".rdf"))))))
 
 (deftest periodicals-single
   (testing "archiving of periodical single volume"
@@ -133,9 +134,9 @@
           iso-name (str dam-number ".iso")
           spool-dir (env :archive-periodical-spool-dir)]
       (archive/archive production)
-      (are [file] (fs/exists? file)
-           (fs/file spool-dir dam-number "produkt" iso-name)
-           (fs/file spool-dir dam-number rdf-name)))))
+      (are [f] (nio/exists? f)
+           (file spool-dir dam-number "produkt" iso-name)
+           (file spool-dir dam-number rdf-name)))))
 
 (deftest periodicals-multiple
   (testing "archiving of periodical multi volume"
@@ -146,9 +147,9 @@
           rdf-name (str dam-number ".rdf")
           spool-dir (env :archive-periodical-spool-dir)]
       (archive/archive production)
-      (are [file] (fs/exists? file)
-           (fs/file spool-dir dam-number "produkt" iso-name)
-           (fs/file spool-dir dam-number rdf-name)))))
+      (are [f] (nio/exists? f)
+           (file spool-dir dam-number "produkt" iso-name)
+           (file spool-dir dam-number rdf-name)))))
 
 (deftest other-single
   (testing "archiving of other production single volume"
@@ -161,9 +162,9 @@
           rdf-name (str dam-number ".rdf")
           spool-dir (env :archive-other-spool-dir)]
       (archive/archive production)
-      (are [file] (fs/exists? file)
-           (fs/file spool-dir dam-number "produkt" iso-name)
-           (fs/file spool-dir dam-number rdf-name)))))
+      (are [f] (nio/exists? f)
+           (file spool-dir dam-number "produkt" iso-name)
+           (file spool-dir dam-number rdf-name)))))
 
 (deftest other-multiple
   (testing "archiving of other production multi volume"
@@ -175,7 +176,7 @@
           dam-number (prod/dam-number production)
           rdf-name (str dam-number ".rdf")]
       (archive/archive production)
-      (are [file] (fs/exists? file)
-           (fs/file spool-dir dam-number "produkt" (str dam-number "_1.iso"))
-           (fs/file spool-dir dam-number "produkt" (str dam-number "_2.iso"))
-           (fs/file spool-dir dam-number rdf-name)))))
+      (are [f] (nio/exists? f)
+           (file spool-dir dam-number "produkt" (str dam-number "_1.iso"))
+           (file spool-dir dam-number "produkt" (str dam-number "_2.iso"))
+           (file spool-dir dam-number rdf-name)))))
