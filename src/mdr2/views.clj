@@ -18,7 +18,8 @@
             [mdr2.dtbook.validation :refer [validate-metadata]]
             [mdr2.production-monitoring :as psm]
             [mdr2.repair :as repair]
-            [mdr2.pipeline1 :as pipeline]))
+            [mdr2.pipeline1 :as pipeline])
+  (:import java.sql.BatchUpdateException))
 
 (defn home [request]
   (let [identity (friend/identity request)]
@@ -171,9 +172,13 @@
 
 (defn production-catalog [request id library_signature]
   (if (prod/library-signature? library_signature)
-    (let [p (assoc (prod/find id) :library_signature library_signature)]
-      (prod/set-state-cataloged! p)
-      (response/redirect-after-post "/catalog"))
+    (try
+      (let [p (assoc (prod/find id) :library_signature library_signature)]
+        (prod/set-state-cataloged! p)
+        (response/redirect-after-post "/catalog"))
+      (catch BatchUpdateException e
+        (catalog request (str "Library signature already in use: "
+                              library_signature))))
     (catalog request "Library signature not valid")))
 
 (defn production-delete [id]
