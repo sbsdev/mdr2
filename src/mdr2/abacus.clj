@@ -47,6 +47,15 @@
    :idVorstufe [:MetaData :sbs :idVorstufe text]
    })
 
+(defn source-date
+  "Extract the source date from a raw `production` by taking the last
+  segment of the `:source_edition`"
+  [{source_edition :source_edition}]
+  (-> source_edition
+      (string/split #"/")
+      last
+      (->> (re-find #"\d{4}"))))
+
 (defn clean-raw-production
   "Return a proper production based on a raw production, i.e. drop
   `:mvl_only`, `:command` and `:idVorstufe` and add `:production_type`
@@ -59,6 +68,7 @@
     (-> raw-production
         (dissoc :mvl_only :command :idVorstufe)
         (assoc :production_type production_type)
+        (assoc :source_date (source-date raw-production))
         (cond-> (= production_type "periodical")
           (assoc :periodical_number idVorstufe)))))
 
