@@ -42,7 +42,7 @@
   [node {:keys [creator title date identifier language publisher
                 source type narrator produced_date producer
                 revision_date source_edition source_publisher
-                multimedia_type encoded_size]
+                source_date multimedia_type encoded_size]
          :as production}]
   (cond
     ;; FIXME: this is a gross hack using one bug to work around
@@ -63,6 +63,7 @@
     (meta-node? node "dc:type") (update-meta-node node type)
     (meta-node? node "ncc:narrator") (update-meta-node node narrator)
     (meta-node? node "ncc:producedDate") (update-meta-node node produced_date)
+    (meta-node? node "ncc:sourceDate") (update-meta-node node source_date)
     (meta-node? node "ncc:producer") (update-meta-node node producer)
     (meta-node? node "ncc:revisionDate") (update-meta-node node revision_date)
     (meta-node? node "ncc:sourceEdition") (update-meta-node node source_edition)
