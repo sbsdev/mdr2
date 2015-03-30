@@ -92,7 +92,7 @@
   the meta data from `production`. If a `manifest` is given the
   `volume` is ignored"
   ([production volume]
-   (update-mainfest! volume (path/manifest-path production volume)))
+   (update-mainfest! production volume (path/manifest-path production volume)))
   ([production _ manifest]
    (let [updated (with-open [r (io/reader manifest)]
                   (update-meta-data (xml/parse r :support-dtd false)
