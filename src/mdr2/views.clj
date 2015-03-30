@@ -316,7 +316,11 @@
         resp (response/redirect-after-post "/")]
     (if (= state "recorded")
       ;; check if the exported production is even valid
-      (let [errors (prod/manifest-validate production)]
+      ;; for validation purposes pretend there is only one volume. At
+      ;; this stage the number of volumes just indicates that there
+      ;; should be a split into that many volumes. The volumes aren't
+      ;; actually there yet
+      (let [errors (prod/manifest-validate (assoc production :volumes 1))]
         (if (seq errors)
           ;; hm the exported production is not valid. Forget about the
           ;; state change.
