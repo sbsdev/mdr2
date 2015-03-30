@@ -112,13 +112,16 @@
    (encode production bitrate (sampling-rate production)))
   ([production bitrate sample-rate]
    (doseq [volume (range 1 (inc (:volumes production)))]
+     ;; make sure the meta data of the recorded production aligns with
+     ;; the meta data we have on file for this production
+     (xml/update-meta-data! production volume)
      (let [{exit :exit error :err} (encode-production production bitrate volume sample-rate)]
        (if (not (and (= 0 exit) (s/blank? error)))
          (log/errorf "Encoding of %s (%s) failed with exit %s and message \"%s\""
                      (:id production) volume exit error)
          (let [encoded_size (dtb/size (path/recorded-path production))]
-           ;; update meta data
-           (xml/update-meta-data! (assoc production :encoded_size encoded_size))
+           ;; add the encoded size to the meta data of the encoded production
+           (xml/update-encoded-meta-data! (assoc production :encoded_size encoded_size) volume)
            ;; downgrade to daisy202
            (downgrade production)
            ;; create an iso

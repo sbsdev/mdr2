@@ -88,19 +88,23 @@
   (w/postwalk #(handler % production) xml))
 
 (defn update-mainfest!
-  "Update the manifest and the smil file of a `production` inplace
-  with the meta data from `production`"
-  [production]
-  (let [manifest (path/manifest-path production)
-        updated (with-open [r (io/reader manifest)]
+  "Update the manifest file of `volume` for `production` in-place with
+  the meta data from `production`. If a `manifest` is given the
+  `volume` is ignored"
+  ([production volume]
+   (update-mainfest! volume (path/manifest-path production volume)))
+  ([production _ manifest]
+   (let [updated (with-open [r (io/reader manifest)]
                   (update-meta-data (xml/parse r :support-dtd false)
                                     production handle-manifest-node))]
     (with-open [w (io/writer manifest)]
-      (xml-new/emit updated w :doctype manifest-doctype))))
+      (xml-new/emit updated w :doctype manifest-doctype)))))
 
 (defn update-master-smil!
-  [production]
-  (let [smil (io/file (path/recorded-path production) "master.smil")
+  "Update the master smil file of `volume` for `production` in-place
+  with the meta data from `production`"
+  [production volume]
+  (let [smil (io/file (path/recorded-path production volume) "master.smil")
         updated (with-open [r (io/reader smil)]
                   (update-meta-data
                    (xml/parse r :support-dtd false)
@@ -109,8 +113,18 @@
       (xml-new/emit updated w :doctype smil-doctype))))
 
 (defn update-meta-data!
-  "Update the manifest and the smil file of a `production` inplace
-  with the meta data from `production`"
-  [production]
-  (update-mainfest! production)
-  (update-master-smil! production))
+  "Update the manifest and the smil file of a `volume` for
+  `production` in-place with the meta data from `production`"
+  [production volume]
+  (update-mainfest! production volume)
+  (update-master-smil! production volume))
+
+(defn update-encoded-meta-data!
+  "Update the meta data of an encoded `volume` for `production`
+  in-place. This can be useful in situations where the meta data is
+  only known after the encoding, such as `:encoded_size`. Presumably
+  only the manifest will be affected. The smil files will not be
+  touched"
+  [production volume]
+  (update-mainfest! production volume
+   (io/file (path/encoded-path production volume) path/manifest-member)))
