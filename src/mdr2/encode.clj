@@ -117,6 +117,9 @@
      (xml/update-meta-data! production volume)
      (let [{exit :exit error :err} (encode-production production bitrate volume sample-rate)]
        (if (not (and (= 0 exit) (s/blank? error)))
+         ;; FIXME: This is very fishy: an error is basically logged
+         ;; and ignored. The state is still set to encoded. Die hard
+         ;; and with a bang!
          (log/errorf "Encoding of %s (%s) failed with exit %s and message \"%s\""
                      (:id production) volume exit error)
          (let [encoded_size (dtb/size (path/recorded-path production))]
