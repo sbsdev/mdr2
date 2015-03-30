@@ -46,7 +46,7 @@
   returns an empty list"
   [production]
   (if (not (manifest? production))
-    []
+    ["No manifest found"]
     (->> (range (:volumes production))
          (map inc)
          (map #(path/manifest-path production %))
