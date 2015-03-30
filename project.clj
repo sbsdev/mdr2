@@ -50,5 +50,4 @@
                     :env {:production-path "test/testfiles"
                           :archive-spool-dir "/tmp/mdr2/archive"
                           :archive-periodical-spool-dir "/tmp/mdr2/periodical-archive"
-                          :archive-other-spool-dir "/tmp/mdr2/other-archive"
-                          :archive-database-url "sqlite:db/archive.db"}}})
+                          :archive-other-spool-dir "/tmp/mdr2/other-archive"}}})
