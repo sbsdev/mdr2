@@ -4,6 +4,8 @@
   This mostly entails functionality to fetch a production from the archive."
   (:require [clojure.java.io :as io]
             [clojure.tools.logging :as log]
+            [immutant.transactions :refer [transaction]]
+            [immutant.transactions.jdbc :refer [factory]]
             [yesql.core :refer [defqueries]]
             [me.raynes.fs :as fs]
             [me.raynes.fs.compression :as compress]
@@ -14,7 +16,7 @@
             [mdr2.production :as prod]
             [mdr2.production.path :as path]))
 
-(def ^:private db (env :archive-database-url))
+(def ^:private db {:factory factory :name "java:jboss/datasources/archive"})
 (def ^:private archive-web-root (env :archive-web-root))
 (def ^:private archive-web-user (env :archive-web-user))
 (def ^:private archive-web-password (env :archive-web-password))
@@ -68,26 +70,27 @@
       (let [dam-number (prod/dam-number production)
             tar-file (io/file (fs/tmpdir) (str dam-number ".tar"))
             tar-dir (io/file (fs/tmpdir) dam-number)]
-        ;; create all dirs for this production
-        (prod/create-dirs production)
-        ;; copy tar to tmpdir
-        (with-open [input (:body response)
-                    output (io/output-stream tar-file)]
-          (io/copy input output))
-        ;; extract the tar
-        (compress/untar tar-file tar-dir)
-        ;; extract the relevant parts to the structured-path
-        (let [src-path (io/file tar-dir dam-number "produkt" dam-number)
-              dest-path (path/structured-path production)]
-          (doseq [f (filter #(.isFile %) (file-seq src-path))]
-            (nio/move! f (io/file dest-path (fs/base-name f)))))
-        ;; clear the temporary files
-        (fs/delete tar-file)
-        (fs/delete-dir tar-dir)
-        ;; create the obi config file
-        (obi/config-file production)
-        ;; set the state
-        (prod/set-state! production "structured"))
+        (transaction
+         ;; create all dirs for this production
+         (prod/create-dirs production)
+         ;; copy tar to tmpdir
+         (with-open [input (:body response)
+                     output (io/output-stream tar-file)]
+           (io/copy input output))
+         ;; extract the tar
+         (compress/untar tar-file tar-dir)
+         ;; extract the relevant parts to the structured-path
+         (let [src-path (io/file tar-dir dam-number "produkt" dam-number)
+               dest-path (path/structured-path production)]
+           (doseq [f (filter #(.isFile %) (file-seq src-path))]
+             (nio/move! f (io/file dest-path (fs/base-name f)))))
+         ;; clear the temporary files
+         (fs/delete tar-file)
+         (fs/delete-dir tar-dir)
+         ;; create the obi config file
+         (obi/config-file production)
+         ;; set the state
+         (prod/set-state! production "structured")))
       (do
         (log/errorf "Couldn't get %s from archive (%s)" (:id production) url)
         ;; close the stream

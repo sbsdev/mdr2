@@ -13,28 +13,27 @@
                  [org.immutant/immutant "2.0.0-beta1"]
                  [org.tobereplaced/nio.file "0.3.1"]
                  [org.xerial/sqlite-jdbc "3.8.7"] ; just for testing
-                 [clj-http "1.0.1"] ; for pipeline2 client
-                 [clj-time "0.8.0"]
+                 [clj-http "1.1.0"] ; for pipeline2 client
+                 [clj-time "0.9.0"]
                  [com.cemerick/friend "0.2.1"]
-                 [com.novemberain/pantomime "2.3.0"]
+                 [com.novemberain/pantomime "2.4.0"]
                  [com.thaiopensource/jing "20091111"]
-                 [compojure "1.3.1"]
+                 [compojure "1.3.2"]
                  [crypto-random "1.2.0"] ; for pipeline2 client
                  [environ "1.0.0"]
                  [hiccup "1.0.5"]
                  [me.raynes/fs "1.4.6"]
-                 [mysql/mysql-connector-java "5.1.34"]
-                 [pandect "0.4.1"] ; for pipeline2 client
-                 [ring/ring-defaults "0.1.3"]
+                 [mysql/mysql-connector-java "5.1.35"]
+                 [pandect "0.5.1"] ; for pipeline2 client
+                 [ring/ring-defaults "0.1.4"]
                  [ring/ring-core "1.3.2"]
                  [ring/ring-devel "1.3.2"]
-                 [robert/hooke "1.3.0"]
                  [yesql "0.5.0-rc2"]
                  ]
   :repositories [["Immutant 2.x incremental builds"
                   "http://downloads.immutant.org/incremental/"]]
   :plugins [[lein-immutant "2.0.0-alpha2"]
-            [codox "0.8.9" :exclusions [org.clojure/clojure leinjacker]]
+            [codox "0.8.11"]
             [lein-environ "1.0.0"]
             [cider/cider-nrepl "0.8.2"]]
   :codox {:project {:name "Madras2"}

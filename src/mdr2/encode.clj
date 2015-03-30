@@ -10,7 +10,8 @@
             [mdr2.dtb :as dtb]
             [mdr2.dtb.xml :as xml]
             [mdr2.pipeline1 :as pipeline]
-            [mdr2.pipeline2.scripts :as pipeline2]))
+            [mdr2.pipeline2.scripts :as pipeline2]
+            [mdr2.util :as util]))
 
 ;; according to wikipedia it should be 737280000 (see
 ;; http://en.wikipedia.org/wiki/CD-ROM#Capacity) but according to k3b
@@ -96,8 +97,8 @@
   "Clean up temporary files of a production, namely the mp3 encoded
   DTB and the iso"
   [production]
-  (fs/delete-dir (path/encoded-path production))
-  (fs/delete-dir (path/iso-path production)))
+  (util/delete-directory! (path/encoded-path production))
+  (util/delete-directory! (path/iso-path production)))
 
 (defn downgrade
   [production]

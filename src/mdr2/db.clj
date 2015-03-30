@@ -2,12 +2,14 @@
   "Persistence for productions"
   (:refer-clojure :exclude [find])
   (:require [clojure.java.jdbc :as jdbc]
+            [immutant.transactions :refer [set-rollback-only]]
+            [immutant.transactions.jdbc :refer [factory]]
             [yesql.core :refer [defqueries]]
             [clojure.string :as s]
             [environ.core :refer [env]])
   (:import java.sql.SQLException))
 
-(def ^:private db (env :database-url))
+(def ^:private db {:factory factory :name "java:jboss/datasources/productions"})
 
 (defqueries "sql/queries.sql" {:connection db})
 
@@ -27,6 +29,7 @@
       (assoc production :id key)
       production)
     (catch SQLException e
+      (set-rollback-only) ; make sure transactions are rolled back
       [(.getMessage e)])))
 
 (defn update!
