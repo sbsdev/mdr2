@@ -5,7 +5,7 @@
             [mdr2.queues :as queues]
             [mdr2.handler :as handler]
             [mdr2.abacus :as abacus]
-            [mdr2.production :as production]
+            [mdr2.production :as prod]
             [mdr2.archive :as archive]
             [mdr2.encode :as encode]))
 
@@ -17,8 +17,9 @@
   ;; wire up queues
   (msg/listen (queues/encode)
               (fn [{:keys [production bitrate sample-rate]}]
-                (if (and bitrate sample-rate)
-                  (encode/encode-or-split production bitrate sample-rate)
-                  (encode/encode-or-split production))))
-  (msg/listen (queues/archive) #(archive/archive %))
-  (msg/listen (queues/notify-abacus) #(abacus/export-file %)))
+                (let [p (prod/iso8601ify production)]
+                  (if (and bitrate sample-rate)
+                    (encode/encode-or-split p bitrate sample-rate)
+                    (encode/encode-or-split p)))))
+  (msg/listen (queues/archive) #(archive/archive (prod/iso8601ify %)))
+  (msg/listen (queues/notify-abacus) #(abacus/export-file (prod/iso8601ify %))))

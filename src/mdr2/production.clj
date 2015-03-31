@@ -5,7 +5,7 @@
             [org.tobereplaced.nio.file :as nio]
             [clj-time.core :as t]
             [clj-time.format :as f]
-            [clj-time.coerce :refer [to-sql-date]]
+            [clj-time.coerce :refer [to-sql-date from-date]]
             [environ.core :refer [env]]
             [immutant.messaging :as msg]
             [immutant.transactions :refer [transaction]]
@@ -91,6 +91,14 @@
   "Add the default meta data to a production"
   [production]
   (merge (default-meta-data) production))
+
+(defn iso8601ify
+  "Convert all dates in a production from java.util.Date into
+  java.sql.Date so that we can just use `str` to get an ISO 8601 date.
+  Use this on productions you grab from a queue"
+  [production]
+  (reduce (fn [p k] (assoc p k (to-sql-date (from-date (k p)))))
+          production [:date :source_date :produced_date :revision_date]))
 
 (defn parse
   "Return a `production` with all values parsed into their proper types,
