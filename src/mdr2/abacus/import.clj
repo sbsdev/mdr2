@@ -1,5 +1,5 @@
 (ns mdr2.abacus.import
-  "Funtionality for the initial import of the production data from
+  "Functionality for the initial import of the production data from
   ABACUS to Madras2.
 
   This is meant to be used only once when importing the productions
