@@ -99,7 +99,8 @@
                     :producedDate :produced_date
                     :sourceDate :source_date
                     :revisionDate :revision_date
-                    :sourcePublisher :source_publisher})))
+                    :sourcePublisher :source_publisher
+                    :process_status :state})))
 
 (defn cleanup-commercial-production
   [m]
@@ -117,7 +118,7 @@
         (assoc :total_time total_time)
         (assoc :library_signature (get production-id-to-library-signature-map (:id m)))
         (select-keys [:id :creator :date :depth :language :library_number :library_signature
-                        :narrator :process_status :produced_date :production_type
+                        :narrator :state :produced_date :production_type
                         :revision_date :source :source_date :source_publisher
                         :subject :title :total_time :volumes]))))
 
@@ -142,24 +143,26 @@
   [{id :id}]
   (get all-files-by-id id))
 
-(def ready-productions
+(defn ready-productions
   "All productions with state \"ready\""
-  (filter #(= (:state %) "ready") all-productions))
+  [productions]
+  (filter #(= (:state %) "ready") productions))
 
 (defn create-ready-productions!
   "Create all productions with state \"ready\""
   []
-  (doseq [p ready-productions]
+  (doseq [p (ready-productions all-productions)]
     (-> p prod/create!)))
 
-(def archived-productions
+(defn archived-productions
   "All productions with state \"archived\""
-  (filter #(= (:state %) "archived") all-productions))
+  [productions]
+  (filter #(= (:state %) "archived") productions))
 
 (defn create-archived-productions!
   "Create all productions with state \"archived\""
   []
-  (->> archived-productions
+  (->> (archived-productions all-productions)
        (map #(assoc % :state "archived"))
        (map prod/add-default-meta-data)
        (apply jdbc/insert! db :production)))
@@ -234,10 +237,10 @@
   (println)
   (println "Importing from ABACUS")
   (println)
-  (println "Ready: " (count ready-productions))
-  (println (string/join ", " (map :id ready-productions)))
+  (println "Ready: " (count (ready-productions all-productions)))
+  (println (string/join ", " (map :id (ready-productions all-productions))))
   (println)
-  (println "Archived: " (count archived-productions))
+  (println "Archived: " (count (archived-productions all-productions)))
   (println)
   (println "Recording with no wav and a struct.html: " (count recording-productions-with-struct))
   (println (string/join ", " (map :id recording-productions-with-struct)))
@@ -258,5 +261,10 @@
     (println (str (string/capitalize state) ": ") (string/join ", " (map :id (filter #(= (:state %) state) all-productions)))))
   (println )
   (println "Importing commercial audio books")
+  (println)
+  (println "Ready: " (count (ready-productions all-commercial-productions)))
+  (println (string/join ", " (map :id (ready-productions all-commercial-productions))))
+  (println)
+  (println "Archived: " (count (archived-productions all-commercial-productions)))
   (println)
 )
