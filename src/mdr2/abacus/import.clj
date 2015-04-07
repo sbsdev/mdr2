@@ -103,7 +103,11 @@
 
 (defn cleanup-commercial-production
   [m]
-  (let [volumes (second (re-matches #"\d of (\d+)" (:setInfo m "1 of 1")))
+  (let [;; the quality of this data is so poor that we just assume 1
+        ;; if we get garbage. See select count(*), value from meta
+        ;; where element='setInfo' group by value
+        volumes (or (second (re-matches #"\d of (\d+)" (:setInfo m "1 of 1")))
+                    "1")
         language (string/lower-case (:language m "de"))
         total_time (to-millis (:totalTime m "0:0:0"))]
     (-> m
