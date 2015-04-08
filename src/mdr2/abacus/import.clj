@@ -67,14 +67,14 @@
    (map fix-production)
    (map #(merge (prod/default-meta-data) %))))
 
-(defn extract-id
-  [line]
-  (parse-int (or (second (re-find #"^\./dam(\d+)" line)) "0")))
+(defn extract-id [regexp s] (parse-int (or (second (re-find regexp s)) "0")))
+(def extract-id-from-file (partial extract-id #"^\./dam(\d+)"))
+(def extract-id-from-db (partial extract-id #"^dam(\d+)"))
 
 (defn files-by-id
   [f]
   (with-open [r (clojure.java.io/reader f)]
-    (group-by extract-id (line-seq r))))
+    (group-by extract-id-from-file (line-seq r))))
 
 (defn wav-file? [f] (re-matches #".*\.wav$" f))
 (defn struct-file? [f] (re-matches #".*/struct.html$" f))
@@ -93,6 +93,7 @@
   [m]
   (-> m
       (assoc (keyword (:element m)) (:value m))
+      (assoc :id (extract-id-from-db (:id m)))
       (rename-keys {:idVorstufe :library_number
                     :producedDate :produced_date
                     :sourceDate :source_date
@@ -123,7 +124,7 @@
 (def all-commercial-productions
   (let [statement (string/join
                    "\n"
-                   ["SELECT d.id, d.tm, d.identifier, d.title, d.process_status, m.element, m.value"
+                   ["SELECT d.tm, d.identifier AS id, d.title, d.process_status, m.element, m.value"
                     "FROM madras.document d, madras.meta m"
                     "WHERE d.id IN (SELECT id_document FROM madras.meta WHERE element='idVorstufe' AND value regexp '^PNX [2-9][0-9][0-9][0-9]')"
                     "AND d.id = m.id_document"])]
