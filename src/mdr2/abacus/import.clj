@@ -9,14 +9,21 @@
             [clojure.string :as string]
             [clojure.set :refer [rename-keys]]
             [clojure.java.jdbc :as jdbc]
+            [org.tobereplaced.nio.file :as nio]
             [environ.core :refer [env]]
             [mdr2.production :as prod]
             [mdr2.dtbook :as dtbook]
+            [mdr2.production.path :as path]
             [immutant.transactions.jdbc :refer [factory]]))
 
 (def ^:private db {:factory factory :name "java:jboss/datasources/productions"})
 (def ^:private old-db {:factory factory :name "java:jboss/datasources/old-productions"})
 (def ^:private archive-db {:factory factory :name "java:jboss/datasources/archive"})
+
+(def abacus-csv "/home/eglic/src/mdr2/samples/ABACUS_export_Books_27032015.csv")
+(def file-dump "/home/eglic/src/mdr2/samples/miloun_files.txt")
+(def move-script "/home/eglic/src/mdr2/samples/move-productions.sh")
+(def old-production-root "/path/to/old/productions")
 
 (defn parse-int [s] (Integer/parseInt s))
 (defn production-id? [id] (let [match (re-matches #"DAM (\d+)$" id)] (when match (parse-int (second match)))))
@@ -62,7 +69,7 @@
 
 (defn extract-id
   [line]
-  (second (re-find #"^\./dam(\d+)" line)))
+  (parse-int (or (second (re-find #"^\./dam(\d+)" line)) "0")))
 
 (defn files-by-id
   [f]
@@ -73,9 +80,7 @@
 (defn struct-file? [f] (re-matches #".*/struct.html$" f))
 (defn obi-project? [f] (re-matches #".*/project.obi$" f))
 
-(def abacus-csv "/home/eglic/src/mdr2/samples/ABACUS_export_Books_27032015.csv")
 (def all-productions (-> abacus-csv io/file productions))
-(def file-dump "/home/eglic/src/mdr2/samples/miloun_files.txt")
 (def all-files-by-id (-> file-dump io/file files-by-id))
 
 (defn to-millis
@@ -152,6 +157,13 @@
                                                    (some wav-file? (get-all-files production))
                                                    (not-any? obi-project? (get-all-files production))))
 
+(defn obi-project-path [production]
+  (->> (some obi-project? (get-all-files production))
+      io/file
+      nio/parent
+      (nio/resolve-path old-production-root)
+      nio/normalize))
+
 (defn create-ready-productions!
   "Create all productions with state \"ready\""
   [productions]
@@ -190,10 +202,12 @@
   (doseq [p (filter recording-with-obi? productions)]
     (-> p
         prod/create!
-        prod/set-state-structured!
-        (comment
-          (copy-obi-project!)
-          (create-obi-config-file!)))))
+        prod/set-state-structured!)
+    (spit move-script
+          (format "mv %s %s\n" (obi-project-path p) (path/recording-path p))
+          :append true)
+    (comment
+      (create-obi-config-file!))))
 
 (defn create-recording-productions-without-obi!
   "Create all productions with state \"recording\" with wav files that
@@ -242,7 +256,7 @@
   (println "Ignoring the rest")
   (println (dissoc (frequencies (map :state all-productions)) "archived" "recording" "ready"))
   (doseq [state ["repairing" "finishing" "recorded" "pre_ready"]]
-    (println (str (string/capitalize state) ": ") (string/join ", " (map :id (filter #(= (:state %) state) all-productions)))))
+    (println (str (string/capitalize state) ":") (string/join ", " (map :id (filter #(= (:state %) state) all-productions)))))
   (println )
   (println "Importing commercial audio books")
   (println "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
