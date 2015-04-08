@@ -194,6 +194,14 @@
           (copy-struct-file!)
           (convert-struct-file!)))))
 
+(defn copy-obi-project! [production]
+  (spit move-script
+        (format "mv %s %s\n"
+                (obi-project-path production)
+                (path/recording-path production))
+        :append true)
+  production)
+
 (defn create-recording-productions-with-obi!
   "Create all productions with state \"recording\" with wav files that
   contain an obi project. Add to the db and create the directories.
@@ -203,12 +211,14 @@
   (doseq [p (filter recording-with-obi? productions)]
     (-> p
         prod/create!
-        prod/set-state-structured!)
-    (spit move-script
-          (format "mv %s %s\n" (obi-project-path p) (path/recording-path p))
-          :append true)
+        prod/set-state-structured!
+        copy-obi-project!))
     (comment
-      (create-obi-config-file!))))
+      (create-obi-config-file!)))
+
+(defn copy-sigtuna-project! [production]
+  ;; FIXME: do we actually copy theses projects or do we do this manually?
+  production)
 
 (defn create-recording-productions-without-obi!
   "Create all productions with state \"recording\" with wav files that
@@ -218,8 +228,7 @@
     (-> p
         prod/create!
         prod/set-state-structured!
-        (comment
-          (copy-sigtuna-project!)))))
+        copy-sigtuna-project!)))
 
 (defn print-stats
   "Print a summary of all the productions that are about to be migrated"
