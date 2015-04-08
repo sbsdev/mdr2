@@ -11,6 +11,7 @@
             [clojure.java.jdbc :as jdbc]
             [environ.core :refer [env]]
             [mdr2.production :as prod]
+            [mdr2.dtbook :as dtbook]
             [immutant.transactions.jdbc :refer [factory]]))
 
 (def ^:private db {:factory factory :name "java:jboss/datasources/productions"})
@@ -68,17 +69,9 @@
   (with-open [r (clojure.java.io/reader f)]
     (group-by extract-id (line-seq r))))
 
-(defn contains-wav-files
-  [coll]
-  (some #(re-matches #".*\.wav$" %) coll))
-
-(defn contains-struct-file
-  [coll]
-  (some #(re-matches #".*/struct.html$" %) coll))
-
-(defn contains-obi-project
-  [coll]
-  (some #(re-matches #".*/project.obi$" %) coll))
+(defn wav-file? [f] (re-matches #".*\.wav$" f))
+(defn struct-file? [f] (re-matches #".*/struct.html$" f))
+(defn obi-project? [f] (re-matches #".*/project.obi$" f))
 
 (def abacus-csv "/home/eglic/src/mdr2/samples/ABACUS_export_Books_27032015.csv")
 (def all-productions (-> abacus-csv io/file productions))
@@ -143,45 +136,44 @@
   [{id :id}]
   (get all-files-by-id id))
 
-(defn ready-productions
-  "All productions with state \"ready\""
-  [productions]
-  (filter #(= (:state %) "ready") productions))
+(defn ready? [production] (= (:state production) "ready"))
+(defn archived? [production] (= (:state production) "archived"))
+(defn recording? [production] (= (:state production) "recording"))
+(defn recording-no-wav? [production] (and (recording? production)
+                                          (not-any? wav-file? (get-all-files production))))
+(defn recording-no-wav-with-struct? [production] (and (recording-no-wav? production)
+                                                      (some struct-file? (get-all-files production))))
+(defn recording-with-wav? [production] (and (recording? production)
+                                            (some wav-file? (get-all-files production))))
+(defn recording-with-obi? [production] (and (recording? production)
+                                            (some wav-file? (get-all-files production))
+                                            (some obi-project? (get-all-files production))))
+(defn recording-with-wav-no-obi? [production] (and (recording? production)
+                                                   (some wav-file? (get-all-files production))
+                                                   (not-any? obi-project? (get-all-files production))))
 
 (defn create-ready-productions!
   "Create all productions with state \"ready\""
-  []
-  (doseq [p (ready-productions all-productions)]
-    (-> p prod/create!)))
-
-(defn archived-productions
-  "All productions with state \"archived\""
   [productions]
-  (filter #(= (:state %) "archived") productions))
+  (doseq [p (filter ready? productions)]
+    (if (:library_number p)
+      (-> p prod/create! prod/set-state-structured! dtbook/dtbook-file)
+      (-> p prod/create!))))
 
 (defn create-archived-productions!
   "Create all productions with state \"archived\""
-  []
-  (->> (archived-productions all-productions)
+  [productions]
+  (->> (filter archived? productions)
        (map #(assoc % :state "archived"))
        (map prod/add-default-meta-data)
        (apply jdbc/insert! db :production)))
-
-(def recording-productions-without-wav
-  "All productions with state \"recording\" that do not contain any wav file"
-  (filter #(and (= (:state %) "recording")
-                (not (contains-wav-files (get-all-files %)))) all-productions))
-
-(def recording-productions-with-struct
-  "All productions with state \"recording\" that do not contain any wav but a struct file"
-  (filter #(contains-struct-file (get-all-files %)) recording-productions-without-wav))
 
 (defn create-recording-productions-with-struct!
   "Create all productions with state \"recording\" that do not contain
   any wav but a struct file. Add to the db, create the directories and
   create the config file. Finally convert the \"struct.html\""
-  []
-  (doseq [p recording-productions-with-struct]
+  [productions]
+  (doseq [p (filter #(recording-no-wav-with-struct? %) productions)]
     (-> p
         prod/create!
         prod/set-state-structured!
@@ -189,24 +181,13 @@
           (copy-struct-file!)
           (convert-struct-file!)))))
 
-(def recording-productions-with-wav
-  "All productions with state \"recording\" that contain wav files"
-  (filter #(and (= (:state %) "recording")
-                (contains-wav-files (get-all-files %)))
-          all-productions))
-
-(def recording-productions-with-obi
-  "All productions with state \"recording\" with wav files that contain an obi project"
-  (filter #(contains-obi-project (get-all-files %))
-          recording-productions-with-wav))
-
 (defn create-recording-productions-with-obi!
   "Create all productions with state \"recording\" with wav files that
   contain an obi project. Add to the db and create the directories.
   Copy the obi project to the new place. Place an obi config file
   inside the obi project"
-  []
-  (doseq [p recording-productions-with-obi]
+  [productions]
+  (doseq [p (filter recording-with-obi? productions)]
     (-> p
         prod/create!
         prod/set-state-structured!
@@ -214,16 +195,11 @@
           (copy-obi-project!)
           (create-obi-config-file!)))))
 
-(def recording-productions-without-obi
-  "All productions with state \"recording\" with wav files but no obi project"
-  (filter #(not (contains-obi-project (get-all-files %)))
-          recording-productions-with-wav))
-
 (defn create-recording-productions-without-obi!
   "Create all productions with state \"recording\" with wav files that
   do not contain an obi project. Add to the db and create the directories"
-  []
-  (doseq [p recording-productions-without-obi]
+  [productions]
+  (doseq [p (filter recording-with-wav-no-obi? productions)]
     (-> p
         prod/create!
         prod/set-state-structured!
@@ -234,26 +210,34 @@
   "Print a summary of all the productions that are about to be migrated"
   []
   (println "Migrating productions from old to new Madras")
+  (println "============================================")
   (println)
   (println "Importing from ABACUS")
+  (println "~~~~~~~~~~~~~~~~~~~~~")
   (println)
-  (println "Ready: " (count (ready-productions all-productions)))
-  (println (string/join ", " (map :id (ready-productions all-productions))))
+  (println "Ready:" (count (filter ready? all-productions)))
+  (println "-----")
+  (println (string/join ", " (map :id (filter ready? all-productions))))
   (println)
-  (println "Archived: " (count (archived-productions all-productions)))
+  (println "Archived:" (count (filter archived? all-productions)))
+  (println "--------")
   (println)
-  (println "Recording with no wav and a struct.html: " (count recording-productions-with-struct))
-  (println (string/join ", " (map :id recording-productions-with-struct)))
+  (println "Recording with no wav and a struct.html:" (count (filter #(recording-no-wav-with-struct? %) all-productions)))
+  (println "---------------------------------------")
+  (println (string/join ", " (map :id (filter #(recording-no-wav-with-struct? %) all-productions))))
   (println)
-  (let [weird (filter #(not (contains-struct-file (get-all-files %))) recording-productions-without-wav)]
-    (println "Recording with no wav and no struct.html: " (count weird))
+  (let [weird (filter #(and (not-any? struct-file? (get-all-files %)) (recording-no-wav? %)) all-productions)]
+    (println "Recording with no wav and no struct.html:" (count weird))
+    (println "----------------------------------------")
     (println (string/join ", " (map :id weird))))
   (println)
-  (println "Recording with wav and an obi project: " (count recording-productions-with-obi))
-  (println (string/join ", " (map :id recording-productions-with-obi)))
+  (println "Recording with wav and an obi project:" (count (filter recording-with-obi? all-productions)))
+  (println "-------------------------------------")
+  (println (string/join ", " (map :id (filter recording-with-obi? all-productions))))
   (println)
-  (println "Recording with wav and no obi project: " (count recording-productions-without-obi))
-  (println (string/join ", " (map :id recording-productions-without-obi)))
+  (println "Recording with wav and no obi project:" (count (filter recording-with-wav-no-obi? all-productions)))
+  (println "-------------------------------------")
+  (println (string/join ", " (map :id (filter recording-with-wav-no-obi? all-productions))))
   (println)
   (println "Ignoring the rest")
   (println (dissoc (frequencies (map :state all-productions)) "archived" "recording" "ready"))
@@ -261,10 +245,13 @@
     (println (str (string/capitalize state) ": ") (string/join ", " (map :id (filter #(= (:state %) state) all-productions)))))
   (println )
   (println "Importing commercial audio books")
+  (println "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
   (println)
-  (println "Ready: " (count (ready-productions all-commercial-productions)))
-  (println (string/join ", " (map :id (ready-productions all-commercial-productions))))
+  (println "Ready:" (count (filter ready? all-commercial-productions)))
+  (println "-----")
+  (println (string/join ", " (map :id (filter ready? all-commercial-productions))))
   (println)
-  (println "Archived: " (count (archived-productions all-commercial-productions)))
+  (println "Archived:" (count (filter archived? all-commercial-productions)))
+  (println "--------")
   (println)
 )
