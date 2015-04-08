@@ -13,6 +13,7 @@
             [environ.core :refer [env]]
             [mdr2.production :as prod]
             [mdr2.dtbook :as dtbook]
+            [mdr2.obi :as obi]
             [mdr2.production.path :as path]
             [immutant.transactions.jdbc :refer [factory]]))
 
@@ -202,6 +203,11 @@
         :append true)
   production)
 
+(defn create-obi-config-file! [production]
+  (let [config-file-name (io/file (path/recording-path production) "obiconfig.xml")]
+    (spit config-file-name (obi/config production))
+    production))
+
 (defn create-recording-productions-with-obi!
   "Create all productions with state \"recording\" with wav files that
   contain an obi project. Add to the db and create the directories.
@@ -212,9 +218,8 @@
     (-> p
         prod/create!
         prod/set-state-structured!
-        copy-obi-project!))
-    (comment
-      (create-obi-config-file!)))
+        copy-obi-project!
+        create-obi-config-file!)))
 
 (defn copy-sigtuna-project! [production]
   ;; FIXME: do we actually copy theses projects or do we do this manually?
