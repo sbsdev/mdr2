@@ -15,6 +15,7 @@
             [mdr2.dtbook :as dtbook]
             [mdr2.obi :as obi]
             [mdr2.production.path :as path]
+            [immutant.transactions :refer [transaction]]
             [immutant.transactions.jdbc :refer [factory]]))
 
 (def ^:private db {:factory factory :name "java:jboss/datasources/productions"})
@@ -177,10 +178,12 @@
 (defn create-archived-productions!
   "Create all productions with state \"archived\""
   [productions]
-  (->> (filter archived? productions)
-       (map #(assoc % :state "archived"))
-       (map prod/add-default-meta-data)
-       (apply jdbc/insert! db :production)))
+  (transaction
+   (->> (filter archived? productions)
+        (map #(assoc % :state "archived"))
+        (map #(update-in % [:revision] inc))
+        (map prod/add-default-meta-data)
+        (apply jdbc/insert! db :production))))
 
 (defn append-to-file
   [filename s]
