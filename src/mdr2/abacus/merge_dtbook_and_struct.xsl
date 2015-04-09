@@ -18,27 +18,60 @@
   </xsl:template>
 
   <xsl:template match="xhtml:h1">
+    <xsl:variable name="current" select="."/>
+    <xsl:variable name="sublevels" select="./following-sibling::xhtml:h2[preceding-sibling::xhtml:h1[1] = $current]"/>
     <level1>
       <h1><xsl:value-of select="text()"/></h1>
-      <p/>
-      <xsl:apply-templates select="xhtml:h2"/>
+      <xsl:apply-templates select="$sublevels"/>
+      <xsl:if test="not($sublevels)"><p/></xsl:if>
     </level1>
   </xsl:template>
 
   <xsl:template match="xhtml:h2">
+    <xsl:variable name="current" select="."/>
+    <xsl:variable name="sublevels" select="./following-sibling::xhtml:h3[preceding-sibling::xhtml:h2[1] = $current]"/>
     <level2>
       <h2><xsl:value-of select="text()"/></h2>
-      <p/>
-      <xsl:apply-templates select="xhtml:h3"/>
+      <xsl:apply-templates select="$sublevels"/>
+      <xsl:if test="not($sublevels)"><p/></xsl:if>
     </level2>
   </xsl:template>
 
   <xsl:template match="xhtml:h3">
+    <xsl:variable name="current" select="."/>
+    <xsl:variable name="sublevels" select="./following-sibling::xhtml:h4[preceding-sibling::xhtml:h3[1] = $current]"/>
     <level3>
       <h3><xsl:value-of select="text()"/></h3>
-      <p/>
-      <xsl:apply-templates select="xhtml:h4"/>
+      <xsl:apply-templates select="$sublevels"/>
+      <xsl:if test="not($sublevels)"><p/></xsl:if>
     </level3>
+  </xsl:template>
+
+  <xsl:template match="xhtml:h4">
+    <xsl:variable name="current" select="."/>
+    <xsl:variable name="sublevels" select="./following-sibling::xhtml:h5[preceding-sibling::xhtml:h4[1] = $current]"/>
+    <level4>
+      <h4><xsl:value-of select="text()"/></h4>
+      <xsl:apply-templates select="$sublevels"/>
+      <xsl:if test="not($sublevels)"><p/></xsl:if>
+    </level4>
+  </xsl:template>
+
+  <xsl:template match="xhtml:h5">
+    <xsl:variable name="current" select="."/>
+    <xsl:variable name="sublevels" select="./following-sibling::xhtml:h6[preceding-sibling::xhtml:h5[1] = $current]"/>
+    <level5>
+      <h5><xsl:value-of select="text()"/></h5>
+      <xsl:apply-templates select="$sublevels"/>
+      <xsl:if test="not($sublevels)"><p/></xsl:if>
+    </level5>
+  </xsl:template>
+
+  <xsl:template match="xhtml:h6">
+    <level6>
+      <h6><xsl:value-of select="text()"/></h6>
+      <p/>
+    </level6>
   </xsl:template>
 
   <xsl:template match="@* | node()">
