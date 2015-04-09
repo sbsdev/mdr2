@@ -135,6 +135,7 @@
   ;; make sure nothing is inserted in the db if we cannot create the dirs
   (transaction
    (let [p (-> production
+               (assoc :state "new")
                add-default-meta-data
                db/insert!)]
      (when (map? p)
