@@ -41,6 +41,11 @@
           (jdbc/query archive-db
                       "SELECT m.value AS production_id, m2.value AS library_signature FROM meta m, meta m2 WHERE m.id_container = m2.id_container AND m.element='idMaster' AND m2.element='idAusleihe'")))
 
+(defn fix-date [s]
+  (when (not (string/blank? s))
+    (let [[_ d m y] (re-matches #"^(\d{2})\.(\d{2})\.(\d{4})$" s)]
+      (format "%s-%s-%s" y m d))))
+
 (defn fix-production
   "Fix a `production`, i.e. fix some of the fields as they are coming
   from ABACUS the values as they are expected by Madras2"
@@ -49,6 +54,8 @@
     (-> production
         (assoc :id id)
         (assoc :production_type "book")
+        (update-in [:date] fix-date)
+        (update-in [:produced_date] fix-date)
         (assoc :periodical_number
                (when-not (string/blank? periodical_number) periodical_number))
         (assoc :library_signature (get production-id-to-library-signature-map id))
@@ -65,8 +72,8 @@
                   :source_publisher :source_date
                   :source :Produktestatus :volumes :id :multimedia_type
                   :narrator :produced_date :total_time :state :date :depth] %))
-   (map prod/parse)
    (map fix-production)
+   (map prod/parse)
    (map #(merge (prod/default-meta-data) %))))
 
 (defn extract-id [regexp s] (parse-int (or (second (re-find regexp s)) "0")))
