@@ -182,25 +182,43 @@
        (map prod/add-default-meta-data)
        (apply jdbc/insert! db :production)))
 
+(defn append-to-file
+  [filename s]
+  (spit filename s :append true))
+
+(defn format-move [production]
+  (format "mv %s %s\n" (obi-project-path production) (path/recording-path production)))
+
+(defn format-merge [production]
+  (let [file-name (str (:id production) ".xml")
+        dtbook-file-name (str (io/file (path/structured-path production) file-name))
+        struct-file (->> production
+                         get-all-files
+                         (some struct-file?)
+                         (nio/resolve-path old-production-root)
+                         nio/normalize)]
+    (format "xsltproc --novalid --stringparam filename %s merge_dtbook_and_struct.xsl %s > %s\n"
+            struct-file dtbook-file-name dtbook-file-name)))
+
+(defn merge-struct-file! [production]
+  (->> production format-merge (append-to-file move-script))
+  production)
+
 (defn create-recording-productions-with-struct!
   "Create all productions with state \"recording\" that do not contain
   any wav but a struct file. Add to the db, create the directories and
-  create the config file. Finally convert the \"struct.html\""
+  create the config file. Finally merge the the \"struct.html\" with
+  the dtbook file."
   [productions]
   (doseq [p (filter #(recording-no-wav-with-struct? %) productions)]
     (-> p
         prod/create!
         prod/set-state-structured!
-        (comment
-          (copy-struct-file!)
-          (convert-struct-file!)))))
+        dtbook/dtbook-file
+        merge-struct-file!)))
 
 (defn copy-obi-project! [production]
-  (spit move-script
-        (format "mv %s %s\n"
-                (obi-project-path production)
-                (path/recording-path production))
-        :append true)
+  (->> production format-move (append-to-file move-script))
   production)
 
 (defn create-obi-config-file! [production]
