@@ -224,8 +224,8 @@
     (-> p
         prod/create!
         prod/set-state-structured!
-        dtbook/dtbook-file
-        merge-struct-file!)))
+        dtbook/dtbook-file)
+    (merge-struct-file! p)))
 
 (defn copy-obi-project! [production]
   (->> production format-move (append-to-file move-script))
