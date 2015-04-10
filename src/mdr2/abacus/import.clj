@@ -27,7 +27,7 @@
 (def move-script "/home/eglic/src/mdr2/samples/move-productions.sh")
 (def old-production-root "/path/to/old/productions")
 
-(defn parse-int [s] (Integer/parseInt s))
+(defn parse-int [s] (int (Float/parseFloat s)))
 (defn production-id? [id] (let [match (re-matches #"DAM (\d+)$" id)] (when match (parse-int (second match)))))
 (defn library-signature? [id] (let [match (re-matches #"DS (\d+)$" id)] (when match (str "ds" (second match)))))
 
