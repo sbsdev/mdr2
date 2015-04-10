@@ -56,6 +56,8 @@
         (assoc :production_type "book")
         (update-in [:date] fix-date)
         (update-in [:produced_date] fix-date)
+        (update-in [:total_time] parse-int)
+        (update-in [:depth] parse-int)
         (assoc :periodical_number
                (when-not (string/blank? periodical_number) periodical_number))
         (assoc :library_signature (get production-id-to-library-signature-map id))
