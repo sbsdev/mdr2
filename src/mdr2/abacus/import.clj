@@ -296,11 +296,14 @@
     (println (string/join ", " (sort (map :id weird)))))
   (println)
   (print "### The rest: ")
-  (println (dissoc (frequencies (map :state all-productions)) "archived" "recording" "ready"))
-  (println)
-  (doseq [state ["repairing" "finishing" "recorded" "pre_ready"]]
-    (println (str (string/capitalize state) ":") (string/join ", " (sort (map :id (filter #(= (:state %) state) all-productions))))))
-  (println )
+  (let [freqs (-> (map :state all-productions)
+                  frequencies
+                  (dissoc "archived" "recording" "ready"))]
+    (println freqs)
+    (println)
+    (doseq [state (keys freqs)]
+      (println (str (string/capitalize state) ":") (string/join ", " (sort (map :id (filter #(= (:state %) state) all-productions))))))
+    (println ))
   (println "# Importing commercial audio books")
   (println)
   (println "## Ready:" (count (filter ready? all-commercial-productions)))
@@ -336,9 +339,12 @@
       (println (string/join ", " (sort (map :id ps))))
       (println)))
   (print "## Ignoring the rest: ")
-  (println (dissoc (frequencies (map :state all-commercial-productions)) "archived" "recording" "ready"))
-  (println)
-  (doseq [state ["structuring" "wipsing"]]
-    (println (str (string/capitalize state) ":") (string/join ", " (sort (map :id (filter #(= (:state %) state) all-commercial-productions))))))
-  (println )
+  (let [freqs (-> (map :state all-commercial-productions)
+                  frequencies
+                  (dissoc "archived" "recording" "ready"))]
+    (println freqs)
+    (println)
+    (doseq [state (keys freqs)]
+      (println (str (string/capitalize state) ":") (string/join ", " (sort (map :id (filter #(= (:state %) state) all-commercial-productions))))))
+    (println ))
 )
