@@ -233,6 +233,8 @@
 
 (defn production-bulk-import
   [productions]
+  ;; FIXME: maybe the whole create and set structured should be in a
+  ;; transaction
   (let [created (doall (map (fn [[_ p]]
                               (-> p
                                   prod/parse
@@ -242,11 +244,12 @@
         errors (remove map? created)
         new (filter map? created)]
     (doseq [p new]
-      ;; productions from vubis do not need any manual structuring.
-      ;; They get their standard structure from a default template
-      prod/set-state-structured!
-      ;; write the dtbook template file
-      dtbook/dtbook-file)
+      (-> p
+       ;; productions from vubis do not need any manual structuring.
+       ;; They get their standard structure from a default template
+       prod/set-state-structured!
+       ;; write the dtbook template file
+       dtbook/dtbook-file))
     (-> (response/redirect-after-post "/")
         (cond-> (seq errors)
           (assoc :flash {:warnings (for [e errors]
