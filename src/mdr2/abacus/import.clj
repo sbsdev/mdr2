@@ -22,10 +22,10 @@
 (def ^:private old-db {:factory factory :name "java:jboss/datasources/old-productions"})
 (def ^:private archive-db {:factory factory :name "java:jboss/datasources/archive"})
 
-(def abacus-csv "/home/eglic/src/mdr2/samples/ABACUS_export_Books_27032015.csv")
-(def file-dump "/home/eglic/src/mdr2/samples/miloun_files2.txt")
-(def move-script "/home/eglic/src/mdr2/samples/move-productions.sh")
-(def old-production-root "/path/to/old/productions")
+(def abacus-csv "/home/eglic/ABACUS_export_Books_10042015.csv")
+(def file-dump "/home/eglic/miloun_files.txt")
+(def move-script "/tmp/move-productions.sh")
+(def old-production-root "/mnt/studio/madras/d2")
 
 (defn parse-int [s] (int (Float/parseFloat s)))
 (defn production-id? [id] (let [match (re-matches #"DAM (\d+)$" id)] (when match (parse-int (second match)))))
@@ -90,6 +90,8 @@
 (defn wav-file? [f] (re-matches #".*\.wav$" f))
 (defn struct-file? [f] (re-matches #".*/struct.html$" f))
 (defn obi-project? [f] (re-matches #".*/project.obi$" f))
+(defn smil-file? [f] (re-matches #".*\.smil$" f))
+(defn ncc-file? [f] (re-matches #".*ncc\.html$" f))
 
 (def all-productions (-> abacus-csv io/file productions))
 (def all-files-by-id (-> file-dump io/file files-by-id))
@@ -198,7 +200,7 @@
   [filename s]
   (spit filename s :append true))
 
-(defn format-move [production]
+(defn format-obi-move [production]
   (format "mv %s %s\n" (obi-project-path production) (path/recording-path production)))
 
 (defn format-merge [production]
@@ -230,11 +232,13 @@
     (merge-struct-file! p)))
 
 (defn copy-obi-project! [production]
-  (->> production format-move (append-to-file move-script))
+  (->> production format-obi-move (append-to-file move-script))
   production)
 
 (defn create-obi-config-file! [production]
-  (let [config-file-name (io/file (path/recording-path production) "obiconfig.xml")]
+  (let [recording-path (path/recording-path production)
+        config-file-name (io/file recording-path "obiconfig.xml")]
+    (nio/create-directory! recording-path)
     (spit config-file-name (obi/config production))
     production))
 
@@ -251,19 +255,39 @@
         copy-obi-project!
         create-obi-config-file!)))
 
+(defn format-sigtuna-move [production]
+  (let [old (nio/resolve-path old-production-root (prod/dam-number production))]
+    (format "mv %s %s\n" old (path/structured-path production))))
+
+(defn format-recode-xml [production]
+  (let [path (path/structured-path production)
+        ncc-file (str (io/file path "ncc.html"))
+        smil-files (->> production
+                         get-all-files
+                         (filter smil-file?)
+                         (map #(nio/resolve-path path %))
+                         (map nio/normalize))]
+    (apply str
+           (format "xsltproc --novalid recode_ncc.xsl %s > %s\n"
+                   ncc-file ncc-file)
+           (map (fn [f] (format "xsltproc --novalid recode_smil.xsl %s > %s\n" f f))
+                smil-files))))
+
 (defn copy-sigtuna-project! [production]
-  ;; FIXME: do we actually copy theses projects or do we do this manually?
+  (->> production format-sigtuna-move (append-to-file move-script))
+  (->> production format-recode-xml (append-to-file move-script))
   production)
 
 (defn create-recording-productions-without-obi!
   "Create all productions with state \"recording\" with wav files that
   do not contain an obi project. Add to the db and create the directories"
   [productions]
-  (doseq [p (filter recording-with-wav-no-obi? productions)]
-    (-> p
-        prod/create!
-        prod/set-state-structured!
-        copy-sigtuna-project!)))
+  (transaction
+   (doseq [p (filter recording-with-wav-no-obi? productions)]
+     (-> p
+         prod/create!
+         prod/set-state-structured!
+         copy-sigtuna-project!))))
 
 (defn print-stats
   "Print a summary of all the productions that are about to be migrated"
