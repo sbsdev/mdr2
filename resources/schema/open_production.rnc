@@ -31,18 +31,18 @@ start =
               element printPageNumber { xsd:integer },
               element idPrint { xsd:integer },
               element kostenstelle { xsd:integer },
-              (element ort { xsd:token },
-               element anrede { xsd:NCName },
-               element plz { xsd:integer },
-               element strasse { xsd:token },
-               element vorname { xsd:token },
-               element idZeitkurz { xsd:NCName },
-               element nachname { xsd:token },
-               element jahr { text })?
+              element ort { xsd:token }?,
+              element anrede { xsd:NCName }?,
+              element plz { xsd:integer }?,
+              element strasse { xsd:token }?,
+              element vorname { xsd:token }?,
+              element idZeitkurz { xsd:NCName }?,
+              element nachname { xsd:token }?,
+              element jahr { text }?
             },
             element ncc {
-              element sourcePublisher { xsd:token },
-              element sourceDate { xsd:token },
+              element sourcePublisher { xsd:token }?,
+              element sourceDate { xsd:token }?,
               element narrator { xsd:token }?,
                # FIXME: could probably also be something of the form "1 of 3"
               element setInfo { xsd:integer }, 

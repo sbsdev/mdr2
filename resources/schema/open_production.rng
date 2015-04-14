@@ -86,36 +86,54 @@
                   <element name="ort">
                     <data type="token"/>
                   </element>
+                </optional>
+                <optional>
                   <element name="anrede">
                     <data type="NCName"/>
                   </element>
+                </optional>
+                <optional>
                   <element name="plz">
                     <data type="integer"/>
                   </element>
+                </optional>
+                <optional>
                   <element name="strasse">
                     <data type="token"/>
                   </element>
+                </optional>
+                <optional>
                   <element name="vorname">
                     <data type="token"/>
                   </element>
+                </optional>
+                <optional>
                   <element name="idZeitkurz">
                     <data type="NCName"/>
                   </element>
+                </optional>
+                <optional>
                   <element name="nachname">
                     <data type="token"/>
                   </element>
+                </optional>
+                <optional>
                   <element name="jahr">
                     <text/>
                   </element>
                 </optional>
               </element>
               <element name="ncc">
-                <element name="sourcePublisher">
-                  <data type="token"/>
-                </element>
-                <element name="sourceDate">
-                  <data type="token"/>
-                </element>
+                <optional>
+                  <element name="sourcePublisher">
+                    <data type="token"/>
+                  </element>
+                </optional>
+                <optional>
+                  <element name="sourceDate">
+                    <data type="token"/>
+                  </element>
+                </optional>
                 <optional>
                   <element name="narrator">
                     <data type="token"/>
