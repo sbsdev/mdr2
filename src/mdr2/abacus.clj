@@ -51,10 +51,11 @@
   "Extract the source date from a raw `production` by taking the last
   segment of the `:source_edition`"
   [{source_edition :source_edition}]
-  (-> source_edition
-      (string/split #"/")
-      last
-      (->> (re-find #"\d{4}"))))
+  (when source_edition
+    (-> source_edition
+        (string/split #"/")
+        last
+        (->> (re-find #"\d{4}")))))
 
 (defn clean-raw-production
   "Return a proper production based on a raw production, i.e. drop
