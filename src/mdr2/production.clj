@@ -85,6 +85,7 @@
    :volumes 1
    :type "Sound"
    :revision 0
+   :depth 1
    :format "Daisy 2.02"}) ; "ANSI/NISO Z39.86-2005" for DAISY3
 
 (defn add-default-meta-data
