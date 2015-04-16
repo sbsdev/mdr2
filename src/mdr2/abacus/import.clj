@@ -201,7 +201,7 @@
   (spit filename s :append true))
 
 (defn format-obi-move [production]
-  (format "mv %s %s\n" (obi-project-path production) (path/recording-path production)))
+  (format "mv %s/* %s\n" (obi-project-path production) (path/recording-path production)))
 
 (defn format-merge [production]
   (let [file-name (str (:id production) ".xml")
@@ -268,9 +268,9 @@
                          (map #(nio/resolve-path path %))
                          (map nio/normalize))]
     (apply str
-           (format "xsltproc --novalid recode_ncc.xsl %s > %s\n"
+           (format "xsltproc --novalid recode_ncc.xsl %s > /tmp/foo.xml && mv /tmp/foo.xml %s\n"
                    ncc-file ncc-file)
-           (map (fn [f] (format "xsltproc --novalid recode_smil.xsl %s > %s\n" f f))
+           (map (fn [f] (format "xsltproc --novalid recode_smil.xsl %s > /tmp/foo.xml && mv /tmp/foo.xml %s\n" f f))
                 smil-files))))
 
 (defn copy-sigtuna-project! [production]
