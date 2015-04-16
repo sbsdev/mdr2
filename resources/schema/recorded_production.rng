@@ -54,7 +54,13 @@
                   </element>
                 </optional>
                 <element name="language">
-                  <data type="NCName"/>
+                  <choice>
+                    <value>de</value>
+                    <value>de-CH</value>
+                    <value>en</value>
+                    <value>fr</value>
+                    <value>it</value>
+                  </choice>
                 </element>
                 <ref name="identifier"/>
                 <element name="date">

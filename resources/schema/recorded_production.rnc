@@ -23,7 +23,7 @@ start =
                      title,
                      element creator { xsd:token }?,
                      element source { xsd:NMTOKEN }?,
-                     element language { xsd:NCName },
+                     element language { "de" | "de-CH" | "en" | "fr" | "it" },
                      identifier,
                      element date { xsd:date }
                   },
