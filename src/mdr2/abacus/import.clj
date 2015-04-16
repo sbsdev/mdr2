@@ -165,7 +165,6 @@
 (defn recording-with-wav? [production] (and (recording? production)
                                             (some wav-file? (get-all-files production))))
 (defn recording-with-obi? [production] (and (recording? production)
-                                            (some wav-file? (get-all-files production))
                                             (some obi-project? (get-all-files production))))
 (defn recording-with-wav-no-obi? [production] (and (recording? production)
                                                    (some wav-file? (get-all-files production))
@@ -243,17 +242,18 @@
     production))
 
 (defn create-recording-productions-with-obi!
-  "Create all productions with state \"recording\" with wav files that
-  contain an obi project. Add to the db and create the directories.
-  Copy the obi project to the new place. Place an obi config file
-  inside the obi project"
+  "Create all productions with state \"recording\" that contain an obi
+  project. Add to the db and create the directories. Copy the obi
+  project to the new place. Place an obi config file inside the obi
+  project"
   [productions]
-  (doseq [p (filter recording-with-obi? productions)]
-    (-> p
-        prod/create!
-        prod/set-state-structured!
-        copy-obi-project!
-        create-obi-config-file!)))
+  (transaction
+   (doseq [p (filter recording-with-obi? productions)]
+     (-> p
+         prod/create!
+         prod/set-state-structured!
+         copy-obi-project!
+         create-obi-config-file!))))
 
 (defn format-sigtuna-move [production]
   (let [old (nio/resolve-path old-production-root (prod/dam-number production))]
