@@ -27,12 +27,16 @@
             <element name="MetaData">
               <element name="dc">
                 <ref name="title"/>
-                <element name="creator">
-                  <data type="token"/>
-                </element>
-                <element name="source">
-                  <data type="NMTOKEN"/>
-                </element>
+                <optional>
+                  <element name="creator">
+                    <data type="token"/>
+                  </element>
+                </optional>
+                <optional>
+                  <element name="source">
+                    <data type="NMTOKEN"/>
+                  </element>
+                </optional>
                 <element name="language">
                   <data type="NCName"/>
                 </element>
@@ -58,38 +62,63 @@
                 <element name="kostenstelle">
                   <data type="integer"/>
                 </element>
-                <element name="ort">
-                  <data type="token"/>
-                </element>
-                <element name="anrede">
-                  <data type="NCName"/>
-                </element>
-                <element name="plz">
-                  <data type="integer"/>
-                </element>
-                <element name="strasse">
-                  <data type="token"/>
-                </element>
-                <element name="vorname">
-                  <data type="token"/>
-                </element>
-                <element name="nachname">
-                  <data type="token"/>
-                </element>
-                <element name="jahr">
-                  <text/>
-                </element>
+                <optional>
+                  <element name="ort">
+                    <data type="token"/>
+                  </element>
+                </optional>
+                <optional>
+                  <element name="anrede">
+                    <data type="NCName"/>
+                  </element>
+                </optional>
+                <optional>
+                  <element name="plz">
+                    <data type="integer"/>
+                  </element>
+                </optional>
+                <optional>
+                  <element name="strasse">
+                    <data type="token"/>
+                  </element>
+                </optional>
+                <optional>
+                  <element name="vorname">
+                    <data type="token"/>
+                  </element>
+                </optional>
+                <optional>
+                  <element name="idZeitkurz">
+                    <data type="NCName"/>
+                  </element>
+                </optional>
+                <optional>
+                  <element name="nachname">
+                    <data type="token"/>
+                  </element>
+                </optional>
+                <optional>
+                  <element name="jahr">
+                    <text/>
+                  </element>
+                </optional>
               </element>
               <element name="ncc">
-                <element name="sourcePublisher">
-                  <data type="token"/>
-                </element>
-                <element name="sourceDate">
-                  <data type="token"/>
-                </element>
-                <element name="narrator">
-                  <data type="token"/>
-                </element>
+                <optional>
+                  <element name="sourcePublisher">
+                    <data type="token"/>
+                  </element>
+                </optional>
+                <optional>
+                  <element name="sourceDate">
+                    <data type="token"/>
+                  </element>
+                </optional>
+                <optional>
+                  <element name="narrator">
+                    <data type="token"/>
+                  </element>
+                </optional>
                 <element name="setInfo">
                   <data type="integer"/>
                 </element>

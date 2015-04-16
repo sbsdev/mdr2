@@ -44,7 +44,6 @@ start =
               element sourcePublisher { xsd:token }?,
               element sourceDate { xsd:token }?,
               element narrator { xsd:token }?,
-               # FIXME: could probably also be something of the form "1 of 3"
               element setInfo { xsd:integer }, 
               element revisionDate { xsd:date }
             }

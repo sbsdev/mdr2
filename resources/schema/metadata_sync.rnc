@@ -17,8 +17,8 @@ start =
           element MetaData {
             element dc {
               title,
-              element creator { xsd:token },
-              element source { xsd:NMTOKEN },
+              element creator { xsd:token }?,
+              element source { xsd:NMTOKEN }?,
               element language { xsd:NCName },
               identifier,
               element date { xsd:date }
@@ -29,18 +29,19 @@ start =
               element idMaster { xsd:NCName },
               element idPrint { xsd:integer },
               element kostenstelle { xsd:integer },
-              element ort { xsd:token },
-              element anrede { xsd:NCName },
-              element plz { xsd:integer },
-              element strasse { xsd:token },
-              element vorname { xsd:token },
-              element nachname { xsd:token },
-              element jahr { text }
+              element ort { xsd:token }?,
+              element anrede { xsd:NCName }?,
+              element plz { xsd:integer }?,
+              element strasse { xsd:token }?,
+              element vorname { xsd:token }?,
+              element idZeitkurz { xsd:NCName }?,
+              element nachname { xsd:token }?,
+              element jahr { text }?
             },
             element ncc {
-              element sourcePublisher { xsd:token },
-              element sourceDate { xsd:token },
-              element narrator { xsd:token },
+              element sourcePublisher { xsd:token }?,
+              element sourceDate { xsd:token }?,
+              element narrator { xsd:token }?,
               element setInfo { xsd:integer },
               element revisionDate { xsd:date }
             }
