@@ -140,7 +140,10 @@
                add-default-meta-data
                db/insert!)]
      (when (map? p)
-       (create-dirs p))
+       (create-dirs p)
+       (when (:product_number p)
+         ;; notify the erp of the status change
+         (msg/publish (queues/notify-abacus) p)))
      p)))
 
 (defn update! [production]
