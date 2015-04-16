@@ -434,7 +434,7 @@
   (let [tempfile (:tempfile f)
         p (abacus/import-metadata-update tempfile)]
     (if (map? p)
-      (response/created nil)
+      (response/response nil)
       ;; an error occured
       (response/status (response/response (print-errors p)) 400))))
 

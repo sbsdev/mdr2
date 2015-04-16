@@ -36,10 +36,14 @@
   "Update the production with the given `id`, `product_number` or `library_number`"
   [{:keys [library_number product_number id] :as production}]
   (when (or id product_number library_number)
-    (jdbc/update! db :production production
-                  (cond id ["id = ?" id]
-                        library_number ["library_number = ?" library_number]
-                        product_number ["product_number = ?" product_number]))))
+    ;; were any rows updated at all?
+    (if (< 0 (first
+              (jdbc/update! db :production production
+                            (cond id ["id = ?" id]
+                                  library_number ["library_number = ?" library_number]
+                                  product_number ["product_number = ?" product_number]))))
+      production
+      [(format "No update was done for %s" production)])))
 
 (defn get-user
   "Return the user with the given `username`"
