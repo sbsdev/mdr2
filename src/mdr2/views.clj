@@ -51,13 +51,12 @@
                  (layout/button-group
                   (remove
                    nil?
-                   [;; show the download button if the next state is structured and the user
-                    ;; is authorized
-                    (when (= next-state "structured")
+                   [;; show the download button while the production hasn't been recorded
+                    (when (#{"structured" "recorded"} next-state)
                       (layout/button (str "/production/" id ".xml") (layout/glyphicon "download")))
-                    ;; show the upload button if the next state is structured and the user
-                    ;; is authorized
-                    (when (= next-state "structured")
+                    ;; show the upload button while the production hasn't been recorded and
+                    ;; the user is authorized
+                    (when (#{"structured" "recorded"} next-state)
                       (layout/button (str "/production/" id "/upload") (layout/glyphicon "upload")))
                     (cond
                       ;; show the "Recorded" button if the next state is "recorded", the
@@ -127,7 +126,10 @@
         production (prod/find id)
         errors (concat
                 (pipeline/validate path :dtbook) ; validate XML
-                (validate-metadata path production))] ; validate meta data
+                (validate-metadata path production) ; validate meta data
+                ;; make sure production is in the state that allows upload
+                (when (not (#{"new" "structured"} (:state production)))
+                  ["Production not in state \"new\" or \"structured\""]))]
     (if (seq errors)
       (file-upload-form request id errors)
       (do
