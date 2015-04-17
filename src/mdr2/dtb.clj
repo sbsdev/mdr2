@@ -4,8 +4,14 @@
   (:require [clojure.java.io :refer [file]]
             [clojure.string :as s]
             [clojure.math.numeric-tower :as math]
-            [pantomime.mime :refer [mime-type-of]])
-  (:import javax.sound.sampled.AudioSystem))
+            [clojure.tools.logging :as log]
+            [pantomime.mime :refer [mime-type-of]]
+            [mdr2.production.path :as path]
+            [clojure.xml :as xml]
+            [clojure.zip :as zip]
+            [clojure.data.zip.xml :refer [xml1-> attr= attr]])
+  (:import javax.sound.sampled.AudioSystem
+           java.lang.NumberFormatException))
 
 (defn wav-file?
   "Is the given `file` a wav file?"
@@ -164,10 +170,27 @@
         bytes (->> files (map #(.length %)) (reduce +))]
     (-> bytes (/ 1024) math/round)))
 
+(defn depth
+  "Return the depth of a given DAISY Talking Book.
+
+  Unlike the other functions which mostly do not trust the meta data
+  from the DTB and calculate the data based on the wav files, the
+  depth is simply taken out of the meta data from the manifest."
+  [dtb]
+  (let [manifest (file dtb path/manifest-member)
+        zipper (-> manifest xml/parse zip/xml-zip)
+        depth-str (xml1-> zipper :head :meta (attr= :name "ncc:depth") (attr :content))]
+    (try
+      (Integer/valueOf depth-str)
+      ;; if there is no sensible depth log this and just return a default of 1
+      (catch NumberFormatException _
+        (log/warnf "%s contains invalid depth \"%s\". Using 1 as a fallback" manifest depth-str)
+        1))))
+
 (defn meta-data
   "Return a map containing all queried meta data for a given DAISY Talking Book"
   [dtb]
-  (let [keys [:multimedia_type :audio_format :total_time]
-        fns [multimedia-type audio-format audio-length]]
+  (let [keys [:multimedia_type :audio_format :total_time :depth]
+        fns [multimedia-type audio-format audio-length depth]]
     (zipmap keys (map #(% dtb) fns))))
 
