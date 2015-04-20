@@ -111,27 +111,28 @@
                 ;; periodical_number will be wrong
                 (dissoc :production_type :periodical_number))
             production (prod/find-by-productnumber product_number)]
-        (cond
-          (empty? production)
-          [(format "Non-existing product number %s" product_number)]
-          (not= "structured" (:state production))
-          [(format "Production %s is not structured (%s instead)"
-                   product_number (:state production))]
-          (not (prod/manifest? production))
-          [(format "Production %s has no DAISY Export in %s"
-                   product_number (path/manifest-path production))]
-          :else
-          ;; check if the exported production is even valid
-          ;; for validation purposes pretend there is only one volume. At
-          ;; this stage the number of volumes just indicates that there
-          ;; should be a split into that many volumes. The volumes aren't
-          ;; actually there yet
-          (let [errors (prod/manifest-validate (assoc production :volumes 1))]
-            (if (seq errors)
-              errors
-              (-> production
-                  (merge new-production)
-                  prod/set-state-recorded!))))))))
+        (let [{:keys [id state]} production]
+          (cond
+            (empty? production)
+            [(format "Non-existing product number %s" product_number)]
+            (not= "structured" state)
+            [(format "Production %s (%s) is not structured (%s instead)"
+                     id product_number state)]
+            (not (prod/manifest? production))
+            [(format "Production %s (%s) has no DAISY Export in %s"
+                     id product_number (path/manifest-path production))]
+            :else
+            ;; check if the exported production is even valid
+            ;; for validation purposes pretend there is only one volume. At
+            ;; this stage the number of volumes just indicates that there
+            ;; should be a split into that many volumes. The volumes aren't
+            ;; actually there yet
+            (let [errors (prod/manifest-validate (assoc production :volumes 1))]
+              (if (seq errors)
+                errors
+                (-> production
+                    (merge new-production)
+                    prod/set-state-recorded!)))))))))
 
 (defn import-status-request
   "Import a status request from file `f`"
