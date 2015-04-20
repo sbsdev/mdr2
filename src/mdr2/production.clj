@@ -125,9 +125,16 @@
                (remove #{(path/recording-path production)}))]
     (nio/create-directories! dir)
     ;; make sure recording and recorded are group writable
-    (when (#{path/recorded-path path/recording-path path/split-path} dir)
-      (let [permissions (conj (nio/posix-file-permissions dir)
-                              (nio/posix-file-permission :group-write))]
+    (when (or (#{(path/recorded-path production)
+                 (path/recording-path production)
+                 (path/split-path production)} dir)
+              ;; FIXME: this is a temporary workaround. Until all
+              ;; narrators have been migrated to obi etext needs write
+              ;; access to the structured dir
+              (and (= (:production_type production) "periodical")
+                   (= (path/structured-path production) dir)))
+      (let [permissions (doto (nio/posix-file-permissions dir)
+                          (.add (nio/posix-file-permission :group-write)))]
         (nio/set-posix-file-permissions! dir permissions)))))
 
 (defn create!
