@@ -443,7 +443,7 @@
 (defn production-monitoring
   "Return a csv containing the total audio length of all productions"
   []
-  (response/file-response (psm/csv (prod/find-by-state :structured))))
+  (response/file-response (psm/csv (prod/find-by-state "structured"))))
 
 (defn login-form []
   (layout/common nil
