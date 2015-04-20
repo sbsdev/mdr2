@@ -167,7 +167,7 @@
                          [:div.form-group
                           (form/label {:class "sr-only"} :library_signature "Signature")
                           (form/text-field
-                           {:class "form-control" :placeholder "Enter Signature"}
+                           {:class "form-control" :placeholder "dsxxxxx"}
                            :library_signature)
                           [:button.btn.btn-default
                            (layout/glyphicon "transfer")]])]])]])))
