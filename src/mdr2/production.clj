@@ -207,14 +207,21 @@
   (obi/config-file production)
   (set-state! production "structured"))
 
+(defn update-production-dates
+  "Update the production dates for a new revision according to
+  http://www.daisy.org/z3986/2005/Z3986-2005.html#PubMed"
+  [production date]
+  (-> production
+      (assoc :date date :revision_date date)
+      ;; only set the :produced_date for the first revision
+      (conj (when (= (:revision production) 0) [:produced_date date]))))
+
 (defn set-state-recorded! [production]
   (transaction
-   (let [current-date (to-sql-date (t/now))
-         new-production
+   (let [new-production
          (-> production
              (merge (dtb/meta-data (path/recorded-path production)))
-             (assoc :produced_date current-date)
-             (assoc :revision_date current-date)
+             (update-production-dates (to-sql-date (t/now)))
              (update-in [:revision] inc)
              (set-state! "recorded"))]
      (msg/publish (queues/encode) {:production new-production})
