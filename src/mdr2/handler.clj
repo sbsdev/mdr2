@@ -34,29 +34,29 @@
         (friend/authorize #{:admin :studio :it} (views/production-repair id)))
 
   ;; individual productions read-only
-  (GET "/production/:id.xml" [id]
+  (GET "/production/:id{\\d{3,}}.xml" [id]
        (friend/authenticated (views/production-xml id)))
-  (GET "/production/:id" [id :as r]
+  (GET "/production/:id{\\d{3,}}" [id :as r]
        (friend/authenticated (views/production r id)))
 
   ;; delete individual production
-  (DELETE "/production/:id" [id]
+  (DELETE "/production/:id{\\d{3,}}" [id]
        (friend/authorize #{:it} (views/production-delete id)))
 
   ;; upload structure for individual production
-  (GET "/production/:id/upload" [id :as r]
+  (GET "/production/:id{\\d{3,}}/upload" [id :as r]
        (friend/authorize #{:admin :etext :it} (views/file-upload-form r id)))
-  (POST "/production/:id/upload" [id file :as r]
+  (POST "/production/:id{\\d{3,}}/upload" [id file :as r]
         (friend/authorize #{:admin :etext :it} (views/production-add-xml r id file)))
 
   ;; modify state of an individual production
-  (POST "/production/:id/state" [id state]
+  (POST "/production/:id{\\d{3,}}/state" [id state]
         (friend/authorize #{:admin :it} (views/production-set-state id state)))
 
   ;; split an individual production
-  (GET "/production/:id/split" [id :as r]
+  (GET "/production/:id{\\d{3,}}/split" [id :as r]
        (friend/authorize #{:admin :it} (views/production-split-form r id)))
-  (POST "/production/:id/split" [id volumes sample-rate bitrate :as r]
+  (POST "/production/:id{\\d{3,}}/split" [id volumes sample-rate bitrate :as r]
         (friend/authorize #{:admin :it} (views/production-split r id volumes sample-rate bitrate)))
 
   ;; archived productions
@@ -69,7 +69,7 @@
   ;; catalog
   (GET "/catalog" request
        (friend/authorize #{:catalog :it} (views/catalog request)))
-  (POST "/catalog/:id" [id library_signature :as r]
+  (POST "/catalog/:id{\\d{3,}}" [id library_signature :as r]
         (friend/authorize #{:catalog :it} (views/production-catalog r id library_signature)))
 
   ;; production monitoring
