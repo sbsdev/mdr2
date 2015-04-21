@@ -1,6 +1,7 @@
 (ns mdr2.views
   (:require [clojure.string :as string]
             [ring.util.response :as response]
+            [clj-time.core :as t]
             [hiccup.form :as form]
             [hiccup.element :refer [link-to]]
             [ring.util.anti-forgery :refer [anti-forgery-field]]
@@ -33,7 +34,7 @@
        [:p.alert.alert-success message])
      [:table#productions.table.table-striped
       [:thead [:tr [:th "DAM"] [:th "Title"] [:th "Type"] [:th "State"]
-               (when (friend/authorized? #{:admin :etext :it} identity) [:th "Action"])]]
+               (when (friend/authorized? #{:admin :etext :it} identity) [:th.orderable-false "Action"])]]
       [:tbody
        (let [cached-state (memoize db/find-state)
              cached-production-type (memoize db/find-production-type)]
@@ -182,6 +183,43 @@
         (catalog request (str "Library signature already in use: "
                               library_signature))))
     (catalog request "Library signature not valid")))
+
+;; archived productions
+(defn production-archived-view [request productions date-str]
+  (let [identity (friend/identity request)]
+    (layout/common
+     identity
+     [:h1 (format "Archived Productions %s" date-str)]
+     [:table#productions.table.table-striped
+      [:thead [:tr [:th "Title"] [:th "Author"] [:th "Product Number"] [:th "Library Number"] [:th "Total time"] [:th "Number of CDs"] [:th "Depth"] [:th "Narrator"] [:th "Date of Production"] [:th "Libary signature"]]]
+      [:tbody
+       (for [{:keys [id title creator product_number
+                     library_number library_signature
+                     total_time volumes depth narrator produced_date]}
+             productions]
+         [:tr
+          [:td (link-to (str "/production/" id) title)]
+          [:td creator]
+          [:td product_number]
+          [:td library_number]
+          [:td (if total_time
+                 (quot total_time (* 1000 60)) "")] ; in minutes
+          [:td volumes]
+          [:td depth]
+          [:td narrator]
+          [:td produced_date]
+          [:td library_signature]])]])))
+
+(defn production-archived
+  ([request]
+   (let [date (t/today)]
+     (response/redirect (format "/production/archived/%s/%s" (t/year date) (t/month date)))))
+  ([request year]
+   (production-archived-view
+    request (prod/find-archived-by-date year) (format "%s" year)))
+  ([request year month]
+   (production-archived-view
+    request (prod/find-archived-by-date year month) (format "%s-%s" year month))))
 
 (defn production-delete [id]
   (prod/delete! (prod/find id))

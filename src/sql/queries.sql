@@ -23,6 +23,16 @@ SELECT * FROM production WHERE state = :state ORDER BY title
 SELECT * FROM production
 WHERE id = :id AND state = 'archived'
 
+-- name: find-archived-by-year
+-- Return archived production for given `year`
+SELECT * FROM production
+WHERE YEAR(date) = :year AND state = 'archived'
+
+-- name: find-archived-by-year-month
+-- Return archived production for given `year` and `month`
+SELECT * FROM production
+WHERE YEAR(date) = :year AND MONTH(date) = :month AND state = 'archived'
+
 -- name: find-archived-by-productnumber
 -- Return the production for given `product_number`
 SELECT * FROM production

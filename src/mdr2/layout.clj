@@ -52,10 +52,16 @@
 (defn dropdown-menu
   "Display a dropdown menu"
   [identity]
-  (let [menu [{:href "/production/upload" :label "Import from Vubis" :roles #{:admin :it}}
-              {:href "/catalog" :label "Assign Library Signature" :roles #{:catalog :it}}
+  (let [menu [{:href "/catalog" :label "Assign Library Signature" :roles #{:catalog :it}}
+              ;; archived productions are visible for any role
+              {:href "/production/archived" :label "Archived Productions" :roles nil}
+              {:href "/production/upload" :label "Import from Vubis" :roles #{:admin :it}}
               {:href "/production/repair" :label "Repair Production" :roles #{:admin :studio :it}}]
-        filtered (filter #(friend/authorized? (:roles %) identity) menu)]
+        filtered (filter #(or
+                           ;; if no role is defined we allow access
+                           (nil? (:roles %))
+                           ;; otherwise we check if the role is authorized
+                           (friend/authorized? (:roles %) identity)) menu)]
     (when (seq filtered)
       [:li.dropdown
        [:a.dropdown-toggle
@@ -88,7 +94,7 @@
    :paginType "simple"
    :pageLength 50
    :lengthChange false
-   :columnDefs [{:targets -1
+   :columnDefs [{:targets "orderable-false"
                  :searchable false
                  :orderable false}]})
 

@@ -59,6 +59,13 @@
   (POST "/production/:id/split" [id volumes sample-rate bitrate :as r]
         (friend/authorize #{:admin :it} (views/production-split r id volumes sample-rate bitrate)))
 
+  ;; archived productions
+  (GET "/production/archived/:year{\\d{4}}/:month{\\d{1,2}}" [year month :as r]
+       (friend/authenticated (views/production-archived r year month)))
+  (GET "/production/archived/:year{\\d{4}}" [year :as r]
+       (friend/authenticated (views/production-archived r year)))
+  (GET "/production/archived" r (friend/authenticated (views/production-archived r)))
+
   ;; catalog
   (GET "/catalog" request
        (friend/authorize #{:catalog :it} (views/catalog request)))

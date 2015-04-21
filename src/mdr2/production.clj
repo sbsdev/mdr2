@@ -177,6 +177,14 @@
   [id]
   (db/find-archived {:id id}))
 
+(defn find-archived-by-date
+  "Find an archived production given the `year` and optionaly `month`
+  it was produced"
+  ([year]
+   (db/find-archived-by-year {:year year}))
+  ([year month]
+   (db/find-archived-by-year-month {:year year :month month})))
+
 (defn find-archived-by-productnumber
   "Find an archived production given its `product_number`"
   [product_number]
