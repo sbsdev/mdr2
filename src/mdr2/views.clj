@@ -139,6 +139,7 @@
         ;; and redirect to the index
         (response/redirect-after-post "/")))))
 
+;; catalog
 (defn catalog [request & error]
   (let [identity (friend/identity request)]
     (layout/common identity
@@ -226,6 +227,7 @@
   (-> (response/redirect-after-post "/")
       (assoc :flash {:message "Production has been deleted"})))
 
+;; bulk import from vubis
 (defn production-bulk-import-form [request & [errors]]
   (let [identity (friend/identity request)]
     (layout/common identity
