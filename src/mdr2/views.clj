@@ -149,8 +149,8 @@
       [:thead [:tr [:th "Title"] [:th "Author"] [:th "Product Number"] [:th "Library Number"] [:th "Total time"] [:th "Number of CDs"] [:th "Depth"] [:th "Narrator"] [:th "Date of Production"] [:th "Libary signature"]]]
       [:tbody
        (for [{:keys [id title creator product_number library_number
-                     total_time volumes depth narrator produced_date]
-              :as production} (prod/find-by-state "encoded")]
+                     total_time volumes depth narrator produced_date]}
+             (prod/find-by-state "encoded")]
          [:tr
           [:td (link-to (str "/production/" id) title)]
           [:td creator]
