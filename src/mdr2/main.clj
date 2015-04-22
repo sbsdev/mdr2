@@ -1,7 +1,6 @@
 (ns mdr2.main
   (:require [immutant.web :as web]
             [immutant.messaging :as msg]
-            [immutant.scheduling :as scheduling]
             [mdr2.queues :as queues]
             [mdr2.handler :as handler]
             [mdr2.abacus :as abacus]
@@ -9,7 +8,7 @@
             [mdr2.archive :as archive]
             [mdr2.encode :as encode]))
 
-(defn -main []
+(defn start []
   ;; start web server
   (web/run handler/site)
   (web/run handler/rest-api :path "/abacus")
