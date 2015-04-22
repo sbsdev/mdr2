@@ -4,7 +4,8 @@
             [clojure.string :as s]
             [clojure.data.xml :as xml]
             [mdr2.data.xml :as xml-new]
-            [mdr2.production.path :as path]))
+            [mdr2.production.path :as path]
+            [mdr2.production :as prod]))
 
 ;; FIXME: we should probably use some ready made library for i18n.
 ;; There is https://github.com/ptaoussanis/tower,
@@ -109,6 +110,10 @@
        [:h1 (t :end)]
        [:p]]]]))
 
+(def conversions
+  "Conversions to be applied to specific attributes of a production."
+  {:total_time prod/smil-clock-value})
+
 (defn- dtbook-sexp
   [{:keys [title creator language production_type library_number] :as production}]
   [:dtbook {:xmlns "http://www.daisy.org/z3986/2005/dtbook/"
@@ -144,7 +149,7 @@
                 :dtb:totalTime :total_time
                 :dtb:audioFormat :audio_format]
                (partition 2))]
-      [:meta {:name (name meta-name) :content (meta-key production)}])]
+      [:meta {:name (name meta-name) :content ((get conversions meta-key meta-key) production)}])]
    (cond
      library_number (commercial-audiobook title creator language)
      (= production_type "periodical") (periodical title creator)

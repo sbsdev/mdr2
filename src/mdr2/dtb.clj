@@ -115,19 +115,6 @@
      (* 1000)
      math/round)))
 
-(defn audio-total-time
-  "Return the total audio length for a given DAISY Talking Book in a
-  format according to
-  http://www.daisy.org/z3986/2005/Z3986-2005.html#Clock"
-  [dtb]
-  (let [duration (audio-length dtb) ; milliseconds
-        in-secs (quot duration 1000)
-        hours (quot in-secs 3600)
-        minutes (quot (mod in-secs 3600) 60)
-        seconds (mod in-secs 60)
-        millis (mod duration 1000)]
-    (format "%02d:%02d:%02d.%03d" hours minutes seconds millis)))
-
 (defn- file-audio-channels
   "Return the number of audio channels for a given audio `file`"
   [file]

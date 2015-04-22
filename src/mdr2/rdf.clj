@@ -5,18 +5,15 @@
   (:require [clojure.data.xml :as xml]
             [clojure.string :as s]
             [mdr2.production.path :as path]
+            [mdr2.production :as prod]
             [mdr2.dtb :as dtb]))
 
-(defn get-meta-data [production]
-  (merge production (dtb/meta-data (path/recorded-path production))))
-
 (defn- rdf-sexp
-  [{:keys [id title creator subject description publisher date type format
-           identifier source language rights
-           source_date source_edition source_publisher source_rights source_title
-           multimedia_type multimedia_content narrator producer produced_date
-           revision revision_date revision_description
-           total_time audio_format periodical_number library_signature]}]
+  [{:keys [id title creator subject description publisher date type format source
+           language rights source_date source_edition source_publisher source_rights
+           source_title multimedia_type multimedia_content narrator producer
+           produced_date revision revision_date revision_description total_time
+           audio_format periodical_number library_signature] :as production}]
   [:rdf:RDF {:xmlns:rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
              :xmlns:dc "http://purl.org/dc/elements/1.1/"
              :xmlns:dtb "http://www.daisy.org/z3986/2005/dtbook/"
@@ -34,7 +31,8 @@
                 :dc:date date
                 :dc:type type
                 :dc:format format
-                :dc:identifier identifier
+                ;; for legacy reasons the identifier needs to be the dam number
+                :dc:identifier (prod/dam-number production)
                 :dc:source source
                 :dc:language language
                 :dc:rights rights
@@ -51,7 +49,7 @@
                 :dtb:revision revision
                 :dtb:revisionDate revision_date
                 :dtb:revisionDescription revision_description
-                :dtb:totalTime total_time
+                :dtb:totalTime (prod/smil-clock-value production)
                 :dtb:audioFormat audio_format
                 :sbs:idVorstufe periodical_number
                 :sbs:idMaster (str "DAM " id)
@@ -63,7 +61,6 @@
   "Create rdf for a given production"
   [production]
   (-> production
-      get-meta-data
       rdf-sexp
       xml/sexp-as-element
       xml/emit-str))
