@@ -333,19 +333,18 @@
       (layout/common identity
        [:h1 "Productions to repair"]
        [:table.table.table-striped
-        [:thead [:tr [:th "Title"] [:th "Creator"] [:th "Action"]]]
+        [:thead [:tr [:th "DAM"] [:th "Title"] [:th "Creator"] [:th "Action"]]]
         [:tbody
-         (for [p productions]
+         (for [{:keys [id title creator]} productions]
            [:tr
-            [:td (:title p)]
-            [:td (:creator p)]
-            [:td
-             (form/form-to
-              {:class "btn-group"}
-              [:post "/production/repair"]
-              (form/hidden-field :id (:id p))
-              (anti-forgery-field)
-              [:button.btn.btn-default (layout/glyphicon "wrench") " Repair"])]])]]
+            [:td id] [:td title] [:td creator]
+            [:td (form/form-to
+                  {:class "btn-group"}
+                  [:post "/production/repair"]
+                  (form/hidden-field :id id)
+                  (anti-forgery-field)
+                  [:button.btn.btn-default
+                   (layout/glyphicon "wrench") " Repair"])]])]]
        (when (empty? productions)
          [:div.alert.alert-warning {:role "alert"} "No Data to display"])))))
 
