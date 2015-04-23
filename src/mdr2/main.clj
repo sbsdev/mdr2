@@ -6,9 +6,10 @@
             [mdr2.abacus :as abacus]
             [mdr2.production :as prod]
             [mdr2.archive :as archive]
-            [mdr2.encode :as encode]))
+            [mdr2.encode :as encode])
+  (:gen-class))
 
-(defn start []
+(defn -main []
   ;; start web server
   (web/run handler/site)
   (web/run handler/rest-api :path "/abacus")

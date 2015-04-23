@@ -40,7 +40,7 @@
           :src-dir-uri "https://github.com/sbsdev/mdr2/blob/master/"
           :src-linenum-anchor-prefix "L"
           :defaults {:doc/format :markdown}}
-  :main mdr2.main/start
+  :main mdr2.main
   :immutant {:war {:context-path "/"}}
   :profiles {:dev {:source-paths ["dev"]
                    :dependencies [[org.xerial/sqlite-jdbc "3.8.7"]
