@@ -29,9 +29,13 @@
 
 (defn update-title-node [node v] (assoc-in node [:content] (list v)))
 
-(defn insert-kbytesize-node [node v]
-  (update-in node [:content] concat ; append
-             (list (xml/element :meta {:name "ncc:kByteSize" :content v}))))
+(defn insert-kbytesize-node [node value]
+  "Append a ncc:kByteSize meta element to `node` if the given `value`
+  is not nil"
+  (if value
+    (update-in node [:content] concat ; append
+               (list (xml/element :meta{:name "ncc:kByteSize" :content value})))
+    node))
 
 (defn insert-xmlns [node]
   (update-in node [:attrs] assoc :xmlns "http://www.w3.org/1999/xhtml"))
