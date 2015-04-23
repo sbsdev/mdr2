@@ -11,7 +11,9 @@
             [mdr2.dtb.xml :as xml]
             [mdr2.pipeline1 :as pipeline]
             [mdr2.pipeline2.scripts :as pipeline2]
-            [mdr2.util :as util]))
+            [mdr2.util :as util])
+  (:import java.text.Normalizer
+           java.text.Normalizer$Form))
 
 ;; according to wikipedia it should be 737280000 (see
 ;; http://en.wikipedia.org/wiki/CD-ROM#Capacity) but according to k3b
@@ -48,6 +50,12 @@
     (pipeline/audio-encoder (.getPath manifest) (.getPath output)
                             :bitrate bitrate :stereo stereo :freq sample-rate)))
 
+(defn deaccent [str]
+  "Remove accent from string"
+  ;; https://gist.github.com/maio/e5f85d69c3f6ca281ccd
+  (let [normalized (Normalizer/normalize str Normalizer$Form/NFD)]
+    (s/replace normalized #"\p{InCombiningDiacriticalMarks}+" "")))
+
 (defn truncate
   "Truncate and trim string `s` to length `n`"
   [s n]
@@ -65,10 +73,10 @@
     (sh "genisoimage"
         "-quiet"
         "-r"
-        "-publisher" (truncate publisher 128)
+        "-publisher" (truncate (deaccent publisher) 128)
         ;; volume ID (volume name or label). No more than 32
         ;; characters are allowed
-        "-V" (truncate title 32)
+        "-V" (truncate (deaccent title) 32)
         ;; Generate Joliet directory records in addition to regular
         ;; ISO9660 filenames
         "-J"
