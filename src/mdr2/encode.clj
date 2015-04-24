@@ -124,20 +124,26 @@
      ;; make sure the meta data of the recorded production aligns with
      ;; the meta data we have on file for this production
      (xml/update-meta-data! production volume)
-     (let [{exit :exit error :err} (encode-production production bitrate volume sample-rate)]
-       (if (not (and (= 0 exit) (s/blank? error)))
+     (let [{:keys [exit err]} (encode-production production bitrate volume sample-rate)]
+       (if (not (and (= 0 exit) (s/blank? err)))
          ;; FIXME: This is very fishy: an error is basically logged
          ;; and ignored. The state is still set to encoded. Die hard
          ;; and with a bang!
          (log/errorf "Encoding of %s (%s) failed with exit %s and message \"%s\""
-                     (:id production) volume exit error)
+                     (:id production) volume exit err)
          (let [encoded_size (dtb/size (path/recorded-path production))]
            ;; add the encoded size to the meta data of the encoded production
            (xml/update-encoded-meta-data! (assoc production :encoded_size encoded_size) volume)
            ;; downgrade to daisy202
            (downgrade production)
            ;; create an iso
-           (create-iso production volume)))))
+           (let [{:keys [exit err]} (create-iso production volume)]
+             (when (not (and (= 0 exit) (s/blank? err)))
+               ;; FIXME: Again this is very fishy: an error is basically
+               ;; logged and ignored. The state is still set to encoded. Die
+               ;; hard and with a bang!
+               (log/errorf "Generating iso for %s (%s) failed with exit %s and message \"%s\""
+                           (:id production) volume exit err)))))))
    (prod/set-state-encoded! production)))
 
 (defn encode-or-split
