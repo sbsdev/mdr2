@@ -257,7 +257,7 @@
 
 (defn format-sigtuna-move [production]
   (let [old (nio/resolve-path old-production-root (prod/dam-number production))]
-    (format "mv %s %s\n" old (path/structured-path production))))
+    (format "mv %s/* %s\n" old (path/structured-path production))))
 
 (defn format-recode-xml [production]
   (let [path (path/structured-path production)
