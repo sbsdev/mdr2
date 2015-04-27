@@ -1,20 +1,28 @@
 (ns mdr2.repair
   "Functions to handle repairing of a production
 
-  This mostly entails functionality to fetch a production from the archive."
+  This mostly entails functionality to fetch a production from the archive.
+
+  A production is stored in the archive as a tar file. There is a HTTP
+  API to the archive which is used to fetch productions. The tar file
+  is then unpacked in a tmp dir inside the structured path (as there
+  is not enough space in the /tmp dir). From this temporary location
+  all the relevant files are copied to the structured path and the
+  production is set to state \"structured\". After that the repair
+  takes its course down the same route as a normal production."
   (:require [clojure.java.io :as io]
             [clojure.tools.logging :as log]
             [immutant.transactions :refer [transaction]]
             [immutant.transactions.jdbc :refer [factory]]
             [yesql.core :refer [defqueries]]
-            [me.raynes.fs :as fs]
             [me.raynes.fs.compression :as compress]
             [org.tobereplaced.nio.file :as nio]
             [environ.core :refer [env]]
             [clj-http.client :as client]
             [mdr2.obi :as obi]
             [mdr2.production :as prod]
-            [mdr2.production.path :as path]))
+            [mdr2.production.path :as path]
+            [mdr2.util :as util]))
 
 (def ^:private db {:factory factory :name "java:jboss/datasources/archive"})
 (def ^:private archive-web-root (env :archive-web-root))
@@ -68,12 +76,17 @@
                    :basic-auth [archive-web-user archive-web-password]})]
     (if (client/success? response)
       (let [dam-number (prod/dam-number production)
-            tar-file (io/file (fs/tmpdir) (str dam-number ".tar"))
-            tar-dir (io/file (fs/tmpdir) dam-number)]
+            ;; create the tmp dir in the structured-path as there is
+            ;; not enough space on the normal tmp dir path
+            tmp-dir (nio/resolve-sibling (path/structured-path production)
+                                         (str (:id production) "_repair"))
+            tar-file (io/file tmp-dir (str dam-number ".tar"))
+            tar-dir (io/file tmp-dir dam-number)]
         (transaction
          ;; create all dirs for this production
          (prod/create-dirs production)
          ;; copy tar to tmpdir
+         (nio/create-directory! tmp-dir)
          (with-open [input (:body response)
                      output (io/output-stream tar-file)]
            (io/copy input output))
@@ -83,10 +96,9 @@
          (let [src-path (io/file tar-dir dam-number "produkt" dam-number)
                dest-path (path/structured-path production)]
            (doseq [f (filter #(.isFile %) (file-seq src-path))]
-             (nio/move! f (io/file dest-path (fs/base-name f)))))
+             (nio/move! f (io/file dest-path (nio/file-name f)))))
          ;; clear the temporary files
-         (fs/delete tar-file)
-         (fs/delete-dir tar-dir)
+         (util/delete-directory! tmp-dir)
          ;; create the obi config file
          (obi/config-file production)
          ;; set the state
