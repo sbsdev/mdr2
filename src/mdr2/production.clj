@@ -74,11 +74,12 @@
   "Return total_time for a `production` as a SMIL Clock Value
   according to http://www.daisy.org/z3986/2005/Z3986-2005.html#Clock,
   i.e. as \"3:22:55.91\""
-  (let [in-secs (quot total_time 1000)
+  (let [time (or total_time 0)
+        in-secs (quot time 1000)
         hours (quot in-secs 3600)
         minutes (quot (mod in-secs 3600) 60)
         seconds (mod in-secs 60)
-        millis (mod total_time 1000)]
+        millis (mod time 1000)]
     (format "%02d:%02d:%02d.%03d" hours minutes seconds millis)))
 
 (defn uuid
