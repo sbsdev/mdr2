@@ -192,13 +192,14 @@
      identity
      [:h1 (format "Archived Productions %s" date-str)]
      [:table#productions.table.table-striped
-      [:thead [:tr [:th "Title"] [:th "Author"] [:th "Product Number"] [:th "Library Number"] [:th "Total time"] [:th "Number of CDs"] [:th "Depth"] [:th "Narrator"] [:th "Date of Production"] [:th "Libary signature"]]]
+      [:thead [:tr [:th "DAM"] [:th "Title"] [:th "Author"] [:th "Product Number"] [:th "Library Number"] [:th "Total time"] [:th "Number of CDs"] [:th "Depth"] [:th "Narrator"] [:th "Date of Production"] [:th "Libary signature"]]]
       [:tbody
        (for [{:keys [id title creator product_number
                      library_number library_signature
                      total_time volumes depth narrator produced_date]}
              productions]
          [:tr
+          [:td id]
           [:td (link-to (str "/production/" id) title)]
           [:td creator]
           [:td product_number]
