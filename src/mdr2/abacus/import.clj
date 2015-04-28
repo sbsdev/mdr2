@@ -33,13 +33,14 @@
 
 ;; production id to library signature mapping
 (def production-id-to-library-signature-map
-  (reduce (fn [m {:keys [production_id library_signature]}]
-            (let [k (production-id? production_id)
-                  v (library-signature? library_signature)]
-              (if (and k v) (assoc m k v) m)))
-          {}
-          (jdbc/query archive-db
-                      "SELECT m.value AS production_id, m2.value AS library_signature FROM meta m, meta m2 WHERE m.id_container = m2.id_container AND m.element='idMaster' AND m2.element='idAusleihe'")))
+  (delay
+   (reduce (fn [m {:keys [production_id library_signature]}]
+             (let [k (production-id? production_id)
+                   v (library-signature? library_signature)]
+               (if (and k v) (assoc m k v) m)))
+           {}
+           (jdbc/query archive-db
+                       "SELECT m.value AS production_id, m2.value AS library_signature FROM meta m, meta m2 WHERE m.id_container = m2.id_container AND m.element='idMaster' AND m2.element='idAusleihe'"))))
 
 (defn fix-date [s]
   (when (not (string/blank? s))
@@ -60,7 +61,7 @@
         (update-in [:depth] parse-int)
         (assoc :periodical_number
                (when-not (string/blank? periodical_number) periodical_number))
-        (assoc :library_signature (get production-id-to-library-signature-map id))
+        (assoc :library_signature (get @production-id-to-library-signature-map id))
         (dissoc :Produktestatus))))
 
 (defn productions
@@ -93,8 +94,8 @@
 (defn smil-file? [f] (re-matches #".*\.smil$" f))
 (defn ncc-file? [f] (re-matches #".*ncc\.html$" f))
 
-(def all-productions (-> abacus-csv io/file productions))
-(def all-files-by-id (-> file-dump io/file files-by-id))
+(def all-productions (delay (-> abacus-csv io/file productions)))
+(def all-files-by-id (delay (-> file-dump io/file files-by-id)))
 
 (defn to-millis
   "Convert a string `s` of the form \"31:28:47\" to milliseconds"
@@ -128,32 +129,33 @@
         (assoc :language language)
         (assoc :volumes volumes)
         (assoc :total_time total_time)
-        (assoc :library_signature (get production-id-to-library-signature-map (:id m)))
+        (assoc :library_signature (get @production-id-to-library-signature-map (:id m)))
         (select-keys [:id :creator :date :depth :language :library_number :library_signature
                         :narrator :state :produced_date :production_type
                         :revision_date :source :source_date :source_publisher
                         :subject :title :total_time :volumes]))))
 
 (def all-commercial-productions
-  (let [statement (string/join
-                   "\n"
-                   ["SELECT d.tm, d.identifier AS id, d.title, d.process_status, m.element, m.value"
-                    "FROM madras.document d, madras.meta m"
-                    "WHERE d.id IN (SELECT id_document FROM madras.meta WHERE element='idVorstufe' AND value regexp '^PNX [2-9][0-9][0-9][0-9]')"
-                    "AND d.id = m.id_document"])]
-    (->> (jdbc/query old-db statement)
-         (map normalize-commercial-production)
-         (group-by :id)
-         (map (fn [[k v]] [k (apply merge v)]))
-         (map second)
-         (map cleanup-commercial-production)
-         (map prod/parse)
-         (map #(merge (prod/default-meta-data) %)))))
+  (delay
+   (let [statement (string/join
+                    "\n"
+                    ["SELECT d.tm, d.identifier AS id, d.title, d.process_status, m.element, m.value"
+                     "FROM madras.document d, madras.meta m"
+                     "WHERE d.id IN (SELECT id_document FROM madras.meta WHERE element='idVorstufe' AND value regexp '^PNX [2-9][0-9][0-9][0-9]')"
+                     "AND d.id = m.id_document"])]
+     (->> (jdbc/query old-db statement)
+          (map normalize-commercial-production)
+          (group-by :id)
+          (map (fn [[k v]] [k (apply merge v)]))
+          (map second)
+          (map cleanup-commercial-production)
+          (map prod/parse)
+          (map #(merge (prod/default-meta-data) %))))))
 
 (defn get-all-files
   "Get all files for a `production`"
   [{id :id}]
-  (get all-files-by-id id))
+  (get @all-files-by-id id))
 
 (defn ready? [production] (= (:state production) "ready"))
 (defn archived? [production] (= (:state production) "archived"))
@@ -296,81 +298,81 @@
   (println)
   (println "## Importing from ABACUS")
   (println)
-  (println "### Ready:" (count (filter ready? all-productions)))
+  (println "### Ready:" (count (filter ready? @all-productions)))
   (println)
-  (println (string/join ", " (sort (map :id (filter ready? all-productions)))))
+  (println (string/join ", " (sort (map :id (filter ready? @all-productions)))))
   (println)
-  (println "### Archived:" (count (filter archived? all-productions)))
+  (println "### Archived:" (count (filter archived? @all-productions)))
   (println)
-  (println "### Recording with no wav and a struct.html:" (count (filter #(recording-no-wav-with-struct? %) all-productions)))
+  (println "### Recording with no wav and a struct.html:" (count (filter #(recording-no-wav-with-struct? %) @all-productions)))
   (println)
-  (println (string/join ", " (sort (map :id (filter #(recording-no-wav-with-struct? %) all-productions)))))
+  (println (string/join ", " (sort (map :id (filter #(recording-no-wav-with-struct? %) @all-productions)))))
   (println)
-  (println "### Recording with wav and an obi project:" (count (filter recording-with-obi? all-productions)))
+  (println "### Recording with wav and an obi project:" (count (filter recording-with-obi? @all-productions)))
   (println)
-  (println (string/join ", " (sort (map :id (filter recording-with-obi? all-productions)))))
+  (println (string/join ", " (sort (map :id (filter recording-with-obi? @all-productions)))))
   (println)
   (println "## Manual migration:")
   (println)
-  (println "### Recording with wav and no obi project:" (count (filter recording-with-wav-no-obi? all-productions)))
+  (println "### Recording with wav and no obi project:" (count (filter recording-with-wav-no-obi? @all-productions)))
   (println)
-  (println (string/join ", " (sort (map :id (filter recording-with-wav-no-obi? all-productions)))))
+  (println (string/join ", " (sort (map :id (filter recording-with-wav-no-obi? @all-productions)))))
   (println)
-  (let [weird (filter #(and (not-any? struct-file? (get-all-files %)) (recording-no-wav? %)) all-productions)]
+  (let [weird (filter #(and (not-any? struct-file? (get-all-files %)) (recording-no-wav? %)) @all-productions)]
     (println "### Recording with no wav and no struct.html:" (count weird))
     (println)
     (println (string/join ", " (sort (map :id weird)))))
   (println)
   (print "### The rest: ")
-  (let [freqs (-> (map :state all-productions)
+  (let [freqs (-> (map :state @all-productions)
                   frequencies
                   (dissoc "archived" "recording" "ready"))]
     (println freqs)
     (println)
     (doseq [state (keys freqs)]
-      (println (str (string/capitalize state) ":") (string/join ", " (sort (map :id (filter #(= (:state %) state) all-productions))))))
+      (println (str (string/capitalize state) ":") (string/join ", " (sort (map :id (filter #(= (:state %) state) @all-productions))))))
     (println ))
   (println "# Importing commercial audio books")
   (println)
-  (println "## Ready:" (count (filter ready? all-commercial-productions)))
+  (println "## Ready:" (count (filter ready? @all-commercial-productions)))
   (println)
-  (let [ready (sort (map :id (filter ready? all-commercial-productions)))]
+  (let [ready (sort (map :id (filter ready? @all-commercial-productions)))]
     (when (seq ready)
       (println (string/join ", " ready))
       (println)))
-  (println "## Archived:" (count (filter archived? all-commercial-productions)))
+  (println "## Archived:" (count (filter archived? @all-commercial-productions)))
   (println)
-  (let [ps (filter #(recording-no-wav-with-struct? %) all-commercial-productions)]
+  (let [ps (filter #(recording-no-wav-with-struct? %) @all-commercial-productions)]
     (println "## Recording with no wav and a struct.html:" (count ps))
     (println)
     (when (seq ps)
       (println (string/join ", " (sort (map :id ps))))
       (println)))
-  (let [ps (filter #(and (recording-no-wav? %)) all-commercial-productions)]
+  (let [ps (filter #(and (recording-no-wav? %)) @all-commercial-productions)]
     (println "## Recording with no wav:" (count ps))
     (println)
     (when (seq ps)
       (println (string/join ", " (sort (map :id ps))))
       (println)))
-  (let [ps (filter recording-with-obi? all-commercial-productions)]
+  (let [ps (filter recording-with-obi? @all-commercial-productions)]
     (println "## Recording with wav and an obi project:" (count ps))
     (println)
     (when (seq ps)
       (println (string/join ", " (sort (map :id ps))))
       (println)))
-  (let [ps (filter recording-with-wav-no-obi? all-commercial-productions)]
+  (let [ps (filter recording-with-wav-no-obi? @all-commercial-productions)]
     (println "## Recording with wav and no obi project:" (count ps))
     (println)
     (when (seq ps)
       (println (string/join ", " (sort (map :id ps))))
       (println)))
   (print "## Ignoring the rest: ")
-  (let [freqs (-> (map :state all-commercial-productions)
+  (let [freqs (-> (map :state @all-commercial-productions)
                   frequencies
                   (dissoc "archived" "recording" "ready"))]
     (println freqs)
     (println)
     (doseq [state (keys freqs)]
-      (println (str (string/capitalize state) ":") (string/join ", " (sort (map :id (filter #(= (:state %) state) all-commercial-productions))))))
+      (println (str (string/capitalize state) ":") (string/join ", " (sort (map :id (filter #(= (:state %) state) @all-commercial-productions))))))
     (println ))
 )
