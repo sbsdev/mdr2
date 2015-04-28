@@ -68,15 +68,20 @@
     :as production} & [volume]]
   (let [encoded-path (.getPath (path/encoded-path production volume))
         iso-path (path/iso-path production volume)
-        iso-name (.getPath (path/iso-name production volume))]
+        iso-name (.getPath (path/iso-name production volume))
+        clean-publisher (truncate (deaccent publisher) 128)
+        clean-title (truncate (deaccent title) 32)]
+    (log/debugf "Creating iso %s (%s) with %s, %s, %s"
+                (:id production) volume
+                clean-publisher clean-title iso-name)
     (fs/mkdir iso-path)
     (sh "genisoimage"
         "-quiet"
         "-r"
-        "-publisher" (truncate (deaccent publisher) 128)
+        "-publisher" clean-publisher
         ;; volume ID (volume name or label). No more than 32
         ;; characters are allowed
-        "-V" (truncate (deaccent title) 32)
+        "-V" clean-title
         ;; Generate Joliet directory records in addition to regular
         ;; ISO9660 filenames
         "-J"

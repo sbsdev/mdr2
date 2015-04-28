@@ -116,6 +116,8 @@ mp3 and the whole thing is packed up in one or more iso files
   [production sektion]
   (let [update (> (:revision production) 1)
         job (db-job production sektion)]
+    (log/debugf "%s archive db %s (%s)"
+                (if update "Updating" "Adding to") (:id production) sektion)
     (if update
       (let [container-id (repair/container-id production sektion)]
         (jdbc/update! db :container job ["id = ?" container-id]))
@@ -142,6 +144,7 @@ mp3 and the whole thing is packed up in one or more iso files
       (log/errorf "Archive root path %s already exists" archive-root-path)
       (let [archive-path (container-path production sektion)]
         (fs/mkdir archive-root-path)
+        (log/debugf "Copying files %s (%s)" (:id production) sektion)
         (case sektion
           :master
           (fs/copy-dir (path/recorded-path production)
@@ -158,9 +161,9 @@ mp3 and the whole thing is packed up in one or more iso files
   directory"
   [production sektion]
   (let [rdf (rdf/rdf production)
-        entries (case sektion :master 2 :dist-master (inc (:volumes production)))]
-    (let [rdf-path (container-rdf-path production sektion)]
-      (spit rdf-path rdf))))
+        rdf-path (container-rdf-path production sektion)]
+    (log/debugf "Creating rdf %s (%s)" (:id production) sektion)
+    (spit rdf-path rdf)))
 
 (defn- archive-sektion
   "Archive a `production` for given `sektion`. For the :master sektion
