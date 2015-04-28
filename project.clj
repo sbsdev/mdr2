@@ -40,9 +40,10 @@
           :src-dir-uri "https://github.com/sbsdev/mdr2/blob/master/"
           :src-linenum-anchor-prefix "L"
           :defaults {:doc/format :markdown}}
-  :main mdr2.main
+  :main ^:skip-aot mdr2.main
   :immutant {:war {:context-path "/"}}
-  :profiles {:dev {:source-paths ["dev"]
+  :profiles {:uberjar {:aot :all}
+             :dev {:source-paths ["dev"]
                    :dependencies [[org.xerial/sqlite-jdbc "3.8.7"]
                                   [javax.servlet/servlet-api "2.5"]]}
              :test {:dependencies [[ring-mock "0.1.5"]]
