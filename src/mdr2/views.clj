@@ -312,7 +312,7 @@
       [:div.form-group
        (form/label "identifier" "Search term")
        (form/text-field {:class "form-control"
-                         :placeholder "DAM number, DS number, DY number, Title or Author"}
+                         :placeholder "damxxxxx, dsxxxxx, DYxxxxx, Title or Author"}
                         "identifier")]
       (form/submit-button {:class "btn btn-default"} "Repair")))))
 
