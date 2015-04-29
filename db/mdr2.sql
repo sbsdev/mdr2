@@ -144,17 +144,3 @@ INSERT INTO production (title, creator, date, source, language, source_publisher
 ("Unter dem Deich", "Hart, Maarten", "2014-12-12", "978-3-492-05573-4", "de", "Piper", "db010282-a39d-40b1-b5cf-f5285aa9b49d"),
 ("Aus dem Berliner Journal", "Frisch, Max", "2014-12-6", "978-3-518-42352-3", "de", "Suhrkamp", "504f26ef-7205-4b2f-b719-f4eef883ebe1"),
 ("Info-Express, Februar 2014", "SZB Taubblinden-Beratung", "2014-12-10", "", "de", "", "1492d357-6a6d-420f-b39e-b25178491b56");
-
-SELECT * FROM production;
-UPDATE production SET state = "encoded" WHERE id = 1;
-UPDATE production SET volumes = 1 WHERE id = 1;
-
--- encoding woes
-SELECT DEFAULT_CHARACTER_SET_NAME, DEFAULT_COLLATION_NAME
-FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = 'madras2';
-
-SHOW VARIABLES LIKE 'character_set%';
-
-SHOW CREATE DATABASE madras2;
-
-SHOW CREATE TABLE production;
