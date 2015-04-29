@@ -1,4 +1,6 @@
 (ns mdr2.dtb.xml
+  "Update meta data of a [DAISY Talking
+  Book](http://www.daisy.org/daisypedia/daisy-digital-talking-book)"
   (:require [clojure.java.io :as io]
             [clojure.data.xml :as xml]
             [mdr2.data.xml :as xml-new]

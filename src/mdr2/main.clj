@@ -1,4 +1,7 @@
 (ns mdr2.main
+  "Main entry point.
+
+  Set up web server and queues."
   (:require [immutant.web :as web]
             [immutant.messaging :as msg]
             [mdr2.queues :as queues]

@@ -1,4 +1,5 @@
 (ns mdr2.production-monitoring
+  "Functionality to query some statistical information on all productions as a CSV"
   (:require [clojure.data.csv :as csv]
             [clojure.java.io :as io]
             [org.tobereplaced.nio.file :as nio]
@@ -37,7 +38,11 @@
    ;; extract the fields that we are interested in
    (map #(map % [:dam-number :last-modified :audio-length]))))
 
-(defn csv [productions]
+(defn csv
+  "Generate a CSV containing the DAM number, the last modified date
+  and the total time for all given `productions`. Return the file
+  name of the generated CSV."
+  [productions]
   (let [tmp-file (io/file (nio/create-temp-file! "psm" ".csv"))]
     (as-> 
      productions prods

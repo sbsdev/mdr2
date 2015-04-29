@@ -1,4 +1,5 @@
 (ns mdr2.views
+  "Views for web application"
   (:require [clojure.string :as string]
             [ring.util.response :as response]
             [clj-time.core :as t]
