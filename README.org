@@ -1,6 +1,6 @@
 * mdr2
 
-A Production Management Tool for DAISY Talking Books.
+A Production Management Tool for [[http://www.daisy.org/daisypedia/daisy-digital-talking-book][DAISY Talking Books]].
 
 ** Installation
 Build with [[https://github.com/technomancy/leiningen][Leiningen]] using the [[https://github.com/immutant/lein-immutant][lein immutant plugin]].
@@ -12,27 +12,26 @@ lein immutant war --nrepl-start --nrepl-port 42278
 Deploy the resulting war file in [[http://wildfly.org/][Wildfly]].
 
 ** Documentation
+
+- [[https://github.com/sbsdev/mdr2/wiki][Wiki]]
+- [[https://sbsdev.github.io/mdr2][API Docs]]
+
 At its core mdr2 integrates a number of systems and coordinates the
 production of DAISY Talking Books from inception through to archiving.
 
 The involved systems are:
 
 - ABACUS ::  Order management and initiation of productions is
-             typically done in the erp namely ABACUS.
+             typically done in the ERP namely ABACUS.
 - Library ::  Some production orders come directly from the library as
-              they are not managed in the erp.
-- Obi :: The actual recording of the production is done in obi.
+              they are not managed in the ERP.
+- Obi :: The actual recording of the production is done in [[http://www.daisy.org/project/obi][Obi]].
 - DAISY Pipeline :: The recorded productions are validated and
                     converted to DAISY Talking Books using software
-                    from both the DAISY Pipeline 1 and DAISY Pipeline
-                    2 projects
+                    from both the [[http://www.daisy.org/project/pipeline][DAISY Pipeline 1]] and [[http://www.daisy.org/pipeline2][DAISY Pipeline
+                    2]] projects
 - Archive :: Once all the artifacts have been created they are
              archived in a legacy in-house archive.
-
-
-- [[https://github.com/sbsdev/mdr2/wiki][Wiki]]
-- [[https://github.io/sbsdev/mdr2][API Docs]]
-
 
 ** Configuration and Dependencies
 Configuration is fairly complex and involves a lot of dependencies. It
