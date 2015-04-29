@@ -176,12 +176,13 @@
   "Export the state of a production as a csv-like structure, ready to
   be consumed by ABACUS"
   [{:keys [product_number total_time state audio_format multimedia_type
-           date id produced_date volumes] :as production}]
+           date id produced_date volumes depth] :as production}]
   (->> [(create-row 2 product_number)
         (create-row 239 (quot (or total_time 0) (* 1000 60))) ; in minutes
         (create-row 106 (string/capitalize state))
         (create-row 280 audio_format)
         (create-row 271 volumes) ; Number of CDs
+        (create-row 279 depth)
         (create-row 281 multimedia_type)
         (create-row 256 (and produced_date
                              (format date-format produced_date))) ; Date of production end
