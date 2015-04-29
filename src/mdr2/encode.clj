@@ -71,7 +71,7 @@
         iso-name (.getPath (path/iso-name production volume))
         clean-publisher (truncate (deaccent publisher) 128)
         clean-title (truncate (deaccent title) 32)]
-    (log/debugf "Creating iso %s (%s) with %s, %s, %s"
+    (log/debugf "Creating iso for %s (%s) with %s, %s, %s"
                 (:id production) volume
                 clean-publisher clean-title iso-name)
     (fs/mkdir iso-path)

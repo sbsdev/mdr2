@@ -116,12 +116,13 @@ mp3 and the whole thing is packed up in one or more iso files
   [production sektion]
   (let [update (> (:revision production) 1)
         job (db-job production sektion)]
-    (log/debugf "%s archive db %s (%s)"
-                (if update "Updating" "Adding to") (:id production) sektion)
     (if update
       (let [container-id (repair/container-id production sektion)]
+        (log/debugf "Updating %s (%s, %s) in archive db" (:id production) sektion container-id)
         (jdbc/update! db :container job ["id = ?" container-id]))
-      (jdbc/insert! db :container job))))
+      (do
+        (log/debugf "Adding %s (%s) to archive db" (:id production) sektion)
+        (jdbc/insert! db :container job)))))
 
 (defn set-file-permissions
   "Set file permissions on `root` to g+w recursively"
@@ -144,7 +145,7 @@ mp3 and the whole thing is packed up in one or more iso files
       (log/errorf "Archive root path %s already exists" archive-root-path)
       (let [archive-path (container-path production sektion)]
         (fs/mkdir archive-root-path)
-        (log/debugf "Copying files %s (%s)" (:id production) sektion)
+        (log/debugf "Copying files for %s (%s)" (:id production) sektion)
         (case sektion
           :master
           (fs/copy-dir (path/recorded-path production)
@@ -162,7 +163,7 @@ mp3 and the whole thing is packed up in one or more iso files
   [production sektion]
   (let [rdf (rdf/rdf production)
         rdf-path (container-rdf-path production sektion)]
-    (log/debugf "Creating rdf %s (%s)" (:id production) sektion)
+    (log/debugf "Creating rdf for %s (%s)" (:id production) sektion)
     (spit rdf-path rdf)))
 
 (defn- archive-sektion
