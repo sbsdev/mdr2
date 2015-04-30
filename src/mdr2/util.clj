@@ -2,7 +2,35 @@
   "Common utilies"
   (:require [org.tobereplaced.nio.file :as nio]
             [clojure.tools.logging :as log])
-  (:import java.nio.file.FileSystemException))
+  (:import (java.nio.file FileSystemException
+                          DirectoryNotEmptyException)
+           java.lang.InterruptedException))
+
+(def ^:private delete-retry-millis 10)
+
+;; when deleting a directory that is on an nfs mount we sometimes get
+;; a DirectoryNotEmptyException. This might have to do with some file
+;; handles that haven't been garbage collected. So if we fail to
+;; delete we try again a bit harder. For some inspiration see
+;; https://svn.apache.org/viewvc/ant/core/trunk/src/main/org/apache/tools/ant/util/FileUtils.java?view=markup.
+(defn try-hard-to-delete [directory]
+  (System/gc) ; do garbage collection
+  ;; wait
+  (try
+    (Thread/sleep delete-retry-millis)
+    (catch InterruptedException e))
+  ;; and then try to delete again
+  (try
+    (nio/delete! directory)
+    (catch DirectoryNotEmptyException e
+      (log/error e))))
+
+(defn post-visit-directory [directory]
+  ;; Deal with nfs issues.
+  (try
+    (nio/delete! directory)
+    (catch DirectoryNotEmptyException e
+      (try-hard-to-delete directory))))
 
 (defn delete-directory!
   "Delete `directory` recursively. See
@@ -12,7 +40,7 @@
     (nio/walk-file-tree
      directory
      (nio/naive-visitor
-      :post-visit-directory nio/delete!
+      :post-visit-directory post-visit-directory
       :visit-file nio/delete!))
     (catch FileSystemException e
       (log/error e))))
