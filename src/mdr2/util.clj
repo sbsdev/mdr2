@@ -6,7 +6,7 @@
                           DirectoryNotEmptyException)
            java.lang.InterruptedException))
 
-(def ^:private delete-retry-millis 10)
+(def ^:private delete-retry-millis 100)
 
 ;; when deleting a directory that is on an nfs mount we sometimes get
 ;; a DirectoryNotEmptyException. This might have to do with some file
@@ -14,12 +14,14 @@
 ;; delete we try again a bit harder. For some inspiration see
 ;; https://svn.apache.org/viewvc/ant/core/trunk/src/main/org/apache/tools/ant/util/FileUtils.java?view=markup.
 (defn try-hard-to-delete [directory]
+  (log/warnf "Directory not empty %s. Trying harder")
   (System/gc) ; do garbage collection
   ;; wait
   (try
     (Thread/sleep delete-retry-millis)
     (catch InterruptedException e))
   ;; and then try to delete again
+  (log/warnf "Now trying again to delete %s")
   (try
     (nio/delete! directory)
     (catch DirectoryNotEmptyException e
