@@ -14,14 +14,14 @@
 ;; delete we try again a bit harder. For some inspiration see
 ;; https://svn.apache.org/viewvc/ant/core/trunk/src/main/org/apache/tools/ant/util/FileUtils.java?view=markup.
 (defn try-hard-to-delete [directory]
-  (log/warnf "Directory not empty %s. Trying harder")
+  (log/warnf "Directory not empty %s. Trying harder" directory)
   (System/gc) ; do garbage collection
   ;; wait
   (try
     (Thread/sleep delete-retry-millis)
     (catch InterruptedException e))
   ;; and then try to delete again
-  (log/warnf "Now trying again to delete %s")
+  (log/warnf "Now trying again to delete %s" directory)
   (try
     (nio/delete! directory)
     (catch DirectoryNotEmptyException e
