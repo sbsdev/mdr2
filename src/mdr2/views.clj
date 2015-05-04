@@ -64,10 +64,11 @@
                       ;; show the "Recorded" button if the next state is "recorded", the
                       ;; user is authorized, there is an DAISY export and the production has
                       ;; been imported from the libary, i.e. is not handled via ABACUS or the
-                      ;; production has already a library signature as is the case with
+                      ;; production has a revision greater than zero as is the case with
                       ;; productions that are repaired
                       (and (= next-state "recorded")
-                           (or (:library_number production) (:library_signature production))
+                           (or (:library_number production)
+                               (> (:revision production) 0))
                            (prod/manifest? production)
                            (friend/authorized? #{:admin :it} identity))
                       (form/form-to
