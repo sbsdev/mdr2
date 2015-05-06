@@ -153,8 +153,9 @@
       errors
       (prod/update!
        (-> (read-file f)
-           ;; ignore production_type when updating metadata
-           (dissoc :production_type))))))
+           ;; ignore production_type and the revision date when
+           ;; updating metadata
+           (dissoc :production_type :revision_date))))))
 
 (defn wrap-rows
   "Wrap an export record according to ABACUS conventions"
