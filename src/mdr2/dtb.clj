@@ -93,12 +93,12 @@
   "Get the length of the audio in seconds for a given audio `file`"
   [file]
   ;; see http://stackoverflow.com/questions/3009908/how-do-i-get-a-sound-files-total-time-in-java
-  (let [stream (AudioSystem/getAudioInputStream file)
-        format (.getFormat stream)
-        frameRate (.getFrameRate format)
-        frames (.getFrameLength stream)
-        durationInSeconds (/ frames frameRate)]
-    durationInSeconds))
+  (with-open [stream (AudioSystem/getAudioInputStream file)]
+    (let [format (.getFormat stream)
+          frameRate (.getFrameRate format)
+          frames (.getFrameLength stream)
+          durationInSeconds (/ frames frameRate)]
+      durationInSeconds)))
 
 (defn audio-length
   "Return the audio length for a given DAISY Talking Book in
@@ -118,9 +118,9 @@
 (defn- file-audio-channels
   "Return the number of audio channels for a given audio `file`"
   [file]
-  (let [stream (AudioSystem/getAudioInputStream file)
-        format (.getFormat stream)]
-    (.getChannels format)))
+  (with-open [stream (AudioSystem/getAudioInputStream file)]
+    (let [format (.getFormat stream)]
+      (.getChannels format))))
 
 (defn audio-channels
   "Return the number of audio channels for a given DAISY Talking Book"
@@ -138,9 +138,9 @@
 (defn file-sampling-rate
   "Return the sample rate for a given audio `file`"
   [file]
-  (let [stream (AudioSystem/getAudioInputStream file)
-        format (.getFormat stream)]
-    (.getSampleRate format)))
+  (with-open [stream (AudioSystem/getAudioInputStream file)]
+    (let [format (.getFormat stream)]
+      (.getSampleRate format))))
 
 (defn sampling-rate
   "Return the sample rate for a given DAISY Talking Book. If there is
