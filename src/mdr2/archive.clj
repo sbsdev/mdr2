@@ -43,7 +43,8 @@ mp3 and the whole thing is packed up in one or more iso files
             [mdr2.production :as prod]
             [mdr2.production.path :as path]
             [mdr2.repair :as repair]
-            [mdr2.rdf :as rdf]))
+            [mdr2.rdf :as rdf]
+            [mdr2.util :as util]))
 
 (def ^:private db {:factory factory :name "java:jboss/datasources/archive"})
 
@@ -198,21 +199,22 @@ mp3 and the whole thing is packed up in one or more iso files
    (let [dam-number (prod/dam-number production)
          archive-path (.getPath (file periodical-spool-dir dam-number))
          multi-volume? (prod/multi-volume? production)]
-     (if (fs/exists? archive-path)
-       (log/errorf "Archive path %s for periodical already exists" archive-path)
-       (do
-         (fs/mkdir archive-path)
-         ;; create the rdf
-         (let [rdf-path (file archive-path (str dam-number ".rdf"))
-               rdf (rdf/rdf production)]
-           (spit rdf-path rdf))
-         ;; copy all volumes
-         (doseq [volume (range 1 (inc (:volumes production)))]
-           (let [iso-archive-name (str dam-number (when multi-volume? (str "_" volume)) ".iso")
-                 iso-archive-path (.getPath (file archive-path "produkt" iso-archive-name))]
-             (fs/copy+ (path/iso-name production volume) iso-archive-path)))
-         (set-file-permissions (file archive-path))
-         (prod/set-state-archived! production))))))
+     (when (fs/exists? archive-path)
+       ;; when repairing the production is already in the spool dir
+       (log/warnf "Archive path %s for periodical already exists, removing" archive-path)
+       (util/delete-directory! archive-path))
+     (nio/create-directory! archive-path)
+     ;; create the rdf
+     (let [rdf-path (file archive-path (str dam-number ".rdf"))
+           rdf (rdf/rdf production)]
+       (spit rdf-path rdf))
+     ;; copy all volumes
+     (doseq [volume (range 1 (inc (:volumes production)))]
+       (let [iso-archive-name (str dam-number (when multi-volume? (str "_" volume)) ".iso")
+             iso-archive-path (.getPath (file archive-path "produkt" iso-archive-name))]
+         (fs/copy+ (path/iso-name production volume) iso-archive-path)))
+     (set-file-permissions (file archive-path))
+     (prod/set-state-archived! production))))
 
 (defmethod archive "other"
   [production]
@@ -222,7 +224,11 @@ mp3 and the whole thing is packed up in one or more iso files
    (let [dam-number (prod/dam-number production)
          archive-path (.getPath (file other-spool-dir dam-number))
          multi-volume? (prod/multi-volume? production)]
-     (fs/mkdir archive-path)
+     (when (fs/exists? archive-path)
+       ;; when repairing the production is already in the spool dir
+       (log/warnf "Archive path %s for other production already exists, removing" archive-path)
+       (util/delete-directory! archive-path))
+     (nio/create-directory! archive-path)
      ;; create the rdf
      (let [rdf-path (file archive-path (str dam-number ".rdf"))
            rdf (rdf/rdf production)]
