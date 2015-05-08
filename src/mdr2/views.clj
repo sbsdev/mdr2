@@ -353,10 +353,13 @@
 
 (defn production-repair
   [id]
-  (let [production (prod/find id)]
-    (repair/repair production) ;; FIXME: notify the user of a failure
+  (let [production (prod/find id)
+        p (repair/repair production)
+        flash (if (map? p)
+                {:message "Repair has been initiated"}
+                {:errors (concat ["Repair failed"] p)})]
     (-> (response/redirect-after-post "/")
-        (assoc :flash {:message "Repair has been initiated"}))))
+        (assoc :flash flash))))
 
 (defn production-set-state [id state]
   (let [production (prod/find id)

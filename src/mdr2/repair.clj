@@ -69,42 +69,61 @@
 (defn repair
   "Get a production from the archive and prepare it for repairing"
   [production]
-  (let [container-id (container-id production)
-        url (archive-url container-id)
-        response (client/get url
-                  {:as :stream
-                   :basic-auth [archive-web-user archive-web-password]})]
-    (if (client/success? response)
-      (let [dam-number (prod/dam-number production)
-            ;; create the tmp dir in the structured-path as there is
-            ;; not enough space on the normal tmp dir path
-            tmp-dir (nio/resolve-sibling (path/structured-path production)
-                                         (str (:id production) "_repair"))
-            tar-file (io/file tmp-dir (str dam-number ".tar"))
-            tar-dir (io/file tmp-dir dam-number)]
-        (transaction
-         ;; create all dirs for this production
-         (prod/create-dirs production)
-         ;; copy tar to tmpdir
-         (nio/create-directory! tmp-dir)
-         (with-open [input (:body response)
-                     output (io/output-stream tar-file)]
-           (io/copy input output))
-         ;; extract the tar
-         (compress/untar tar-file tar-dir)
-         ;; extract the relevant parts to the structured-path
-         (let [src-path (io/file tar-dir dam-number "produkt" dam-number)
-               dest-path (path/structured-path production)]
-           (doseq [f (filter #(.isFile %) (file-seq src-path))]
-             (nio/move! f (io/file dest-path (nio/file-name f)))))
-         ;; clear the temporary files
-         (util/delete-directory! tmp-dir)
-         ;; create the obi config file
-         (obi/config-file production)
-         ;; set the state
-         (prod/set-state! production "structured")))
-      (do
-        (log/errorf "Couldn't get %s from archive (%s)" (:id production) url)
-        ;; close the stream
-        (.close (:body response))))))
+  (log/infof "Repairing %s" (:id production))
+  (let [dest-path (path/structured-path production)
+        ;; create the tmp dir in the structured-path as there is not
+        ;; enough space on the normal tmp dir path
+        tmp-dir (nio/resolve-sibling dest-path (str (:id production) "_repair"))]
+    (cond
+      (not= (:state production) "archived")
+      (let [error-msg "Production is not in state \"archived\""]
+        (log/error error-msg)
+        [error-msg])
+      ;; checking for the state is not enough: there is a race
+      ;; condition as the state is only set after all the files have
+      ;; been copied. This takes time. So we also check for the
+      ;; existence of some important directories
+      (nio/exists? dest-path)
+      (let [error-msg (format "Directory %s already exists" dest-path)]
+        (log/error error-msg)
+        [error-msg])
+      (nio/exists? tmp-dir)
+      (let [error-msg (format "Directory %s already exists" tmp-dir)]
+        (log/error error-msg)
+        [error-msg])
+      :else
+      (let [container-id (container-id production)
+            url (archive-url container-id)
+            response (client/get url
+                                 {:as :stream
+                                  :basic-auth [archive-web-user archive-web-password]})]
+        (if (client/success? response)
+          (let [dam-number (prod/dam-number production)
+                tar-file (io/file tmp-dir (str dam-number ".tar"))
+                tar-dir (io/file tmp-dir dam-number)]
+            (transaction
+             ;; create all dirs for this production
+             (prod/create-dirs production)
+             ;; copy tar to tmpdir
+             (nio/create-directory! tmp-dir)
+             (with-open [input (:body response)
+                         output (io/output-stream tar-file)]
+               (io/copy input output))
+             ;; extract the tar
+             (compress/untar tar-file tar-dir)
+             ;; extract the relevant parts to the structured-path
+             (let [src-path (io/file tar-dir dam-number "produkt" dam-number)]
+               (doseq [f (filter #(.isFile %) (file-seq src-path))]
+                 (nio/move! f (io/file dest-path (nio/file-name f)))))
+             ;; clear the temporary files
+             (util/delete-directory! tmp-dir)
+             ;; create the obi config file
+             (obi/config-file production)
+             ;; set the state
+             (prod/set-state! production "structured")))
+          (let [error-msg (format "Couldn't get %s from archive (%s)" (:id production) url)]
+            ;; close the stream
+            (.close (:body response))
+            (log/error error-msg)
+            [error-msg]))))))
 
