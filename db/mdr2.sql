@@ -82,9 +82,12 @@ CREATE TABLE production (
   -- The unique id that the library assigns to this production
   library_signature VARCHAR(255) UNIQUE,
   FOREIGN KEY(state) REFERENCES state(id),
-  FOREIGN KEY(production_type) REFERENCES production_type(id)
+  FOREIGN KEY(production_type) REFERENCES production_type(id),
+  INDEX (state)
 )
 AUTO_INCREMENT = 20000;
+
+-- CREATE INDEX production_state_index ON production (state);
 
 CREATE TABLE user (
   id VARCHAR(32) PRIMARY KEY,
