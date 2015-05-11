@@ -89,7 +89,7 @@
 
 (def bitrates
   "Possible bitrates for encoding a DTB"
-  [128 64 56 48])
+  [128 112 96 80 64 56 48])
 
 (defn ideal-bitrate
   "Calculate the ideal bitrate based on the size of a production and
