@@ -100,8 +100,7 @@
   [production]
   (let [dtb (path/recorded-path production)
         duration (quot (dtb/audio-length dtb) 1000) ; convert from millisecs to secs
-        sampling-ratio (if (dtb/mono? dtb) 1 2)
-        max-bitrate (/ (* (/ max-size duration sampling-ratio) 8) 1000)]
+        max-bitrate (/ (* (/ max-size duration) 8) 1000)]
     (->> bitrates
          (filter #(<= % max-bitrate))
          (apply max 0))))
