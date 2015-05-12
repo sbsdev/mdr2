@@ -100,7 +100,12 @@
   [production]
   (let [dtb (path/recorded-path production)
         duration (quot (dtb/audio-length dtb) 1000) ; convert from millisecs to secs
-        max-bitrate (/ (* (/ max-size duration) 8) 1000)]
+        ;; apparently stereo doesn't use twice as much space if you
+        ;; use joint stereo compression mode, so no need to divide by
+        ;; two. The legacy system just added a tolerance of 2% for
+        ;; stereo productions.
+        sampling-ratio (if (dtb/mono? dtb) 1 1.02)
+        max-bitrate (/ (* (/ max-size duration sampling-ratio) 8) 1000)]
     (->> bitrates
          (filter #(<= % max-bitrate))
          (apply max 0))))
