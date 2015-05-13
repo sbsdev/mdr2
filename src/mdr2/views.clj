@@ -422,7 +422,7 @@
                       (assoc production :volumes 2)))]
         (if (seq errors)
           ;; there are errors in the split production. No point in
-          ;; showing the split diealog. Just redirect to the main view
+          ;; showing the split dialog. Just redirect to the main view
           (-> (response/redirect-after-post "/")
               (assoc :flash {:errors errors}))
           ;; all is well. Show the split dialog
