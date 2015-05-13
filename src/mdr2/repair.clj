@@ -12,6 +12,7 @@
   takes its course down the same route as a normal production."
   (:require [clojure.java.io :as io]
             [clojure.tools.logging :as log]
+            [immutant.caching :as caching]
             [immutant.transactions :refer [transaction]]
             [immutant.transactions.jdbc :refer [factory]]
             [yesql.core :refer [defqueries]]
@@ -30,6 +31,8 @@
 (def ^:private archive-web-password (env :archive-web-password))
 
 (defqueries "mdr2/archive/queries.sql" {:connection db})
+
+(def ^:private repairing-cache (caching/cache "repairing-cache" :ttl [2 :minutes]))
 
 (defn production-id?
   "Return true if `id` is a valid production id"
@@ -68,13 +71,17 @@
 
 (defn repair
   "Get a production from the archive and prepare it for repairing"
-  [production]
-  (log/infof "Repairing %s" (:id production))
-  (let [dest-path (path/structured-path production)
+  [{id :id :as production}]
+  (let [repairing-in-progress? (.putIfAbsent repairing-cache id true)
+        dest-path (path/structured-path production)
         ;; create the tmp dir in the structured-path as there is not
         ;; enough space on the normal tmp dir path
-        tmp-dir (nio/resolve-sibling dest-path (str (:id production) "_repair"))]
+        tmp-dir (nio/resolve-sibling dest-path (str id "_repair"))]
     (cond
+      repairing-in-progress?
+      (let [error-msg (format "Repair for %s already pending" id)]
+        (log/warn error-msg)
+        [error-msg])
       (not= (:state production) "archived")
       (let [error-msg "Production is not in state \"archived\""]
         (log/error error-msg)
@@ -97,6 +104,7 @@
             response (client/get url
                                  {:as :stream
                                   :basic-auth [archive-web-user archive-web-password]})]
+        (log/infof "Repairing %s" id)
         (if (client/success? response)
           (let [dam-number (prod/dam-number production)
                 tar-file (io/file tmp-dir (str dam-number ".tar"))
@@ -120,10 +128,15 @@
              ;; create the obi config file
              (obi/config-file production)
              ;; set the state
+             (let [updated (prod/set-state! production "structured")]
+               ;; clear repairing-cache
+               (.remove repairing-cache id)
+               updated)
              (prod/set-state! production "structured")))
-          (let [error-msg (format "Couldn't get %s from archive (%s)" (:id production) url)]
+          (let [error-msg (format "Couldn't get %s from archive (%s)" id url)]
             ;; close the stream
             (.close (:body response))
             (log/error error-msg)
+            (.remove repairing-cache id)
             [error-msg]))))))
 
