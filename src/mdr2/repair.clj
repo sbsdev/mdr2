@@ -32,7 +32,7 @@
 
 (defqueries "mdr2/archive/queries.sql" {:connection db})
 
-(def ^:private repairing-cache (caching/cache "repairing-cache" :ttl [2 :minutes]))
+(def ^:private repairing-cache (caching/cache "repairing-cache" :ttl [15 :minutes]))
 
 (defn production-id?
   "Return true if `id` is a valid production id"
