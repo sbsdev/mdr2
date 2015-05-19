@@ -44,7 +44,7 @@ start =
               element sourcePublisher { xsd:token }?,
               element sourceDate { xsd:token }?,
               element narrator { xsd:token }?,
-              element setInfo { xsd:integer }, 
+              element setInfo { xsd:positiveInteger },
               element revisionDate { xsd:date }
             }
           }

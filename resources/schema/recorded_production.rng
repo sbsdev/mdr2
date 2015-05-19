@@ -140,7 +140,7 @@
                   <data type="token"/>
                 </element>
                 <element name="setInfo">
-                  <data type="integer"/>
+                  <data type="positiveInteger"/>
                 </element>
                 <element name="revisionDate">
                   <data type="date"/>
