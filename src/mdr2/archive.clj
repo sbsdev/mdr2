@@ -39,7 +39,6 @@ mp3 and the whole thing is packed up in one or more iso files
             [clj-time.core :as t]
             [clj-time.coerce :refer [to-date]]
             [org.tobereplaced.nio.file :as nio]
-            [me.raynes.fs :as fs]
             [mdr2.production :as prod]
             [mdr2.production.path :as path]
             [mdr2.repair :as repair]
@@ -142,20 +141,21 @@ mp3 and the whole thing is packed up in one or more iso files
   files. For a production distribution master copy the isos"
   [production sektion]
   (let [archive-root-path (container-root-path production sektion)]
-    (if (fs/exists? archive-root-path)
+    (if (nio/exists? archive-root-path)
       (log/errorf "Archive root path %s already exists" archive-root-path)
       (let [archive-path (container-path production sektion)]
-        (fs/mkdir archive-root-path)
+        (nio/create-directory! archive-root-path)
         (log/debugf "Copying files for %s (%s)" (:id production) sektion)
         (case sektion
           :master
-          (fs/copy-dir (path/recorded-path production)
-                       (file archive-path (prod/dam-number production)))
+          (util/copy-directory! (path/recorded-path production)
+                                (file archive-path (prod/dam-number production)))
           :dist-master
           (doseq [volume (range 1 (inc (:volumes production)))]
             (let [iso-archive-name (str (container-id production sektion volume) ".iso")
                   iso-archive-path (.getPath (file archive-path iso-archive-name))]
-              (fs/copy+ (path/iso-name production volume) iso-archive-path))))
+              (nio/create-directories! iso-archive-path)
+              (nio/copy! (path/iso-name production volume) iso-archive-path))))
         (set-file-permissions archive-root-path)))))
 
 (defn- create-rdf
@@ -199,7 +199,7 @@ mp3 and the whole thing is packed up in one or more iso files
    (let [dam-number (prod/dam-number production)
          archive-path (.getPath (file periodical-spool-dir dam-number))
          multi-volume? (prod/multi-volume? production)]
-     (when (fs/exists? archive-path)
+     (when (nio/exists? archive-path)
        ;; when repairing the production is already in the spool dir
        (log/warnf "Archive path %s for periodical already exists, removing" archive-path)
        (util/delete-directory! archive-path))
@@ -212,7 +212,8 @@ mp3 and the whole thing is packed up in one or more iso files
      (doseq [volume (range 1 (inc (:volumes production)))]
        (let [iso-archive-name (str dam-number (when multi-volume? (str "_" volume)) ".iso")
              iso-archive-path (.getPath (file archive-path "produkt" iso-archive-name))]
-         (fs/copy+ (path/iso-name production volume) iso-archive-path)))
+         (nio/create-directories! iso-archive-path)
+         (nio/copy! (path/iso-name production volume) iso-archive-path)))
      (set-file-permissions (file archive-path))
      (prod/set-state-archived! production))))
 
@@ -224,7 +225,7 @@ mp3 and the whole thing is packed up in one or more iso files
    (let [dam-number (prod/dam-number production)
          archive-path (.getPath (file other-spool-dir dam-number))
          multi-volume? (prod/multi-volume? production)]
-     (when (fs/exists? archive-path)
+     (when (nio/exists? archive-path)
        ;; when repairing the production is already in the spool dir
        (log/warnf "Archive path %s for other production already exists, removing" archive-path)
        (util/delete-directory! archive-path))
@@ -237,6 +238,7 @@ mp3 and the whole thing is packed up in one or more iso files
      (doseq [volume (range 1 (inc (:volumes production)))]
        (let [iso-archive-name (str dam-number (when multi-volume? (str "_" volume)) ".iso")
              iso-archive-path (.getPath (file archive-path "produkt" iso-archive-name))]
-         (fs/copy+ (path/iso-name production volume) iso-archive-path)
+         (nio/create-directories! iso-archive-path)
+         (nio/copy! (path/iso-name production volume) iso-archive-path)
          (set-file-permissions (file iso-archive-path))))
      (prod/set-state-archived! production))))
