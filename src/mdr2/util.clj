@@ -3,8 +3,7 @@
   (:require [org.tobereplaced.nio.file :as nio]
             [clojure.tools.logging :as log])
   (:import (java.nio.file FileSystemException
-                          DirectoryNotEmptyException
-                          FileVisitResult)
+                          DirectoryNotEmptyException)
            java.lang.InterruptedException))
 
 (def ^:private delete-retry-millis 100)
@@ -48,14 +47,3 @@
     (catch FileSystemException e
       (log/error e))))
 
-(defn copy-directory!
-  "Copy a directory from `from` to `to` recursively"
-  [from to]
-  (let [copy (fn [path]
-               (nio/copy! path (nio/resolve-path to (nio/relativize from path)))
-               FileVisitResult/CONTINUE)]
-    (nio/walk-file-tree
-     from
-     (nio/naive-visitor
-      :pre-visit-directory copy
-      :visit-file copy))))
