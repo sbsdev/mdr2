@@ -116,7 +116,7 @@
              (nio/create-directory! tmp-dir)
              (with-open [input (:body response)
                          output (io/output-stream tar-file)]
-               (nio/copy! input output))
+               (io/copy input output))
              ;; extract the tar
              (compress/untar tar-file tar-dir)
              ;; extract the relevant parts to the structured-path
