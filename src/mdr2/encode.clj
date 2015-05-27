@@ -107,6 +107,8 @@
         sampling-ratio (if (dtb/mono? dtb) 1 1.02)
         max-bitrate (/ (* (/ max-size duration sampling-ratio) 8) 1000)]
     (->> bitrates
+         ;; for stereo productions use only bitrates larger than 96
+         (filter #(or (dtb/mono? dtb) (>= % 96)))
          (filter #(<= % max-bitrate))
          (apply max 0))))
 
