@@ -17,7 +17,7 @@
   (:require [clojure.java.io :as io]
             [clojure.xml :as xml]
             [clojure.zip :as zip]
-            [clojure.data.zip.xml :refer [xml1-> attr= attr text]]
+            [clojure.data.zip.xml :refer [xml-> xml1-> attr= attr text]]
             [clojure.string :as string]
             [clojure.tools.logging :as log]
             [immutant.messaging :as msg]
@@ -73,14 +73,22 @@
         (cond-> (= production_type "periodical")
           (assoc :periodical_number idVorstufe)))))
 
+(defn extract-value
+  "Extract values from a `zipper` from an ABACUS export file for `key`"
+  [zipper key]
+  (let [path (key param-mapping)]
+    (case key
+      :narrator (string/join "; " (apply xml-> zipper (concat root-path path)))
+      (apply xml1-> zipper (concat root-path path)))))
+
 (defn read-file
   "Read an export file from ABACUS and return a map with all the data,
   i.e. a production"
   [file]
   (let [zipper (-> file io/file xml/parse zip/xml-zip)]
     (->>
-     (for [[key path] param-mapping
-           :let [val (apply xml1-> zipper (concat root-path path))]
+     (for [key (keys param-mapping)
+           :let [val (extract-value zipper key)]
            :when (some? val)]
        [key val])
       (into {})
