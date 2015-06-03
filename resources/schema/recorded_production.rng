@@ -136,9 +136,11 @@
                 <element name="sourceDate">
                   <data type="token"/>
                 </element>
-                <element name="narrator">
-                  <data type="token"/>
-                </element>
+                <oneOrMore>
+                  <element name="narrator">
+                    <data type="token"/>
+                  </element>
+                </oneOrMore>
                 <element name="setInfo">
                   <data type="positiveInteger"/>
                 </element>
