@@ -3,6 +3,7 @@
   Book](http://www.daisy.org/daisypedia/daisy-digital-talking-book)"
   (:require [clojure.java.io :as io]
             [clojure.data.xml :as xml]
+            [clojure.java.shell :as shell]
             [mdr2.data.xml :as xml-new]
             [clojure.walk :as w]
             [clojure.zip :as zip]
@@ -93,6 +94,13 @@
   [xml production handler]
   (w/postwalk #(handler % production) xml))
 
+(defn xml-format!
+  "Format xml file `in` and store it in file `out`"
+  [in out]
+  (shell/sh "xmllint" "--format" "--nonet"
+            "--output" (.getAbsolutePath out)
+            (.getAbsolutePath in)))
+
 (defn update-mainfest!
   "Update the manifest file of `volume` for `production` in-place with
   the meta data from `production`. If a `manifest` is given the
@@ -103,8 +111,11 @@
    (let [updated (with-open [r (io/reader manifest)]
                   (update-meta-data (xml/parse r :support-dtd false)
                                     production handle-manifest-node))]
-    (with-open [w (io/writer manifest)]
-      (xml-new/emit updated w :doctype manifest-doctype)))))
+     (let [tmp-file (java.io.File/createTempFile "mdr2-" ".xml")]
+       (with-open [w (io/writer tmp-file)]
+         (xml-new/emit updated w :doctype manifest-doctype))
+       (xml-format! tmp-file manifest)
+       (.delete tmp-file)))))
 
 (defn update-master-smil!
   "Update the master smil file of `volume` for `production` in-place
@@ -115,8 +126,11 @@
                   (update-meta-data
                    (xml/parse r :support-dtd false)
                    production handle-smil-node))]
-    (with-open [w (io/writer smil)]
-      (xml-new/emit updated w :doctype smil-doctype))))
+    (let [tmp-file (java.io.File/createTempFile "mdr2-" ".smil")]
+      (with-open [w (io/writer tmp-file)]
+        (xml-new/emit updated w :doctype smil-doctype))
+      (xml-format! tmp-file smil)
+      (.delete tmp-file))))
 
 (defn update-meta-data!
   "Update the manifest and the smil file of a `volume` for
