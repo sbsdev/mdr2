@@ -4,6 +4,8 @@
   (:require [clojure.java.io :as io]
             [clojure.data.xml :as xml]
             [clojure.java.shell :as shell]
+            [clojure.tools.logging :as log]
+            [clojure.string :as s]
             [mdr2.data.xml :as xml-new]
             [clojure.walk :as w]
             [clojure.zip :as zip]
@@ -97,9 +99,13 @@
 (defn xml-format!
   "Format xml file `in` and store it in file `out`"
   [in out]
-  (shell/sh "xmllint" "--format" "--nonet"
-            "--output" (.getAbsolutePath out)
-            (.getAbsolutePath in)))
+  (let [{:keys [exit err]}
+        (shell/sh "xmllint" "--format" "--nonet"
+                  "--output" (.getAbsolutePath out)
+                  (.getAbsolutePath in))]
+    (when-not (and (= 0 exit) (s/blank? err))
+      (log/errorf "xmllint of %s failed with exit %s and message \"%s\""
+                  (.getAbsolutePath in) exit (s/trim-newline err)))))
 
 (defn update-mainfest!
   "Update the manifest file of `volume` for `production` in-place with
