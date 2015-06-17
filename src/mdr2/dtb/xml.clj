@@ -6,6 +6,7 @@
             [clojure.java.shell :as shell]
             [clojure.tools.logging :as log]
             [clojure.string :as s]
+            [org.tobereplaced.nio.file :as nio]
             [mdr2.data.xml :as xml-new]
             [clojure.walk :as w]
             [clojure.zip :as zip]
@@ -117,11 +118,11 @@
    (let [updated (with-open [r (io/reader manifest)]
                   (update-meta-data (xml/parse r :support-dtd false)
                                     production handle-manifest-node))]
-     (let [tmp-file (java.io.File/createTempFile "mdr2-" ".xml")]
+     (let [tmp-file (io/file (nio/create-temp-file! "mdr2-" ".xml"))]
        (with-open [w (io/writer tmp-file)]
          (xml-new/emit updated w :doctype manifest-doctype))
        (xml-format! tmp-file manifest)
-       (.delete tmp-file)))))
+       (nio/delete! tmp-file)))))
 
 (defn update-master-smil!
   "Update the master smil file of `volume` for `production` in-place
@@ -132,11 +133,11 @@
                   (update-meta-data
                    (xml/parse r :support-dtd false)
                    production handle-smil-node))]
-    (let [tmp-file (java.io.File/createTempFile "mdr2-" ".smil")]
+    (let [tmp-file (io/file (nio/create-temp-file! "mdr2-" ".smil"))]
       (with-open [w (io/writer tmp-file)]
         (xml-new/emit updated w :doctype smil-doctype))
       (xml-format! tmp-file smil)
-      (.delete tmp-file))))
+      (nio/delete! tmp-file))))
 
 (defn update-meta-data!
   "Update the manifest and the smil file of a `volume` for
