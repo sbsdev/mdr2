@@ -84,7 +84,7 @@ mp3 and the whole thing is packed up in one or more iso files
   `production` and `sektion`"
   [production sektion]
   (let [root-path (container-root-path production sektion)]
-    (.getPath (file root-path "produkt"))))
+    (file root-path "produkt")))
 
 (defn container-rdf-path
   "Return the path to the rdf file in the archive spool for a given
@@ -144,7 +144,7 @@ mp3 and the whole thing is packed up in one or more iso files
     (if (nio/exists? archive-root-path)
       (log/errorf "Archive root path %s already exists" archive-root-path)
       (let [archive-path (container-path production sektion)]
-        (nio/create-directory! archive-root-path)
+        (nio/create-directories! archive-path)
         (log/debugf "Copying files for %s (%s)" (:id production) sektion)
         (case sektion
           :master
@@ -153,8 +153,7 @@ mp3 and the whole thing is packed up in one or more iso files
           :dist-master
           (doseq [volume (range 1 (inc (:volumes production)))]
             (let [iso-archive-name (str (container-id production sektion volume) ".iso")
-                  iso-archive-path (.getPath (file archive-path iso-archive-name))]
-              (nio/create-directories! iso-archive-path)
+                  iso-archive-path (file archive-path iso-archive-name)]
               (nio/copy! (path/iso-name production volume) iso-archive-path))))
         (set-file-permissions archive-root-path)))))
 
@@ -211,8 +210,8 @@ mp3 and the whole thing is packed up in one or more iso files
      ;; copy all volumes
      (doseq [volume (range 1 (inc (:volumes production)))]
        (let [iso-archive-name (str dam-number (when multi-volume? (str "_" volume)) ".iso")
-             iso-archive-path (.getPath (file archive-path "produkt" iso-archive-name))]
-         (nio/create-directories! iso-archive-path)
+             iso-archive-path (file archive-path "produkt" iso-archive-name)]
+         (nio/create-directories! (nio/parent iso-archive-path))
          (nio/copy! (path/iso-name production volume) iso-archive-path)))
      (set-file-permissions (file archive-path))
      (prod/set-state-archived! production))))
@@ -237,8 +236,8 @@ mp3 and the whole thing is packed up in one or more iso files
      ;; copy all volumes
      (doseq [volume (range 1 (inc (:volumes production)))]
        (let [iso-archive-name (str dam-number (when multi-volume? (str "_" volume)) ".iso")
-             iso-archive-path (.getPath (file archive-path "produkt" iso-archive-name))]
-         (nio/create-directories! iso-archive-path)
+             iso-archive-path (file archive-path "produkt" iso-archive-name)]
+         (nio/create-directories! (nio/parent iso-archive-path))
          (nio/copy! (path/iso-name production volume) iso-archive-path)
          (set-file-permissions (file iso-archive-path))))
      (prod/set-state-archived! production))))
