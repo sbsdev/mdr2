@@ -45,7 +45,8 @@ start =
               element sourceDate { xsd:token }?,
               element narrator { xsd:token }?,
               element setInfo { xsd:positiveInteger },
-              element revisionDate { xsd:date }
+              element revisionDate { xsd:date },
+              element VubisRecordID { xsd:positiveInteger }?
             }
           }
         }
