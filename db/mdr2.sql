@@ -90,6 +90,7 @@ CREATE TABLE production (
 AUTO_INCREMENT = 20000;
 
 -- CREATE INDEX production_state_index ON production (state);
+-- ALTER TABLE production ADD COLUMN library_record_id INTEGER UNIQUE AFTER library_signature;
 
 CREATE TABLE user (
   id VARCHAR(32) PRIMARY KEY,
