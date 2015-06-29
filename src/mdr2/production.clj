@@ -124,7 +124,7 @@
       (cond
         (#{:date :source_date :produced_date :revision_date} k)
         (to-sql-date (f/parse v))
-        (#{:volumes} k) (Integer/parseInt v)
+        (#{:volumes :library_record_id} k) (Integer/parseInt v)
         :else v)))
    {} production))
 
