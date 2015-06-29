@@ -60,7 +60,7 @@
 (defn clean-raw-production
   "Return a proper production based on a raw production, i.e. drop
   `:mvl_only`, `:command` and `:idVorstufe` and add `:production_type`
-  and `periodical_number`"
+  and `:periodical_number`"
   [{:keys [mvl_only command idVorstufe] :as raw-production}]
   (let [production_type (cond
                           (= command "mdaDocAdd_Kleinauftrag") "other"
