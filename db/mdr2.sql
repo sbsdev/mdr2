@@ -81,6 +81,8 @@ CREATE TABLE production (
   library_number VARCHAR(255) UNIQUE,
   -- The unique id that the library assigns to this production
   library_signature VARCHAR(255) UNIQUE,
+  -- The unique record id that the library uses to track this production
+  library_record_id INTEGER UNIQUE,
   FOREIGN KEY(state) REFERENCES state(id),
   FOREIGN KEY(production_type) REFERENCES production_type(id),
   INDEX (state)
