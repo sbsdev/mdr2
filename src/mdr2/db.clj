@@ -2,6 +2,7 @@
   "Persistence for productions"
   (:refer-clojure :exclude [find])
   (:require [clojure.java.jdbc :as jdbc]
+            [clojure.tools.logging :as log]
             [immutant.transactions :refer [set-rollback-only]]
             [immutant.transactions.jdbc :refer [factory]]
             [yesql.core :refer [defqueries]]
@@ -30,6 +31,7 @@
       production)
     (catch SQLException e
       (set-rollback-only) ; make sure transactions are rolled back
+      (log/error "Failed to insert production" production e)
       [(.getMessage e)])))
 
 (defn update!
