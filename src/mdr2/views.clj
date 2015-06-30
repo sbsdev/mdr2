@@ -148,8 +148,8 @@
      [:h1 "Productions"]
      (when error
        [:p [:ul.alert.alert-danger [:li error]]])
-     [:table.table.table-striped
-      [:thead [:tr [:th "Title"] [:th "Author"] [:th "Product Number"] [:th "Library Number"] [:th "Total time"] [:th "Number of CDs"] [:th "Depth"] [:th "Narrator"] [:th "Date of Production"] [:th "Libary signature"]]]
+     [:table#productions.table.table-striped
+      [:thead [:tr [:th "Title"] [:th "Author"] [:th "Product Number"] [:th "Library Number"] [:th "Total time"] [:th "Number of CDs"] [:th "Depth"] [:th "Narrator"] [:th "Date of Production"] [:th.orderable-false "Libary signature"]]]
       [:tbody
        (for [{:keys [id title creator product_number library_number
                      total_time volumes depth narrator produced_date]}
