@@ -55,11 +55,11 @@
                    nil?
                    [;; show the download button while the production hasn't been recorded
                     (when (#{"structured" "recorded"} next-state)
-                      (layout/button (str "/production/" id ".xml") (layout/glyphicon "download")))
+                      (layout/button (str "/production/" id ".xml") (layout/glyphicon "download" "Download xml structure template")))
                     ;; show the upload button while the production hasn't been recorded and
                     ;; the user is authorized
                     (when (#{"structured" "recorded"} next-state)
-                      (layout/button (str "/production/" id "/upload") (layout/glyphicon "upload")))
+                      (layout/button (str "/production/" id "/upload") (layout/glyphicon "upload" "Upload xml structure")))
                     (cond
                       ;; show the "Recorded" button if the next state is "recorded", the
                       ;; user is authorized, there is an DAISY export and the production has

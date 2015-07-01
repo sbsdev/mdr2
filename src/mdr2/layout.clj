@@ -13,8 +13,12 @@
        (map s/capitalize)
        (s/join " ")))
 
-(defn glyphicon [class]
-  [:span {:class (str "glyphicon glyphicon-" class)}])
+(defn glyphicon
+  ([class]
+   (glyphicon class nil))
+  ([class tooltip]
+   [:span (into {} (list [:class (str "glyphicon glyphicon-" class)]
+                         (when tooltip [:title tooltip])))]))
 
 (defn button
   "Return a button. If the `href` is nil the button is disabled"
