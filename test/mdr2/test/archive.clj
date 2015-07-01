@@ -43,7 +43,7 @@
 
   (testing "container path"
     (is (= (#'mdr2.archive/container-path {:id 123} :master)
-           (.getPath (file (env :archive-spool-dir) "dam123" "produkt")))))
+           (file (env :archive-spool-dir) "dam123" "produkt"))))
 
   (testing "rdf path"
     (is (= (#'mdr2.archive/container-rdf-path {:id 123} :master)

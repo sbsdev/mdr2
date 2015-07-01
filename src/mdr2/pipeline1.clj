@@ -6,7 +6,7 @@
   `/usr/lib/daisy-pipeline/scripts`."
   (:require [clojure.java.shell :refer [sh]]
             [clojure.string :as s]
-            [me.raynes.fs :as fs]))
+            [org.tobereplaced.nio.file :as nio]))
 
 (def ^:private install-path "/usr/lib/daisy-pipeline/scripts")
 
@@ -40,7 +40,7 @@
   ;; the pipeline1 validator is not so brilliant when it comes to
   ;; returning error conditions. For that reason we check for
   ;; existence of the input file before hand
-  (if (not (and (fs/exists? file) (fs/readable? file)))
+  (if (not (and (nio/exists? file) (nio/readable? file)))
     [(format "Input file '%s' does not exist or is not readable" file)]
     (let [args ["daisy-pipeline"
                 (str install-path "/verify/ConfigurableValidator.taskScript")
