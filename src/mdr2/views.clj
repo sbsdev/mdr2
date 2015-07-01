@@ -152,7 +152,7 @@
       [:thead [:tr [:th "Title"] [:th "Author"] [:th "Product Number"]
                [:th "Library Number"] [:th "Record id"] [:th "Total time"]
                [:th "Number of CDs"] [:th "Depth"] [:th "Narrator"]
-               [:th "Date of Production"] [:th.orderable-false "Libary signature"]]]
+               [:th "Date of Production"] [:th.orderable-false "Library signature"]]]
       [:tbody
        (for [{:keys [id title creator product_number
                      library_number library_record_id
