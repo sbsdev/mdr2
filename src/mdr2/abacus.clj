@@ -42,6 +42,7 @@
    :narrator [:MetaData :ncc :narrator text]
    :volumes [:MetaData :ncc :setInfo text]
    :revision_date [:MetaData :ncc :revisionDate text]
+   :library_record_id [:MetaData :ncc :VubisRecordID text]
    :mvl_only [:mvl_only text]
    :command [(attr :command)]
    :idVorstufe [:MetaData :sbs :idVorstufe text]

@@ -151,6 +151,11 @@
                 <element name="revisionDate">
                   <data type="date"/>
                 </element>
+                <optional>
+                  <element name="VubisRecordID">
+                    <data type="positiveInteger"/>
+                  </element>
+                </optional>
               </element>
             </element>
           </element>

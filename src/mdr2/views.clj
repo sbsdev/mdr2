@@ -149,9 +149,13 @@
      (when error
        [:p [:ul.alert.alert-danger [:li error]]])
      [:table#productions.table.table-striped
-      [:thead [:tr [:th "Title"] [:th "Author"] [:th "Product Number"] [:th "Library Number"] [:th "Total time"] [:th "Number of CDs"] [:th "Depth"] [:th "Narrator"] [:th "Date of Production"] [:th.orderable-false "Libary signature"]]]
+      [:thead [:tr [:th "Title"] [:th "Author"] [:th "Product Number"]
+               [:th "Library Number"] [:th "Record id"] [:th "Total time"]
+               [:th "Number of CDs"] [:th "Depth"] [:th "Narrator"]
+               [:th "Date of Production"] [:th.orderable-false "Libary signature"]]]
       [:tbody
-       (for [{:keys [id title creator product_number library_number
+       (for [{:keys [id title creator product_number
+                     library_number library_record_id
                      total_time volumes depth narrator produced_date]}
              (prod/find-by-state "encoded")]
          [:tr
@@ -159,6 +163,7 @@
           [:td creator]
           [:td product_number]
           [:td library_number]
+          [:td library_record_id]
           [:td (quot total_time (* 1000 60))] ; in minutes
           [:td volumes]
           [:td depth]
