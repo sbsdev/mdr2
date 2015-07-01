@@ -42,6 +42,11 @@
   [file]
   (and (.isFile file) (.endsWith (.getName file) ".ncx")))
 
+(defn- ncc-file?
+  "Is the given `file` an ncc file?"
+  [file]
+  (and (.isFile file) (= (.getName file) "ncc.html")))
+
 (defn- has-type? [type-pred path]
   (some type-pred (file-seq (file path))))
 
@@ -49,6 +54,7 @@
 (defn- has-text? [dtb] (has-type? text-file? dtb))
 (defn- has-image? [dtb] (has-type? image-file? dtb))
 (defn- has-ncx? [dtb] (has-type? ncx-file? dtb))
+(defn- has-ncc? [dtb] (has-type? ncc-file? dtb))
 
 (defn- audio-content [dtb] (when (has-audio? dtb) "audio"))
 (defn- text-content [dtb] (when (has-text? dtb) "text"))
@@ -67,11 +73,14 @@
   [dtb]
   (let [has-audio (has-audio? dtb)
         has-text (has-text? dtb)
-        has-ncx (has-ncx? dtb)]
+        has-ncx (has-ncx? dtb)
+        has-ncc (has-ncc? dtb)]
     (cond 
-     (and has-audio has-text) "audioFullText"
+     (and has-audio has-text (or has-ncx has-ncc)) "audioFullText"
      (and has-audio has-ncx) "audioNCX"
+     (and has-audio has-ncc) "audioNcc"
      (and has-text has-ncx?) "textNCX"
+     (and has-text has-ncc) "textNcc"
      has-audio "audioOnly"
      :else "")))
 
