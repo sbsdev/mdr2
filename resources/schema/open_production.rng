@@ -140,11 +140,11 @@
                     <data type="token"/>
                   </element>
                 </optional>
-                <optional>
+                <zeroOrMore>
                   <element name="narrator">
                     <data type="token"/>
                   </element>
-                </optional>
+                </zeroOrMore>
                 <element name="setInfo">
                   <data type="positiveInteger"/>
                 </element>
