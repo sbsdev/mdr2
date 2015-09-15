@@ -16,20 +16,22 @@
   {:de
    {:about "Zu diesem DAISY-Buch"
     :bib "Bibliographische Angaben"
-    :description "Produktbeschreibung des Hörbuchverlages"
     :blurb "Klappentexte"
+    :about_the_book "Über den Inhalt"
+    :about_the_author "Über den Verfasser/die Verfasserin"
     :contributors "Mitwirkende"
-    :enclosures "Hörbuchbeilagen"
+    :enclosures "Produktbeschreibung und Hörbuchbeilagen"
     :end "Ende des Buches"
     :title_creator_fmt "%s von %s"
     :unknown_title "Unbekannter Titel"}
    :en
    {:about "About this DAISY book"
     :bib "Bibliographic information"
-    :description "Product description by talking book publisher"
     :blurb "Blurbs"
+    :about_the_book "About the book"
+    :about_the_author "About the author"
     :contributors "Contributors"
-    :enclosures "Talking book enclosures"
+    :enclosures "Product description and Talking book enclosures"
     :end "End of book"
     :title_creator_fmt "%s by %s"
     :unknown_title "Unknown title"}})
@@ -92,11 +94,13 @@
        [:h1 (t :bib)]
        [:p]]
       [:level1
-       [:h1 (t :description)]
-       [:p]]
-      [:level1
        [:h1 (t :blurb)]
-       [:p]]]
+       [:level2
+        [:h2 (t :about_the_book)]
+        [:p]]
+       [:level2
+        [:h2 (t :about_the_author)]
+        [:p]]]]
      [:bodymatter
       [:level1 [:h1 "[Audioimport]"] [:p]]]
      [:rearmatter
