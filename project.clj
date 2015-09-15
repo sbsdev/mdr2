@@ -1,4 +1,4 @@
-(defproject mdr2 "0.6.0"
+(defproject mdr2 "0.6.1"
   :description "A Production Management Tool for DAISY Talking Books"
   :url "https://github.com/sbsdev/mdr2"
   :dependencies [[org.clojure/clojure "1.6.0"]
@@ -36,7 +36,7 @@
   :plugins [[lein-immutant "2.0.0"]
             [codox "0.8.11"]
             [lein-environ "1.0.0"]
-            [cider/cider-nrepl "0.9.1-SNAPSHOT"]]
+            [cider/cider-nrepl "0.9.1"]]
   :codox {:project {:name "Madras2"}
           :src-dir-uri "https://github.com/sbsdev/mdr2/blob/master/"
           :src-linenum-anchor-prefix "L"
