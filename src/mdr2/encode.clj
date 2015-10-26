@@ -142,7 +142,7 @@
          ;; and with a bang!
          (log/errorf "Encoding of %s (%s) failed with exit %s and message \"%s\""
                      (:id production) volume exit err)
-         (let [encoded_size (dtb/size (path/recorded-path production))]
+         (let [encoded_size (dtb/size (path/encoded-path production volume))]
            ;; add the encoded size to the meta data of the encoded production
            (xml/update-encoded-meta-data! (assoc production :encoded_size encoded_size) volume)
            ;; downgrade to daisy202

@@ -1,4 +1,4 @@
-(defproject mdr2 "0.6.2"
+(defproject mdr2 "0.6.3"
   :description "A Production Management Tool for DAISY Talking Books"
   :url "https://github.com/sbsdev/mdr2"
   :dependencies [[org.clojure/clojure "1.6.0"]
