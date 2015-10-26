@@ -94,13 +94,7 @@
        [:h1 (t :bib)]
        [:p]]
       [:level1
-       [:h1 (t :blurb)]
-       [:level2
-        [:h2 (t :about_the_book)]
-        [:p]]
-       [:level2
-        [:h2 (t :about_the_author)]
-        [:p]]]]
+       [:h1 (t :blurb)]]]
      [:bodymatter
       [:level1 [:h1 "[Audioimport]"] [:p]]]
      [:rearmatter
