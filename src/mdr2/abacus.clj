@@ -1,10 +1,10 @@
 (ns mdr2.abacus
   "Import and export files to and from ABACUS
 
-  Unfortunately the interface to our ERP is very crude: you basically
-  read and write files from an directory. The import from ABACUS is
-  done via XML and the export to ABACUS is done via some form of csv.
-  The interface imports the following notifications:
+  The interface to our ERP is quite crude: you basically read and
+  write files from an directory. Both the import from and the export
+  to ABACUS are done via XML. The interface imports the following
+  notifications:
 
   - Start (open) a production
   - a production is recorded
@@ -16,6 +16,7 @@
   - meta data of a production changes."
   (:require [clojure.java.io :as io]
             [clojure.xml :as xml]
+            [clojure.data.xml :as data.xml]
             [clojure.zip :as zip]
             [clojure.data.zip.xml :refer [xml-> xml1-> attr= attr text]]
             [clojure.string :as string]
@@ -166,48 +167,48 @@
            ;; updating metadata
            (dissoc :production_type :revision_date))))))
 
-(defn wrap-rows
-  "Wrap an export record according to ABACUS conventions"
-  [rs]
-  (concat [(list "N" "ADO")] ; 'N' for new
-          rs
-          [(list "S")])) ; 's' for save
-
-(defn create-row
-  "Create a row for export according to ABACUS conventions"
-  [k v]
-  (when v
-    (let [section (if (= k 4) "IBF" "ADO")]
-      (list "D" section k (format "'%s'" v))))) ; all values need to be quoted
-
 (def ^:private date-format "%1$td.%1$tm.%1$tY")
 
+(defn- export-sexp
+  [{:keys [product_number total_time state audio_format
+           multimedia_type produced_date volumes depth] :as production}]
+  [:AbaConnectContainer
+   [:TaskCount 1]
+   [:Task
+    [:Parameter
+     [:Application "ORDE"]
+    [:Id "Produktstamm"]
+    [:MapId "AbaDefault"]
+    [:Version "2015.00"]]
+   [:Transaction {:id 1}
+    [:ProductData {:mode "SAVE"}
+     [:ProductDataFields {:mode "SAVE"}
+      [:ProductNumber product_number]
+      [:Ascii3 (string/capitalize state)]
+      [:_USERFIELD13 (quot (or total_time 0) (* 1000 60))] ; in minutes
+      [:_USERFIELD52 (and produced_date
+                          (format date-format produced_date))] ; Date of production end
+      [:_USERFIELD54 volumes]
+      [:__USERFIELD53 depth]
+      [:__USERFIELD54 audio_format]
+      [:__USERFIELD55 multimedia_type]]
+     [:ProductDataIndividualUserFields {:mode "SAVE"}
+      [:ProductDataIndividualUserFieldsFields {:mode "SAVE"}
+       [:Ascii1 (prod/dam-number production)]]]]]]])
+
 (defn export
-  "Export the state of a production as a csv-like structure, ready to
-  be consumed by ABACUS"
-  [{:keys [product_number total_time state audio_format multimedia_type
-           date id produced_date volumes depth] :as production}]
-  (->> [(create-row 2 product_number)
-        (create-row 239 (quot (or total_time 0) (* 1000 60))) ; in minutes
-        (create-row 106 (string/capitalize state))
-        (create-row 280 audio_format)
-        (create-row 271 volumes) ; Number of CDs
-        (create-row 279 depth)
-        (create-row 281 multimedia_type)
-        (create-row 256 (and produced_date
-                             (format date-format produced_date))) ; Date of production end
-        (create-row 4 (prod/dam-number production))] ; for legacy purposes
-       (remove nil?) ; remove empty rows
-       wrap-rows ; wrap the payload
-       (map-indexed #(conj %2 (inc %1))) ; number each row starting at 1
-       (map #(string/join "," %))
-       (string/join "\r\n"))) ; use cr/lf as this is consumed only on windows
+  "Export the state of a production, ready to be consumed by ABACUS"
+  [production]
+  (-> production
+      export-sexp
+      data.xml/sexp-as-element
+      data.xml/indent-str))
 
 (defn export-file
   "Export the state of a production into a special file in
   `export-dir`. The file is named with the `product_number`. Existing
   files are overwritten"
   [{product_number :product_number :as production}]
-  ;; file names are supposed to be "Ax_product_number.txt, e.g. Ax_DY15000.txt"
-  (let [file-name (.getPath (io/file export-dir (str "Ax_" product_number ".txt")))]
+  ;; file names are supposed to be "Ax_product_number.xml, e.g. Ax_DY15000.xml"
+  (let [file-name (.getPath (io/file export-dir (str "Ax_" product_number ".xml")))]
     (spit file-name (export production))))
