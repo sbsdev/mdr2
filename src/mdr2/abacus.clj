@@ -167,11 +167,9 @@
            ;; updating metadata
            (dissoc :production_type :revision_date))))))
 
-(def ^:private date-format "%1$td.%1$tm.%1$tY")
-
 (defn- export-sexp
   [{:keys [product_number total_time state audio_format
-           multimedia_type produced_date volumes depth] :as production}]
+           multimedia_type volumes depth] :as production}]
   [:AbaConnectContainer
    [:TaskCount 1]
    [:Task
@@ -186,8 +184,6 @@
       [:ProductNumber product_number]
       [:Ascii3 (string/capitalize state)]
       [:_USERFIELD13 (quot (or total_time 0) (* 1000 60))] ; in minutes
-      [:_USERFIELD52 (and produced_date
-                          (format date-format produced_date))] ; Date of production end
       [:_USERFIELD54 volumes]
       [:__USERFIELD53 depth]
       [:__USERFIELD54 audio_format]
