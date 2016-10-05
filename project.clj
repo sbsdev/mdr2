@@ -36,7 +36,8 @@
   :plugins [[lein-immutant "2.0.0"]
             [codox "0.8.11"]
             [lein-environ "1.0.0"]
-            [cider/cider-nrepl "0.9.1"]]
+            [cider/cider-nrepl "0.9.1"]
+            [org.clojars.cvillecsteele/lein-git-version "1.0.3"]]
   :codox {:project {:name "Madras2"}
           :src-dir-uri "https://github.com/sbsdev/mdr2/blob/master/"
           :src-linenum-anchor-prefix "L"
@@ -44,8 +45,8 @@
   :main ^:skip-aot mdr2.main
   :immutant {:war {:context-path "/"}}
   :profiles {:uberjar {:aot :all}
-             :dev {:source-paths ["dev"]
-                   :dependencies [[org.xerial/sqlite-jdbc "3.8.7"]
+             :dev {:source-paths ["src" "dev"]
+                   :dependencies [[org.xerial/sqlite-jdbc "3.14.2.1"]
                                   [javax.servlet/servlet-api "2.5"]]}
              :test {:dependencies [[ring-mock "0.1.5"]]
                     :env {:production-path "test/testfiles"
