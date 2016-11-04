@@ -135,6 +135,9 @@
      ;; make sure the meta data of the recorded production aligns with
      ;; the meta data we have on file for this production
      (xml/update-meta-data! production volume)
+     ;; newer versions of OBI create unformated smil files which makes
+     ;; many old players choke. So we format the smil files.
+     (xml/format-smil-files! production volume)
      (let [{:keys [exit err]} (encode-production production bitrate volume sample-rate)]
        (if (not (and (= 0 exit) (s/blank? err)))
          ;; FIXME: This is very fishy: an error is basically logged

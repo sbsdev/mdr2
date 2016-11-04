@@ -1,16 +1,18 @@
 (ns mdr2.dtb.xml
   "Update meta data of a [DAISY Talking
   Book](http://www.daisy.org/daisypedia/daisy-digital-talking-book)"
-  (:require [clojure.java.io :as io]
+  (:require [clojure
+             [string :as str]
+             [walk :as walk]]
             [clojure.data.xml :as xml]
-            [clojure.java.shell :as shell]
+            [clojure.java
+             [io :as io]
+             [shell :as shell]]
             [clojure.tools.logging :as log]
-            [clojure.string :as s]
-            [org.tobereplaced.nio.file :as nio]
             [mdr2.data.xml :as xml-new]
-            [clojure.walk :as w]
-            [clojure.zip :as zip]
-            [mdr2.production.path :as path]))
+            [mdr2.production.path :as path]
+            [org.tobereplaced.nio.file :as nio])
+  (:import java.nio.file.StandardCopyOption))
 
 (def ^:private manifest-doctype
   (str
@@ -95,7 +97,7 @@
   "Update `xml` with the metadata from `production` using the given
   node `handler`"
   [xml production handler]
-  (w/postwalk #(handler % production) xml))
+  (walk/postwalk #(handler % production) xml))
 
 (defn xml-format!
   "Format xml file `in` and store it in file `out`"
@@ -104,9 +106,9 @@
         (shell/sh "xmllint" "--format" "--nonet"
                   "--output" (.getAbsolutePath out)
                   (.getAbsolutePath in))]
-    (when-not (and (= 0 exit) (s/blank? err))
+    (when-not (and (= 0 exit) (str/blank? err))
       (log/errorf "xmllint of %s failed with exit %s and message \"%s\""
-                  (.getAbsolutePath in) exit (s/trim-newline err)))))
+                  (.getAbsolutePath in) exit (str/trim-newline err)))))
 
 (defn update-mainfest!
   "Update the manifest file of `volume` for `production` in-place with
@@ -138,6 +140,19 @@
         (xml-new/emit updated w :doctype smil-doctype))
       (xml-format! tmp-file smil)
       (nio/delete! tmp-file))))
+
+(defn format-smil-files!
+  "Format all smil files. OBI now produces unformated smil files and
+  some old players don't seem to like this"
+  [production volume]
+  (let [formatted (io/file "/tmp/formatted.smil")
+        dir (io/file (path/recorded-path production volume))
+        files (->> dir
+                   file-seq
+                   (filter #(str/ends-with? (.getName %) ".smil")))]
+    (doseq [file files]
+      (xml-format! file formatted)
+      (nio/move! formatted file StandardCopyOption/REPLACE_EXISTING))))
 
 (defn update-meta-data!
   "Update the manifest and the smil file of a `volume` for
