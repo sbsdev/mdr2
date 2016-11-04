@@ -43,7 +43,10 @@
           :src-linenum-anchor-prefix "L"
           :defaults {:doc/format :markdown}}
   :main ^:skip-aot mdr2.main
-  :immutant {:war {:context-path "/"}}
+  :immutant {:war {:context-path "/"
+                   :name "%p%v%t"
+                   :nrepl {:port 42278
+                           :start? true}}}
   :profiles {:uberjar {:aot :all}
              :dev {:source-paths ["src" "dev"]
                    :dependencies [[org.xerial/sqlite-jdbc "3.14.2.1"]
