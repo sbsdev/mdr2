@@ -34,14 +34,14 @@
                  [yesql "0.5.3"]
                  ]
   :plugins [[lein-immutant "2.1.0"]
-            [codox "0.10.0"]
+            [lein-codox "0.10.0"]
             [lein-environ "1.1.0"]
             [cider/cider-nrepl "0.13.0"]
             [org.clojars.cvillecsteele/lein-git-version "1.0.3"]]
   :codox {:project {:name "Madras2"}
-          :src-dir-uri "https://github.com/sbsdev/mdr2/blob/master/"
-          :src-linenum-anchor-prefix "L"
-          :defaults {:doc/format :markdown}}
+          :source-paths ["src"]
+          :source-uri "https://github.com/sbsdev/mdr2/blob/v{version}/{filepath}#L{line}"
+          :metadata {:doc/format :markdown}}
   :main ^:skip-aot mdr2.main
   :immutant {:war {:context-path "/"
                    :name "%p%v%t"
