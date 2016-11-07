@@ -1,6 +1,7 @@
 *~
 *.class
 *.jar
+*.war
 /.lein-*
 /.nrepl-port
 /checkouts/
@@ -15,3 +16,4 @@ pom.xml.asc
 /profiles.clj
 /.descriptors/
 /hornetq-data/
+/src/mdr2/version.clj
