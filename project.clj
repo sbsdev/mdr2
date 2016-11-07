@@ -26,7 +26,7 @@
                  [environ "1.1.0"]
                  [hiccup "1.0.5"]
                  [me.raynes/fs "1.4.6" :exclusions [org.apache.commons/commons-compress]]
-                 [mysql/mysql-connector-java "6.0.4"]
+                 [mysql/mysql-connector-java "5.1.35"]
                  [pandect "0.6.0"] ; for pipeline2 client
                  [ring/ring-defaults "0.2.1"]
                  [ring/ring-core "1.5.0" :exclusions [org.clojure/tools.reader]]
