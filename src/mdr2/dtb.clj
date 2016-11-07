@@ -47,8 +47,13 @@
   [file]
   (and (.isFile file) (= (.getName file) "ncc.html")))
 
+(defn- get-files
+  "Return a seq of all regular files contained in `dtb`"
+  [dtb]
+  (->> dtb file file-seq (filter #(.isFile %))))
+
 (defn- has-type? [type-pred path]
-  (some type-pred (file-seq (file path))))
+  (some type-pred (get-files path)))
 
 (defn- has-audio? [dtb] (has-type? audio-file? dtb))
 (defn- has-text? [dtb] (has-type? text-file? dtb))
@@ -88,7 +93,8 @@
   "Return the format in which the audio files in the DTB file set are
   written for a given DAISY Talking Book"
   [dtb]
-  (let [mime-types (->> (file-seq (file dtb))
+  (let [mime-types (->> dtb
+                        get-files
                         (filter audio-file?)
                         (remove #(= (.getName %) "tpbnarrator_res.mp3"))
                         (map mime-type-of))]
@@ -117,7 +123,7 @@
   ;; seem to be supported at the moment. You need to have the proper
   ;; providers. Maybe this is a problem of openjdk? So just use wav
   ;; files for the calculation.
-  (let [audio-files (filter wav-file? (file-seq (file dtb)))]
+  (let [audio-files (filter wav-file? (get-files dtb))]
     (->> audio-files
      (map file-audio-length)
      (reduce +)
@@ -134,7 +140,7 @@
 (defn audio-channels
   "Return the number of audio channels for a given DAISY Talking Book"
   [dtb]
-  (let [audio-files (filter wav-file? (file-seq (file dtb)))
+  (let [audio-files (filter wav-file? (get-files dtb))
         channels (map file-audio-channels audio-files)]
     ;; if not all files are mono we assume the whole book is stereo
     (if (every? #(= 1 %) channels) 1 2)))
@@ -155,14 +161,14 @@
   "Return the sample rate for a given DAISY Talking Book. If there is
   a mix of sampling rates used the most frequently used is returned"
   [dtb]
-  (let [audio-files (filter wav-file? (file-seq (file dtb)))
+  (let [audio-files (filter wav-file? (get-files dtb))
         sampling-rates (map file-sampling-rate audio-files)]
     (ffirst (sort-by val (frequencies sampling-rates)))))
 
 (defn size
   "Return the size in kBytes of a given DAISY Talking Book"
   [dtb]
-  (let [files (filter #(.isFile %) (file-seq (file dtb)))
+  (let [files (get-files dtb)
         bytes (->> files (map #(.length %)) (reduce +))]
     (-> bytes (/ 1024) math/round)))
 
