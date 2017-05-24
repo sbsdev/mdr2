@@ -300,11 +300,19 @@
        prod/set-state-structured!
        ;; write the dtbook template file
        dtbook/dtbook-file))
-    (-> (response/redirect-after-post "/")
-        (cond-> (seq errors)
-          (assoc :flash {:warnings (for [e errors]
-                                     (str (re-find #"PNX \d+" (first e))
-                                          " has already been imported"))})))))
+    (->
+     (response/redirect-after-post "/")
+     (cond-> (seq errors)
+       (assoc
+        :flash
+        {:warnings
+         (for [e errors]
+           (if (first e)
+             (str (re-find #"PNX \d+" (first e)) " has already been imported")
+             ;; FIXME: Unfortunately `immutant.transactions/transaction` no longer
+             ;; seems to return anything if the transaction was rolled back. So
+             ;; `e` is nil.
+             "Unknown error. Please consult the log file."))})))))
 
 (defn production-repair-form
   [request & [errors]]
