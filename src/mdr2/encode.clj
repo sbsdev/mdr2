@@ -53,8 +53,14 @@
 (defn deaccent [str]
   "Remove accent from string"
   ;; https://gist.github.com/maio/e5f85d69c3f6ca281ccd
-  (let [normalized (Normalizer/normalize str Normalizer$Form/NFD)]
-    (s/replace normalized #"\p{InCombiningDiacriticalMarks}+" "")))
+  ;; https://stackoverflow.com/questions/2096667/convert-unicode-to-ascii-without-changing-the-string-length-in-java/2097224#comment46476953_2097224
+  (->
+   str
+   (Normalizer/normalize Normalizer$Form/NFD)
+   ;; replace accents
+   (s/replace #"\p{InCombiningDiacriticalMarks}+" "")
+   ;; replace remaining weird chars by '_'
+   (s/replace #"\P{InBasicLatin}+" "_")))
 
 (defn truncate
   "Truncate and trim string `s` to length `n`"
