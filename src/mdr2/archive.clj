@@ -125,7 +125,7 @@ mp3 and the whole thing is packed up in one or more iso files
         (jdbc/insert! db :container job)))))
 
 (defn set-file-permissions
-  "Set file permissions on `root` to g+w recursively"
+  "Set file permissions on `file-tree` to g+w recursively"
   [file-tree]
   (let [permissions (conj (set (nio/posix-file-permissions file-tree))
                           (nio/posix-file-permission :group-write))
