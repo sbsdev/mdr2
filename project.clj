@@ -10,27 +10,27 @@
                  [org.clojure/java.jdbc "0.6.1"]
                  [org.clojure/math.numeric-tower "0.0.4"]
                  [org.clojure/tools.logging "0.3.1"]
-                 [org.immutant/caching "2.1.6"]
-                 [org.immutant/messaging "2.1.6"]
-                 [org.immutant/transactions "2.1.6"]
-                 [org.immutant/web "2.1.6"]
+                 [org.immutant/caching "2.1.5"]
+                 [org.immutant/messaging "2.1.5"]
+                 [org.immutant/transactions "2.1.5"]
+                 [org.immutant/web "2.1.5"]
                  [org.tobereplaced/nio.file "0.4.0"]
-                 [org.xerial/sqlite-jdbc "3.16.1"] ; just for testing
-                 [clj-http "3.4.1"] ; for pipeline2 client
-                 [clj-time "0.13.0"]
+                 [org.xerial/sqlite-jdbc "3.14.2.1"] ; just for testing
+                 [clj-http "3.3.0"] ; for pipeline2 client
+                 [clj-time "0.12.0"]
                  [com.cemerick/friend "0.2.3"]
                  [com.novemberain/pantomime "2.8.0"]
                  [com.thaiopensource/jing "20091111" :exclusions [xml-apis]]
-                 [compojure "1.5.2"]
+                 [compojure "1.5.1"]
                  [crypto-random "1.2.0"] ; for pipeline2 client
                  [environ "1.1.0"]
                  [hiccup "1.0.5"]
                  [me.raynes/fs "1.4.6" :exclusions [org.apache.commons/commons-compress]]
-                 [mysql/mysql-connector-java "6.0.5"]
-                 [pandect "0.6.1"] ; for pipeline2 client
-                 [ring/ring-defaults "0.2.2"]
-                 [ring/ring-core "1.5.1" :exclusions [org.clojure/tools.reader]]
-                 [ring/ring-devel "1.5.1"]
+                 [mysql/mysql-connector-java "5.1.35"]
+                 [pandect "0.6.0"] ; for pipeline2 client
+                 [ring/ring-defaults "0.2.1"]
+                 [ring/ring-core "1.5.0" :exclusions [org.clojure/tools.reader]]
+                 [ring/ring-devel "1.5.0"]
                  [yesql "0.5.3"]
                  ]
   :plugins [[lein-immutant "2.1.0"]
@@ -49,7 +49,7 @@
                            :start? true}}}
   :profiles {:uberjar {:aot :all}
              :dev {:source-paths ["src" "dev"]
-                   :dependencies [[org.xerial/sqlite-jdbc "3.16.1"]
+                   :dependencies [[org.xerial/sqlite-jdbc "3.14.2.1"]
                                   [javax.servlet/servlet-api "2.5"]]}
              :test {:dependencies [[ring-mock "0.1.5"]]
                     :env {:production-path "test/testfiles"
