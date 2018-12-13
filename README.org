@@ -2,7 +2,7 @@
 
 A Production Management Tool for [[http://www.daisy.org/daisypedia/daisy-digital-talking-book][DAISY Talking Books]].
 
-[[https://versions.deps.co/sbsdev/mdr2/status.svg][https://versions.deps.co/sbsdev/mdr2]]
+[[https://versions.deps.co/sbsdev/mdr2][https://versions.deps.co/sbsdev/mdr2/status.svg]]
 
 ** Installation
 Build with [[https://github.com/technomancy/leiningen][Leiningen]] using the [[https://github.com/immutant/lein-immutant][lein immutant plugin]].
