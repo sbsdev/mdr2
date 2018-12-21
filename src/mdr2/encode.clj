@@ -159,11 +159,23 @@
            ;; create an iso
            (let [{:keys [exit err]} (create-iso production volume)]
              (when (not (and (= 0 exit) (s/blank? err)))
-               ;; FIXME: Again this is very fishy: an error is basically
-               ;; logged and ignored. The state is still set to encoded. Die
-               ;; hard and with a bang!
+               ;; If the creation of the iso failed, wait for a moment and then try again.
+               ;; There's a suspicion that the encoding process is finished but the
+               ;; underlying storage hasn't managed to flush all the content. So the hope
+               ;; is that after waiting a little while the iso creation might work.
                (log/errorf "Generating iso for %s (%s) failed with exit %s and message \"%s\""
-                           (:id production) volume exit err)))))))
+                           (:id production) volume exit err)
+               (log/errorf "Waiting for 5 minutes before trying again to generate an iso for %s (%s)"
+                           (:id production) volume)
+               (Thread/sleep (* 1000 60 5)) ; wait 5 minutes
+               (let [{:keys [exit err]} (create-iso production volume)]
+                 (when (not (and (= 0 exit) (s/blank? err)))
+                   ;; FIXME: Again this is very fishy: an error is basically
+                   ;; logged and ignored. The state is still set to encoded. Die
+                   ;; hard and with a bang!
+                   (log/errorf
+                    "Generating iso for %s (%s) failed a second time with exit %s and message \"%s\""
+                    (:id production) volume exit err)))))))))
    (prod/set-state-encoded! production)))
 
 (defn encode-or-split
