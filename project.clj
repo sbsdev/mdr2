@@ -34,9 +34,9 @@
                  [yesql "0.5.3"]
                  ]
   :plugins [[lein-immutant "2.1.0"]
-            [lein-codox "0.10.0"]
+            [lein-codox "0.10.7"]
             [lein-environ "1.1.0"]
-            [cider/cider-nrepl "0.13.0"]
+            [cider/cider-nrepl "0.22.3"]
             [org.clojars.cvillecsteele/lein-git-version "1.0.3"]]
   :codox {:project {:name "Madras2"}
           :source-paths ["src"]
