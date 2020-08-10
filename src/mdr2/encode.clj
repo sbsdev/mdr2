@@ -95,7 +95,7 @@
 
 (def bitrates
   "Possible bitrates for encoding a DTB"
-  [128 112 96 80 64 56 48])
+  [128 112 96 80 64 56 48 32])
 
 (defn ideal-bitrate
   "Calculate the ideal bitrate based on the size of a production and how
@@ -120,6 +120,8 @@
         ;; BitRate (kbps) = (File Size (bytes) / Duration (seconds)) * 8/1000
         max-bitrate (* (/ max-capacity duration sampling-ratio) (/ 8 1000))]
     (->> bitrates
+         ;; only use bitrate 32 for periodicals
+         (filter #(or (= (:production_type production) "periodical") (> % 32)))
          ;; for stereo productions use only bitrates larger than 96
          (filter #(or (dtb/mono? dtb) (>= % 96)))
          (filter #(<= % max-bitrate))
