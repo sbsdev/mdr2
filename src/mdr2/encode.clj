@@ -122,7 +122,7 @@
     (->> bitrates
          ;; only use bitrate 32 for periodicals
          (filter #(or (= (:production_type production) "periodical") (> % 32)))
-         ;; for stereo productions use only bitrates larger than 96
+         ;; for stereo productions use only bitrates larger or equal than 96
          (filter #(or (dtb/mono? dtb) (>= % 96)))
          (filter #(<= % max-bitrate))
          (apply max 0))))
