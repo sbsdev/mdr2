@@ -18,7 +18,7 @@
 ;; according to wikipedia it should be 737280000 (see
 ;; http://en.wikipedia.org/wiki/CD-ROM#Capacity) but according to k3b
 ;; it is 666.4 MiB (2,048 B * 341,186 blocks = 698,748,928 B)
-(def ^:private max-size
+(def ^:private max-capacity
   "Max number of bytes that fit on a CD-ROM"
   698748928)
 
@@ -111,7 +111,7 @@
         ;; two. The legacy system just added a tolerance of 2% for
         ;; stereo productions.
         sampling-ratio (if (dtb/mono? dtb) 1 1.02)
-        max-bitrate (/ (* (/ max-size duration sampling-ratio) 8) 1000)]
+        max-bitrate (/ (* (/ max-capacity duration sampling-ratio) 8) 1000)]
     (->> bitrates
          ;; for stereo productions use only bitrates larger than 96
          (filter #(or (dtb/mono? dtb) (>= % 96)))
