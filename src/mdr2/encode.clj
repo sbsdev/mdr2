@@ -98,11 +98,16 @@
   [128 112 96 80 64 56 48])
 
 (defn ideal-bitrate
-  "Calculate the ideal bitrate based on the size of a production and
-  how much will generally fit on a CD-ROM. It will first try a higher
+  "Calculate the ideal bitrate based on the size of a production and how
+  much will generally fit on a CD-ROM. It will first try a higher
   bitrate (see `bitrates`). If the production still doesn't fit on one
   CD it will subsequently try lesser bitrates. Return 0 if the content
-  doesn't even fit on one CD with the lowest bitrate."
+  doesn't even fit on one CD with the lowest bitrate.
+
+  See also this web based [Audio File Size
+  Calculator](https://www.colincrawley.com/audio-file-size-calculator/)
+  and in particular the underlying [javascript
+  code](https://www.colincrawley.com/cc/wp-content/plugins/audio-file-size-calculator/audiofilesizecalculator.js)"
   [production]
   (let [dtb (path/recorded-path production)
         duration (quot (dtb/audio-length dtb) 1000) ; convert from millisecs to secs
@@ -111,7 +116,9 @@
         ;; two. The legacy system just added a tolerance of 2% for
         ;; stereo productions.
         sampling-ratio (if (dtb/mono? dtb) 1 1.02)
-        max-bitrate (/ (* (/ max-capacity duration sampling-ratio) 8) 1000)]
+        ;; BitRate is measured in kilobits per second
+        ;; BitRate (kbps) = (File Size (bytes) / Duration (seconds)) * 8/1000
+        max-bitrate (* (/ max-capacity duration sampling-ratio) (/ 8 1000))]
     (->> bitrates
          ;; for stereo productions use only bitrates larger than 96
          (filter #(or (dtb/mono? dtb) (>= % 96)))
