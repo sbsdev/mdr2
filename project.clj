@@ -10,10 +10,10 @@
                  [org.clojure/java.jdbc "0.6.1"]
                  [org.clojure/math.numeric-tower "0.0.4"]
                  [org.clojure/tools.logging "0.3.1"]
-                 [org.immutant/caching "2.1.10"]
-                 [org.immutant/messaging "2.1.10"]
-                 [org.immutant/transactions "2.1.10"]
-                 [org.immutant/web "2.1.10"]
+                 [org.immutant/caching "2.1.5"]
+                 [org.immutant/messaging "2.1.5"]
+                 [org.immutant/transactions "2.1.5"]
+                 [org.immutant/web "2.1.5"]
                  [org.tobereplaced/nio.file "0.4.0"]
                  [org.xerial/sqlite-jdbc "3.14.2.1"] ; just for testing
                  [clj-http "3.3.0"] ; for pipeline2 client
