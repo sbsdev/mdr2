@@ -53,10 +53,12 @@
 (defn archive-url
   "Return the url for an archived production given a `container-id`"
   [container-id]
-  (format "%s/0%s/%s/a0%s.tar" archive-web-root
-          (.substring container-id 0 1)
-          (.substring container-id 1 3)
-          container-id))
+  ;; zero pad the container-id so that it contains 6 digits
+  (let [padded-id (format "%06d" container-id)]
+    (format "%s/%s/%s/a%s.tar" archive-web-root
+            (.substring padded-id 0 2)
+            (.substring padded-id 2 4)
+            padded-id)))
 
 (defn container-id
   "Return a container-id given a `production` and optionally `sektion`
@@ -67,7 +69,7 @@
    (let [id (case sektion
               :master (prod/dam-number production)
               :dist-master (:library_signature production))]
-     (-> {:id id} production-id-to-archive-id first :id str))))
+     (-> {:id id} production-id-to-archive-id first :id))))
 
 (defn repair
   "Get a production from the archive and prepare it for repairing"
