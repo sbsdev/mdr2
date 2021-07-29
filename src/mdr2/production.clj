@@ -15,7 +15,8 @@
             [mdr2.production.path :as path]
             [mdr2.obi :as obi]
             [mdr2.pipeline1 :as pipeline]
-            [mdr2.util :as util])
+            [mdr2.util :as util]
+            [clojure.tools.logging :as log])
   (:import java.nio.file.StandardCopyOption))
 
 (defn library-signature?
@@ -45,6 +46,7 @@
   `production`. If there are no validation errors or no DAISY exports
   returns an empty list"
   [production]
+  (log/debugf "Validating production %s" (:id production))
   (if (not (manifest? production))
     ["No manifest found"]
     (->> (range (:volumes production))
@@ -245,6 +247,7 @@
       (conj (when (= (:revision production) 0) [:produced_date date]))))
 
 (defn set-state-recorded! [production]
+  (log/debugf "Setting production state of %s to recorded" (:id production))
   (transaction
    (let [new-production
          (-> production
@@ -252,6 +255,7 @@
              (update-production-dates (to-sql-date (t/now)))
              (update-in [:revision] inc)
              (set-state! "recorded"))]
+     (log/debugf "Publishing %s to encode queue" (:id new-production))
      (msg/publish (queues/encode) {:production new-production})
      new-production)))
 

@@ -20,7 +20,8 @@
             [mdr2.dtbook.validation :refer [validate-metadata]]
             [mdr2.production-monitoring :as psm]
             [mdr2.repair :as repair]
-            [mdr2.pipeline1 :as pipeline])
+            [mdr2.pipeline1 :as pipeline]
+            [clojure.tools.logging :as log])
   (:import java.sql.BatchUpdateException))
 
 (defn home [request]
@@ -458,6 +459,7 @@
   (format "/production/%s" id))
 
 (defn print-errors [errors]
+  (log/errorf "Failed to handle request from ABACUS: %s" errors)
   (->> errors
    (map (fn [{:keys [error line column] :as msg}]
           (if error

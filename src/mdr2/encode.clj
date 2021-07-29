@@ -194,6 +194,7 @@
   expected that the production is in state \"split\""
   ([{:keys [volumes state] :as production}]
    {:pre [(= state "recorded")]}
+   (log/debugf "Encoding recorded production %s" (:id production))
    (let [ideal-bitrate (ideal-bitrate production)]
      (if (and (= volumes 1) (not= ideal-bitrate 0))
        ;; the production has just been recorded, no specific number
@@ -204,5 +205,6 @@
        (prod/set-state! production "pending-split"))))
   ([{:keys [state] :as production} bitrate sample-rate]
    {:pre [(= state "split")]}
+   (log/debugf "Encoding split production %s with bitrate %s and sample-rate %s" (:id production) bitrate sample-rate)
    (encode production bitrate sample-rate)))
 

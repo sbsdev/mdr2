@@ -108,6 +108,7 @@
 (defn import-recorded-production
   "Import a recorded production from file `f`"
   [f]
+  (log/debugf "Importing recorded production from file %s" f)
   (let [errors (validation/recorded-validation-errors f)]
     (if (seq errors)
       errors
@@ -122,6 +123,7 @@
                 (dissoc :production_type :periodical_number))
             production (prod/find-by-productnumber product_number)]
         (let [{:keys [id state]} production]
+          (log/debugf "Importing recorded event for production %s" (:id production))
           (cond
             (empty? production)
             [(format "Non-existing product number %s" product_number)]
