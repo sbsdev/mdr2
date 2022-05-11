@@ -11,8 +11,12 @@
 pom.xml
 pom.xml.asc
 /db/mdr2.db
-/doc/
 /db/archive.db
+/doc/css/
+/doc/js/
+/doc/mdr2*
+/doc/index.html
+/doc/state_diagram.png
 /profiles.clj
 /.descriptors/
 /hornetq-data/

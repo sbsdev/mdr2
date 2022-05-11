@@ -1,0 +1,44 @@
+@startuml
+
+title Madras2 State Diagram
+
+/'
+state New
+state Structured
+state Recorded
+state Encoded
+state Cataloged
+state Archived
+state Deleted
+state Failed
+'/
+
+New: all folders created
+Recorded: production exported from obi
+PendingVolumeSplit: waiting for manual split
+Encoded: mp3 generated,\n iso generated
+Cataloged: ds number assigned
+Archived: production archived,\n all files removed
+
+[*] --> New : @abacus
+[*] --> Structured : @admin, @studio, @it\n via repair
+
+New --> Structured : @admin, @it
+Structured --> Recorded : @abacus
+Recorded --> Encoded
+Encoded --> Cataloged : @catalog, @it
+Cataloged --> Archived
+Split --> Encoded
+Recorded --> PendingVolumeSplit
+PendingVolumeSplit --> Split : @admin, @it
+
+Recorded --> Failed
+New --> Deleted : @it
+Structured --> Deleted : @it
+Recorded --> Deleted : @it
+Encoded --> Deleted : @it
+Failed --> [*]
+Deleted --> [*]
+Archived --> [*]
+
+@enduml
