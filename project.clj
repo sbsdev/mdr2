@@ -1,57 +1,118 @@
-(defproject mdr2 "0.7.0"
+(defproject mdr2 "0.9.0-SNAPSHOT"
+
   :description "A Production Management Tool for DAISY Talking Books"
   :url "https://github.com/sbsdev/mdr2"
-  :dependencies [[org.clojure/clojure "1.8.0"]
-                 [org.clojure/data.codec "0.1.0"] ; for pipeline2 client
-                 [org.clojure/data.csv "0.1.3"]
-                 [org.clojure/data.json "0.2.6"]
-                 [org.clojure/data.xml "0.0.8"]
-                 [org.clojure/data.zip "0.1.2"]
-                 [org.clojure/java.jdbc "0.6.1"]
-                 [org.clojure/math.numeric-tower "0.0.4"]
-                 [org.clojure/tools.logging "0.3.1"]
-                 [org.immutant/caching "2.1.5"]
-                 [org.immutant/messaging "2.1.5"]
-                 [org.immutant/transactions "2.1.5"]
-                 [org.immutant/web "2.1.5"]
-                 [org.tobereplaced/nio.file "0.4.0"]
-                 [org.xerial/sqlite-jdbc "3.14.2.1"] ; just for testing
-                 [clj-http "3.3.0"] ; for pipeline2 client
-                 [clj-time "0.12.0"]
-                 [com.cemerick/friend "0.2.3"]
-                 [com.novemberain/pantomime "2.8.0"]
-                 [com.thaiopensource/jing "20091111" :exclusions [xml-apis]]
-                 [compojure "1.5.1"]
-                 [crypto-random "1.2.0"] ; for pipeline2 client
-                 [environ "1.1.0"]
-                 [hiccup "1.0.5"]
-                 [me.raynes/fs "1.4.6" :exclusions [org.apache.commons/commons-compress]]
-                 [mysql/mysql-connector-java "5.1.35"]
-                 [pandect "0.6.0"] ; for pipeline2 client
-                 [ring/ring-defaults "0.2.1"]
-                 [ring/ring-core "1.5.0" :exclusions [org.clojure/tools.reader]]
-                 [ring/ring-devel "1.5.0"]
-                 [yesql "0.5.3"]
-                 ]
-  :plugins [[lein-immutant "2.1.0"]
-            [lein-codox "0.10.7"]
-            [lein-environ "1.1.0"]
-            [org.clojars.cvillecsteele/lein-git-version "1.0.3"]]
+
+  :dependencies [[buddy/buddy-auth "3.0.323"]
+                 [buddy/buddy-core "1.10.413"]
+                 [buddy/buddy-hashers "1.8.158"]
+                 [buddy/buddy-sign "3.4.333"]
+                 [ch.qos.logback/logback-classic "1.2.10"]
+                 [cljs-ajax "0.8.4"]
+                 [clojure.java-time "0.3.3"]
+                 [com.cognitect/transit-clj "1.0.329"]
+                 [com.cognitect/transit-cljs "0.8.269"]
+                 [com.google.javascript/closure-compiler-unshaded "v20220502"]
+                 [com.google.protobuf/protobuf-java "3.8.0"]
+                 [conman "0.9.3"]
+                 [cprop "0.1.19"]
+                 [day8.re-frame/http-fx "0.2.4"]
+                 [expound "0.9.0"]
+                 [funcool/struct "1.4.0"]
+                 [json-html "0.4.7"]
+                 [luminus-migrations "0.7.2"]
+                 [luminus-transit "0.1.5"]
+                 [luminus-undertow "0.1.14"]
+                 [luminus/ring-ttl-session "0.3.3"]
+                 [markdown-clj "1.10.8"]
+                 [metosin/muuntaja "0.6.8"]
+                 [metosin/reitit "0.5.15"]
+                 [metosin/ring-http-response "0.9.3"]
+                 [mount "0.1.16"]
+                 [mysql/mysql-connector-java "8.0.18"]
+                 [nrepl "0.9.0"]
+                 [org.clojure/clojure "1.11.1"]
+                 [org.clojure/clojurescript "1.11.51" :scope "provided"]
+                 [org.clojure/core.async "1.5.648"]
+                 [org.clojure/tools.cli "1.0.206"]
+                 [org.clojure/tools.logging "1.2.4"]
+                 [org.webjars.npm/bulma "0.9.3"]
+                 [org.webjars.npm/material-icons "1.0.0"]
+                 [org.webjars/webjars-locator "0.42"]
+                 [org.webjars/webjars-locator-jboss-vfs "0.1.0"]
+                 [re-frame "1.2.0"]
+                 [reagent "1.1.0"]
+                 [ring-webjars "0.2.0"]
+                 [ring/ring-core "1.9.5"]
+                 [ring/ring-defaults "0.3.3"]
+                 [selmer "1.12.50"]
+                 [thheller/shadow-cljs "2.19.0" :scope "provided"]
+                 [com.taoensso/tempura "1.3.0"]
+                 [org.clojure/data.xml "0.2.0-alpha6"]
+                 [babashka/fs "0.1.6"]
+                 [pandect "1.0.2"]
+                 [org.clojure/data.zip "1.0.0"]
+                 [com.novemberain/pantomime "2.11.0" :exclusions [com.google.guava/guava]]
+                 [clj-http "3.12.3"]
+                 [org.clojure/data.csv "1.0.1"]
+                 [org.clojars.pntblnk/clj-ldap "0.0.17"]]
+
+  :min-lein-version "2.0.0"
+  
+  :source-paths ["src/clj" "src/cljs" "src/cljc"]
+  :test-paths ["test/clj"]
+  :resource-paths ["resources" "target/cljsbuild"]
+  :target-path "target/%s/"
+  :main ^:skip-aot mdr2.core
+
+  :plugins [[lein-kibit "0.1.2"]
+            [lein-codox "0.10.8"]]
+
   :codox {:project {:name "Madras2"}
           :source-paths ["src"]
           :source-uri "https://github.com/sbsdev/mdr2/blob/v{version}/{filepath}#L{line}"
           :metadata {:doc/format :markdown}}
-  :main ^:skip-aot mdr2.main
-  :immutant {:war {:context-path "/"
-                   :name "%p%v%t"
-                   :nrepl {:port 42278
-                           :start? true}}}
-  :profiles {:uberjar {:aot :all}
-             :dev {:source-paths ["src" "dev"]
-                   :dependencies [[org.xerial/sqlite-jdbc "3.14.2.1"]
-                                  [javax.servlet/servlet-api "2.5"]]}
-             :test {:dependencies [[ring-mock "0.1.5"]]
-                    :env {:production-path "test/testfiles"
-                          :archive-spool-dir "/tmp/mdr2/archive"
-                          :archive-periodical-spool-dir "/tmp/mdr2/periodical-archive"
-                          :archive-other-spool-dir "/tmp/mdr2/other-archive"}}})
+
+  :clean-targets ^{:protect false}
+  [:target-path "target/cljsbuild"]
+  
+
+  :profiles
+  {:uberjar {:omit-source true
+             
+             :prep-tasks ["compile" ["run" "-m" "shadow.cljs.devtools.cli" "release" "app"]]
+             :aot :all
+             :uberjar-name "mdr2.jar"
+             :source-paths ["env/prod/clj"  "env/prod/cljs" ]
+             :resource-paths ["env/prod/resources"]}
+
+   :dev           [:project/dev :profiles/dev]
+   :test          [:project/dev :project/test :profiles/test]
+
+   :project/dev  {:jvm-opts ["-Dconf=dev-config.edn" ]
+                  :dependencies [[binaryage/devtools "1.0.4"]
+                                 [cider/piggieback "0.5.3"]
+                                 [org.clojure/tools.namespace "1.2.0"]
+                                 [pjstadig/humane-test-output "0.11.0"]
+                                 [prone "2021-04-23"]
+                                 [re-frisk "1.5.2"]
+                                 [ring/ring-devel "1.9.5"]
+                                 [ring/ring-mock "0.4.0"]]
+                  :plugins      [[com.jakemccrary/lein-test-refresh "0.24.1"]
+                                 [jonase/eastwood "0.3.5"]
+                                 [cider/cider-nrepl "0.26.0"]] 
+                  
+                  
+                  :source-paths ["env/dev/clj"  "env/dev/cljs" "test/cljs" ]
+                  :resource-paths ["env/dev/resources"]
+                  :repl-options {:init-ns user
+                                 :timeout 120000}
+                  :injections [(require 'pjstadig.humane-test-output)
+                               (pjstadig.humane-test-output/activate!)]}
+   :project/test {:jvm-opts ["-Dconf=test-config.edn" ]
+                  :resource-paths ["env/test/resources"] 
+                  
+                  
+                  }
+   :profiles/dev {}
+   :profiles/test {}})
