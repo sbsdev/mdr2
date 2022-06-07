@@ -1,5 +1,6 @@
 (ns mdr2.auth
   (:require [ajax.core :as ajax]
+            [mdr2.ajax :refer [as-transit]]
             [mdr2.events]
             [mdr2.productions.notifications :as notifications]
             [mdr2.i18n :refer [tr]]
@@ -10,13 +11,12 @@
 (rf/reg-event-fx
   ::login
   (fn [{:keys [db]} [_ username password]]
-    {:http-xhrio {:method          :post
+    {:http-xhrio
+     (as-transit {:method          :post
                   :uri             "/api/login"
-                  :format          (ajax/json-request-format)
                   :params          {:username username :password password}
-                  :response-format (ajax/transit-response-format)
                   :on-success      [::login-success]
-                  :on-failure      [::login-failure :login]}}))
+                  :on-failure      [::login-failure :login]})}))
 
 (rf/reg-event-db
  ::logout
@@ -28,10 +28,7 @@
  (fn [{:keys [db]} [_ {:keys [token user]}]]
    {:db (-> db
             (assoc-in [:credentials :token] token)
-            (assoc-in [:credentials :user] user)
-            ;; since JSON converts sets into arrays we have to convert
-            ;; it back to a set
-            #_(update-in [:credentials :user :roles] #(apply hash-set %)))
+            (assoc-in [:credentials :user] user))
     :common/navigate-fx! [:productions]}))
 
 (rf/reg-event-db

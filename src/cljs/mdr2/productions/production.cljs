@@ -1,5 +1,7 @@
 (ns mdr2.productions.production
   (:require [ajax.core :as ajax]
+            [mdr2.ajax :refer [as-transit]]
+            [cljs-time.format :as tf]
             [clojure.string :as string]
             [mdr2.i18n :refer [tr]]
             [re-frame.core :as rf]))
@@ -17,10 +19,10 @@
 (rf/reg-event-fx
   ::fetch-current
   (fn [_ [_ id]]
-    {:http-xhrio {:method          :get
+    {:http-xhrio
+     (as-transit {:method          :get
                   :uri             (str "/api/productions/" id)
-                  :response-format (ajax/json-response-format {:keywords? true})
-                  :on-success      [::set-current]}}))
+                  :on-success      [::set-current]})}))
 
 (rf/reg-event-fx
   ::init-current
@@ -44,6 +46,7 @@
      (for [k (remove #{:title :creator :state :source_publisher} (keys production)) #_[:date :modified-at :language]
            :let [v (case k
                      #_:spelling #_(state/mapping (get production k))
+                     (:produced_date :date :source_date :revision_date) (if-let [raw (get production k)] (tf/unparse (tf/formatters :date) raw) "")
                      (get production k))]
            :when (not (string/blank? v))]
        ^{:key k}

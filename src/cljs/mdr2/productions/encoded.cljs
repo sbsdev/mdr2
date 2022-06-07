@@ -1,7 +1,9 @@
 (ns mdr2.productions.encoded
   (:require [ajax.core :as ajax]
+            [cljs-time.format :as tf]
             [mdr2.auth :as auth]
             [mdr2.i18n :refer [tr]]
+            [mdr2.ajax :refer [as-transit]]
             [mdr2.pagination :as pagination]
             [mdr2.validation :as validation]
             [mdr2.productions.production :as production]
@@ -15,15 +17,15 @@
     (let [search @(rf/subscribe [::search])
           offset (pagination/offset db :encoded)]
       {:db (assoc-in db [:loading :encoded] true)
-       :http-xhrio {:method          :get
-                    :uri             "/api/productions"
-                    :params          {:search (if (nil? search) "" search)
-                                      :offset offset
-                                      :limit pagination/page-size
-                                      :state "encoded"}
-                    :response-format (ajax/json-response-format {:keywords? true})
-                    :on-success      [::fetch-productions-success]
-                    :on-failure      [::fetch-productions-failure :fetch-encoded-productions]}})))
+       :http-xhrio (as-transit
+                    {:method          :get
+                     :uri             "/api/productions"
+                     :params          {:search (if (nil? search) "" search)
+                                       :offset offset
+                                       :limit pagination/page-size
+                                       :state "encoded"}
+                     :on-success      [::fetch-productions-success]
+                     :on-failure      [::fetch-productions-failure :fetch-encoded-productions]})})))
 
 (rf/reg-event-db
  ::fetch-productions-success
@@ -53,15 +55,13 @@
           cleaned (-> production
                       (select-keys [:untranslated :uncontracted :contracted :type :homograph-disambiguation]))]
       {:db (notifications/set-button-state db id :save)
-       :http-xhrio {:method          :put
-                    :format          (ajax/json-request-format)
-                    :headers 	     (auth/auth-header db)
-                    :uri             (str "/api/productions")
-                    :params          cleaned
-                    :response-format (ajax/json-response-format {:keywords? true})
-                    :on-success      [::ack-save id]
-                    :on-failure      [::ack-failure id :save]
-                    }})))
+       :http-xhrio (as-transit
+                    {:method          :put
+                     :headers 	     (auth/auth-header db)
+                     :uri             (str "/api/productions")
+                     :params          cleaned
+                     :on-success      [::ack-save id]
+                     :on-failure      [::ack-failure id :save]})})))
 
 (rf/reg-event-db
   ::ack-save
@@ -159,7 +159,7 @@
      [:td volumes]
      [:td depth]
      [:td narrator]
-     [:td produced_date]
+     [:td (tf/unparse (tf/formatters :date) produced_date)]
      [:td [fields/input-field :encoded uuid :library_signature validation/library-signature?]]
      [:td [buttons uuid]]]))
 

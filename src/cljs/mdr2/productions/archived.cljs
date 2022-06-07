@@ -1,6 +1,8 @@
 (ns mdr2.productions.archived
   (:require [ajax.core :as ajax]
             [mdr2.auth :as auth]
+            [cljs-time.format :as tf]
+            [mdr2.ajax :refer [as-transit]]
             [mdr2.i18n :refer [tr]]
             [mdr2.pagination :as pagination]
             [mdr2.productions.production :as production]
@@ -13,15 +15,15 @@
     (let [search @(rf/subscribe [::search])
           offset (pagination/offset db :archived)]
       {:db (assoc-in db [:loading :archived] true)
-       :http-xhrio {:method          :get
+       :http-xhrio
+       (as-transit {:method          :get
                     :uri             "/api/productions"
                     :params          {:search (if (nil? search) "" search)
                                       :offset offset
                                       :limit pagination/page-size
                                       :state "archived"}
-                    :response-format (ajax/json-response-format {:keywords? true})
                     :on-success      [::fetch-productions-success]
-                    :on-failure      [::fetch-productions-failure :fetch-archived-productions]}})))
+                    :on-failure      [::fetch-productions-failure :fetch-archived-productions]})})))
 
 (rf/reg-event-db
  ::fetch-productions-success
@@ -108,7 +110,7 @@
      [:td volumes]
      [:td depth]
      [:td narrator]
-     [:td produced_date]]))
+     [:td (tf/unparse (tf/formatters :date) produced_date)]]))
 
 (defn productions-page []
   (let [loading? @(rf/subscribe [::notifications/loading? :archived])

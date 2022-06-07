@@ -1,6 +1,7 @@
 (ns mdr2.productions.repair
   (:require [ajax.core :as ajax]
             [mdr2.auth :as auth]
+            [mdr2.ajax :refer [as-transit]]
             [mdr2.i18n :refer [tr]]
             [mdr2.pagination :as pagination]
             [mdr2.validation :as validation]
@@ -15,15 +16,15 @@
     (let [search @(rf/subscribe [::search])
           offset (pagination/offset db :repair)]
       {:db (assoc-in db [:loading :repair] true)
-       :http-xhrio {:method          :get
+       :http-xhrio
+       (as-transit {:method          :get
                     :uri             "/api/productions"
                     :params          {:search (if (nil? search) "" search)
                                       :offset offset
                                       :limit pagination/page-size
                                       :state "archived"}
-                    :response-format (ajax/json-response-format {:keywords? true})
                     :on-success      [::fetch-productions-success]
-                    :on-failure      [::fetch-productions-failure :fetch-repair-productions]}})))
+                    :on-failure      [::fetch-productions-failure :fetch-repair-productions]})})))
 
 (rf/reg-event-db
  ::fetch-productions-success
@@ -53,15 +54,13 @@
           cleaned (-> production
                       (select-keys [:untranslated :uncontracted :contracted :type :homograph-disambiguation]))]
       {:db (notifications/set-button-state db id :repair)
-       :http-xhrio {:method          :put
-                    :format          (ajax/json-request-format)
+       :http-xhrio
+       (as-transit {:method          :put
                     :headers 	     (auth/auth-header db)
                     :uri             (str "/api/productions")
                     :params          cleaned
-                    :response-format (ajax/json-response-format {:keywords? true})
                     :on-success      [::ack-repair id]
-                    :on-failure      [::ack-failure id :repair]
-                    }})))
+                    :on-failure      [::ack-failure id :repair]})})))
 
 (rf/reg-event-db
   ::ack-repair
@@ -145,7 +144,7 @@
 (defn production [id]
   (let [{:keys [uuid id title creator product_number
                 library_number library_record_id
-                total_time volumes depth narrator produced_date]
+                total_time volumes depth narrator]
          :as production} @(rf/subscribe [::production id])]
     [:tr
      [:td id]
