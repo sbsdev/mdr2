@@ -30,7 +30,7 @@
   (r/with-let [expanded? (r/atom false)]
               [:nav.navbar.is-info>div.container
                [:div.navbar-brand
-                [:a.navbar-item {:href "/" :style {:font-weight :bold}} "Madras 2"]
+                [:a.navbar-item {:style {:font-weight :bold}} "Madras 2"]
                 [:span.navbar-burger.burger
                  {:data-target :nav-menu
                   :on-click #(swap! expanded? not)
