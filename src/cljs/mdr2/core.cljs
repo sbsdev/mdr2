@@ -39,7 +39,6 @@
                [:div#nav-menu.navbar-menu
                 {:class (when @expanded? :is-active)}
                 [:div.navbar-start
-                 [nav-link "#/" "Home" :home]
                  [nav-link "#/productions" "Productions" :productions]
                  [nav-link "#/archived" "Archived" :archived]
                  [nav-link "#/encoded" "Encoded" :encoded]
@@ -47,11 +46,6 @@
                 [:div.navbar-end
                  [:div.navbar-item
                   (auth/user-buttons)]]]]))
-
-(defn home-page []
-  [:section.section>div.container>div.content
-   (when-let [docs @(rf/subscribe [:docs])]
-     [:div {:dangerouslySetInnerHTML {:__html (md->html docs)}}])])
 
 (defn page []
   (if-let [page @(rf/subscribe [:common/page])]
@@ -64,10 +58,7 @@
 
 (def router
   (reitit/router
-    [["/" {:name        :home
-           :view        #'home-page
-           :controllers [{:start (fn [_] (rf/dispatch [:page/init-home]))}]}]
-     ["/login" {:name :login
+    [["/login" {:name :login
                 :view #'auth/login-page}]
      ["/productions" {:name :productions
                       :view #'productions/productions-page
