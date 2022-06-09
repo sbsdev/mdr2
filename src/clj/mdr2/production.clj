@@ -110,8 +110,9 @@
    (fn [m k v]
      (assoc m k
       (cond
-        (#{:date :source_date :produced_date :revision_date} k)
-        (time/local-date v)
+        (#{:date :produced_date :revision_date} k) (time/local-date v)
+        ;; source_date is just a year string
+        (#{:source_date} k) (time/local-date (time/year v))
         (#{:volumes :library_record_id} k) (Integer/parseInt v)
         :else v)))
    {} production))
