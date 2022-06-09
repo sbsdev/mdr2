@@ -47,6 +47,7 @@
                  [ring/ring-defaults "0.3.3"]
                  [selmer "1.12.50"]
                  [thheller/shadow-cljs "2.19.0" :scope "provided"]
+                 [com.thaiopensource/jing "20091111" :exclusions [xml-apis]]
                  [com.taoensso/tempura "1.3.0"]
                  [org.clojure/data.xml "0.2.0-alpha6"]
                  [babashka/fs "0.1.6"]
