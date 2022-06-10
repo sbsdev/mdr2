@@ -45,13 +45,14 @@ VALUES (
        )
 
 -- :name update-production :! :n
--- :doc Update a production
+-- :doc Update a production given by `id`, `library_number` or `product_number`
 /* :require [clojure.string :as string]
             [hugsql.parameters :refer [identifier-param-quote]] */
 UPDATE production
 SET
 --~ (string/join "," (for [field [:title :creator :subject :description :publisher :date :type :format :identifier :source :language :rights :source_date :source_edition :source_publisher :source_rights :multimedia_type :multimedia_content :narrator :producer :produced_date :revision :revision_date :revision_description :total_time :audio_format :depth :volumes :state :product_number :production_type :periodical_number :library_number :library_signature :library_record_id] :when (contains? params field)] (str (identifier-param-quote (name field) options) " = :v:" (name field))))
-WHERE id = :id
+WHERE
+--~ (cond (:id params) "id = :id" (:library_number params) "library_number = :library_number" (:product_number params) "product_number = :product_number")
 
 -- :name delete-production :! :n
 -- :doc Remove the production with the given `id`
