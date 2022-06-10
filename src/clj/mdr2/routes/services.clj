@@ -12,8 +12,10 @@
     [ring.util.http-response :refer :all]
     [clojure.string :refer [blank?]]
     [clojure.java.io :as io]
+    [de.otto.nom.core :as nom]
     [mdr2.db.core :as db]
-    [mdr2.auth :as auth]))
+    [mdr2.auth :as auth]
+    [mdr2.abacus.core :as abacus]))
 
 (def default-limit 100)
 
@@ -107,6 +109,46 @@
                          (ok doc)
                          (not-found)))
             }}]]
+
+   ["/abacus"
+    {:swagger {:tags ["Abacus API"]}}
+
+    ["/new"
+     {:post {:summary "Add a production"
+             :parameters {:multipart {:file multipart/temp-file-part}}
+             :handler (fn [{{{:keys [file]} :multipart} :parameters}]
+                        (let [tempfile (:tempfile file)
+                              p (abacus/import-new-production tempfile)]
+                          (if-not (nom/anomaly? p)
+                            (created)
+                            (bad-request p))))}}]
+    ["/recorded"
+     {:post {:summary "Mark a production as recorded"
+             :parameters {:multipart {:file multipart/temp-file-part}}
+             :handler (fn [{{{:keys [file]} :multipart} :parameters}]
+                        (let [tempfile (:tempfile file)
+                              p (abacus/import-recorded-production tempfile)]
+                          (if-not (nom/anomaly? p)
+                            (no-content)
+                            (bad-request p))))}}]
+    ["/status"
+     {:post {:summary "Request the status of a production"
+             :parameters {:multipart {:file multipart/temp-file-part}}
+             :handler (fn [{{{:keys [file]} :multipart} :parameters}]
+                        (let [tempfile (:tempfile file)
+                              p (abacus/import-status-request tempfile)]
+                          (if-not (nom/anomaly? p)
+                            (no-content)
+                            (bad-request p))))}}]
+    ["/metadata"
+     {:post {:summary "Update the meta data of a production"
+             :parameters {:multipart {:file multipart/temp-file-part}}
+             :handler (fn [{{{:keys [file]} :multipart} :parameters}]
+                        (let [tempfile (:tempfile file)
+                              p (abacus/import-metadata-update tempfile)]
+                          (if-not (nom/anomaly? p)
+                            (no-content)
+                            (bad-request p))))}}]]
 
    ["/files"
     {:swagger {:tags ["files"]}}
