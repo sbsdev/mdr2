@@ -67,11 +67,12 @@
   (let [production_type (cond
                           (= command "mdaDocAdd_Kleinauftrag") "other"
                           (= mvl_only "yes") "periodical"
-                          :else "book")]
+                          :else "book")
+        source-date (source-date raw-production)]
     (-> raw-production
         (dissoc :mvl_only :command :idVorstufe)
         (assoc :production_type production_type)
-        (assoc :source_date (source-date raw-production))
+        (cond-> source-date (assoc :source_date source-date))
         (cond-> (= production_type "periodical")
           (assoc :periodical_number idVorstufe)))))
 
