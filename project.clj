@@ -54,6 +54,7 @@
                  [pandect "1.0.2"]
                  [org.clojure/data.zip "1.0.0"]
                  [com.novemberain/pantomime "2.11.0" :exclusions [com.google.guava/guava]]
+                 [de.otto/nom "0.2.0"]
                  [clj-http "3.12.3"]
                  [org.clojure/data.csv "1.0.1"]
                  [org.clojars.pntblnk/clj-ldap "0.0.17"]]

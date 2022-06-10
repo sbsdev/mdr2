@@ -22,6 +22,7 @@
             [clojure.string :as string]
             [clojure.tools.logging :as log]
             [clojure.core.async :refer [>!!]]
+            [de.otto.nom.core :as nom]
             [mdr2.config :refer [env]]
             [mdr2.queues :as queues]
             [mdr2.production :as prod]
@@ -101,7 +102,8 @@
   [f]
   (let [errors (validation/open-validation-errors f)]
     (if (seq errors)
-      errors
+      (nom/fail ::xml-invalid
+                {:message "The provided xml is not valid" :errors errors})
       (prod/create! (read-file f)))))
 
 (defn import-recorded-production
@@ -110,7 +112,8 @@
   (log/debugf "Importing recorded production from file %s" f)
   (let [errors (validation/recorded-validation-errors f)]
     (if (seq errors)
-      errors
+      (nom/fail ::xml-invalid
+                {:message "The provided xml is not valid" :errors errors})
       (let [{product_number :product_number :as new-production}
             (-> (read-file f)
                 ;; ignore production_type and periodical_number when
@@ -125,13 +128,11 @@
           (log/debugf "Importing recorded event for production %s" (:id production))
           (cond
             (empty? production)
-            [(format "Non-existing product number %s" product_number)]
+            (nom/fail ::error {:message (format "Non-existing product number %s" product_number)})
             (not= "structured" state)
-            [(format "Production %s (%s) is not structured (%s instead)"
-                     id product_number state)]
+            (nom/fail ::error {:message (format "Production %s (%s) is not structured (%s instead)" id product_number state)})
             (not (prod/manifest? production))
-            [(format "Production %s (%s) has no DAISY Export in %s"
-                     id product_number (path/manifest-path production))]
+            (nom/fail ::error {:message (format "Production %s (%s) has no DAISY Export in %s" id product_number (path/manifest-path production))})
             :else
             ;; check if the exported production is even valid
             ;; for validation purposes pretend there is only one volume. At
@@ -140,7 +141,7 @@
             ;; actually there yet
             (let [errors (prod/manifest-validate (assoc production :volumes 1))]
               (if (seq errors)
-                errors
+                (nom/fail ::manifest-invalid {:message "The exported production is not valid" :errors errors})
                 (-> production
                     (merge new-production)
                     prod/set-state-recorded!)))))))))
@@ -150,7 +151,7 @@
   [f]
   (let [errors (validation/status-request-errors f)]
     (if (seq errors)
-      errors
+      (nom/fail ::xml-invalid {:message "The provided xml is not valid" :errors errors})
       (let [{product_number :product_number} (read-file f)
             production (prod/find-by-productnumber product_number)]
         (>!! queues/notify-abacus production)
@@ -161,7 +162,7 @@
   [f]
   (let [errors (validation/metadata-sync-errors f)]
     (if (seq errors)
-      errors
+      (nom/fail ::xml-invalid {:message "The provided xml is not valid" :errors errors})
       (prod/update!
        (-> (read-file f)
            ;; ignore production_type and the revision date when
