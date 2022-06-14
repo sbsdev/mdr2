@@ -68,7 +68,7 @@
   ::set-vubis-file
   (fn [db [_ file]] (assoc db :vubis-file file)))
 
-(defn- vubis-file []
+(defn- file-input []
   (let [get-value (fn [e] (-> e .-target .-files (aget 0)))
         save!     #(rf/dispatch [::set-vubis-file %])
         file      @(rf/subscribe [::vubis-file])]
@@ -84,7 +84,20 @@
         [:span.file-label (tr [:choose-vubis])]]
        [:span.file-name (if file (.-name file) (tr [:no-file]))]]]]))
 
-(defn production [id]
+(defn- file-upload []
+  (let [klass (when @(rf/subscribe [::notifications/button-loading? :vubis :vubis-file]) "is-loading")
+        admin? @(rf/subscribe [::auth/is-admin?])
+        file @(rf/subscribe [::vubis-file])]
+    [:div.field.is-grouped
+     [file-input]
+     [:p.control
+      [:button.button
+       {:disabled (or (nil? file) (not admin?))
+        :class klass
+        :on-click (fn [e] (rf/dispatch [::vubis-file file]))}
+       [:span.material-icons "upload_file"]]]])  )
+
+(defn- production [id]
   (let [{:keys [title creator source description
                 library_number source_publisher source_date]
          :as production} @(rf/subscribe [::production id])]
@@ -99,7 +112,7 @@
      [:td source_publisher]
      [:td (tf/unparse (tf/formatters :date) source_date)]]))
 
-(defn productions []
+(defn- productions []
   [:<>
    [:table.table.is-striped
     [:thead
@@ -123,21 +136,10 @@
 (defn page []
   (let [loading? @(rf/subscribe [::notifications/loading? :vubis])
         errors? @(rf/subscribe [::notifications/errors?])
-        admin? @(rf/subscribe [::auth/is-admin?])
-        klass (when @(rf/subscribe [::notifications/button-loading? :vubis :vubis-file]) "is-loading")
-        file @(rf/subscribe [::vubis-file])
-        confirm? @(rf/subscribe [::has-productions?])]
+        confirming? @(rf/subscribe [::has-productions?])]
     [:section.section>div.container>div.content
      (cond
         errors? [notifications/error-notification]
         loading? [notifications/loading-spinner]
-        confirm? [productions]
-        :else
-        [:div.field.is-grouped
-         [vubis-file]
-         [:p.control
-          [:button.button
-           {:disabled (or (nil? file) (not admin?))
-            :class klass
-            :on-click (fn [e] (rf/dispatch [::vubis-file file]))}
-           [:span.material-icons "upload_file"]]]])]))
+        confirming? [productions]
+        :else [file-upload])]))
