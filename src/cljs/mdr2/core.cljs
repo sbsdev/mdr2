@@ -15,6 +15,7 @@
     [mdr2.productions.encoded :as encoded]
     [mdr2.productions.repair :as repair]
     [mdr2.productions.production :as production]
+    [mdr2.productions.vubis :as vubis]
     [reitit.core :as reitit]
     [reitit.frontend.easy :as rfe]
     [clojure.string :as string])
@@ -42,7 +43,8 @@
                  [nav-link "#/productions" "Productions" :productions]
                  [nav-link "#/archived" "Archived" :archived]
                  [nav-link "#/encoded" "Encoded" :encoded]
-                 [nav-link "#/repair" "Repair" :repair]]
+                 [nav-link "#/repair" "Repair" :repair]
+                 [nav-link "#/vubis" "Upload" :vubis]]
                 [:div.navbar-end
                  [:div.navbar-item
                   (auth/user-buttons)]]]]))
@@ -75,7 +77,9 @@
                   :controllers [{:start (fn [_] (rf/dispatch [::encoded/fetch-productions]))}]}]
      ["/repair" {:name :repair
                   :view #'repair/productions-page
-                  :controllers [{:start (fn [_] (rf/dispatch [::repair/fetch-productions]))}]}]
+                 :controllers [{:start (fn [_] (rf/dispatch [::repair/fetch-productions]))}]}]
+     ["/vubis" {:name :vubis
+                 :view #'vubis/page}]
 ]))
 
 (defn start-router! []

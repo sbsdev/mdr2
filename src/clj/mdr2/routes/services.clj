@@ -15,7 +15,8 @@
     [de.otto.nom.core :as nom]
     [mdr2.db.core :as db]
     [mdr2.auth :as auth]
-    [mdr2.abacus.core :as abacus]))
+    [mdr2.abacus.core :as abacus]
+    [mdr2.vubis :as vubis]))
 
 (def default-limit 100)
 
@@ -149,6 +150,21 @@
                           (if-not (nom/anomaly? p)
                             (no-content)
                             (bad-request p))))}}]]
+   ["/vubis"
+    {:swagger {:tags ["Upload of Vubis export data"]}}
+
+    ["/upload"
+     {:post {:summary "Upload XML from a Vubis export"
+             :parameters {:multipart {:file multipart/temp-file-part}}
+             :handler (fn [{{{:keys [file]} :multipart} :parameters}]
+                        (let [tempfile (:tempfile file)
+                              errors (vubis/validate (.getPath tempfile))]
+                          (if (empty? errors)
+                            (let [productions (vubis/read-file tempfile)]
+                              (if-not (nom/anomaly? productions)
+                                (ok productions)
+                                (bad-request productions)))
+                            (bad-request errors))))}}]]
 
    ["/files"
     {:swagger {:tags ["files"]}}
