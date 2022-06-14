@@ -130,13 +130,14 @@
 (defn buttons [id]
   (let [valid? @(rf/subscribe [::valid? id])
         admin? @(rf/subscribe [::auth/is-admin?])]
-    [:div.buttons.has-addons
-     (if @(rf/subscribe [::notifications/button-loading? id :save])
-       [:button.button.is-loading]
-       [:button.button
-        {:disabled (not (and valid? admin?))
-         :on-click (fn [e] (rf/dispatch [::save-production id]))}
-        [:span.material-icons "save"]])]))
+    (if @(rf/subscribe [::notifications/button-loading? id :save])
+      [:button.button.is-loading]
+      [:button.button
+       {:disabled (not (and valid? admin?))
+        :on-click (fn [e] (rf/dispatch [::save-production id]))}
+       #_[:span (tr [:save])]
+       [:span.icon
+        [:span.material-icons "save"]]])))
 
 (defn production-link [{:keys [id title] :as production}]
   [:a {:href (str "#/productions/" id)

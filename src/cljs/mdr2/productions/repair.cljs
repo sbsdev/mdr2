@@ -128,13 +128,14 @@
 
 (defn buttons [id]
   (let [admin? @(rf/subscribe [::auth/is-admin?])]
-    [:div.buttons.has-addons
-     (if @(rf/subscribe [::notifications/button-loading? id :repair])
+    (if @(rf/subscribe [::notifications/button-loading? id :repair])
        [:button.button.is-loading]
        [:button.button
         {:disabled (not admin?)
          :on-click (fn [e] (rf/dispatch [::repair-production id]))}
-        [:span.material-icons "build"]])]))
+        [:span (tr [:repair])]
+        [:span.icon.is-small
+         [:span.material-icons "build"]]])))
 
 (defn production-link [{:keys [id title] :as production}]
   [:a {:href (str "#/productions/" id)

@@ -95,7 +95,8 @@
        {:disabled (or (nil? file) (not admin?))
         :class klass
         :on-click (fn [e] (rf/dispatch [::vubis-file file]))}
-       [:span.material-icons "upload_file"]]]])  )
+       [:span.icon.is-small
+        [:span.material-icons "upload_file"]]]]]))
 
 (defn- production [id]
   (let [{:keys [title creator source description
@@ -131,7 +132,8 @@
     [:button.button
      {:on-click (fn [e] (rf/dispatch ::confirm-all))}
      [:span (tr [:approve-all])]
-     [:span.material-icons "done"]]]])
+     [:span.icon.is-small
+      [:span.material-icons "done"]]]]])
 
 (defn page []
   (let [loading? @(rf/subscribe [::notifications/loading? :vubis])

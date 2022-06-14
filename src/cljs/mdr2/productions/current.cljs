@@ -149,18 +149,21 @@
        [:button.button.is-loading]
        [:button.button
         {:on-click (fn [e] (rf/dispatch [::save-production id]))}
-        [:span.material-icons "download"]])
+        [:span.icon.is-small
+         [:span.material-icons "file_download"]]])
      (if @(rf/subscribe [::notifications/button-loading? id :upload])
        [:button.button.is-loading]
        [:button.button
         {:on-click (fn [e] (rf/dispatch [::upload-production id]))}
-        [:span.material-icons "upload"]])
+        [:span.icon.is-small
+         [:span.material-icons "file_upload"]]])
      (if @(rf/subscribe [::notifications/button-loading? id :delete])
        [:button.button.is-danger.is-loading]
        [:button.button.is-danger
         {:disabled (not admin?)
          :on-click (fn [e] (rf/dispatch [::delete-production id]))}
-        [:span.material-icons "delete"]])]))
+        [:span.icon.is-small
+         [:span.material-icons "delete"]]])]))
 
 (defn production-link [{:keys [id title] :as production}]
   [:a {:href (str "#/productions/" id)
