@@ -16,7 +16,9 @@
     [mdr2.db.core :as db]
     [mdr2.auth :as auth]
     [mdr2.abacus.core :as abacus]
-    [mdr2.vubis :as vubis]))
+    [mdr2.vubis :as vubis]
+    [mdr2.production :as prod]
+    [mdr2.production.validation :refer [production]]))
 
 (def default-limit 100)
 
@@ -82,7 +84,17 @@
                        (ok (db/get-productions
                             {:limit limit :offset offset
                              :search (if (blank? search) nil (db/search-to-sql search))
-                             :state state})))}}]
+                             :state state})))}
+      :put {:summary "Update or create a production"
+            ;;:middleware [wrap-restricted wrap-authorized]
+            ;;:swagger {:security [{:apiAuth []}]}
+            :parameters {:body production}
+            :handler (fn [{{p :body} :parameters}]
+                       (let [p (prod/create! p)]
+                         (if-not (nom/anomaly? p)
+                           (no-content)
+                           (bad-request {:status-text
+                                         (ex-message (:exception (nom/payload p)))}))))}}]
 
     ["/:id"
      {:get {:summary "Get a production by ID"
@@ -91,7 +103,7 @@
                        (if-let [doc (db/get-production {:id id})]
                          (ok doc)
                          (not-found)))}
-      
+
       :delete {:summary "Delete a production"
                ;;:middleware [wrap-restricted wrap-authorized]
                ;;:swagger {:security [{:apiAuth []}]}
