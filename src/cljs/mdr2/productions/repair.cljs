@@ -121,11 +121,6 @@
  (fn [db [_ id]]
    (get-in db [:productions :repair id])))
 
-(rf/reg-sub
- ::valid?
- (fn [db [_ id]]
-   (validation/library-signature? (get-in db [:productions :repair id :library_signature]))))
-
 (defn buttons [id]
   (let [admin? @(rf/subscribe [::auth/is-admin?])]
     (if @(rf/subscribe [::notifications/button-loading? id :repair])
