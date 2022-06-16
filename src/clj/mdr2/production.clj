@@ -87,6 +87,7 @@
 (defn default-meta-data
   "Return default meta data"
   []
+  ;; FIXME: the comment below is probably wrong
   ;; we use sql date because its toString returns the format we want
   ;; in all the output (i.e. xml, etc)
   {:date (time/local-date)
