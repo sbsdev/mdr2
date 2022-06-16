@@ -160,7 +160,8 @@
                         (let [tempfile (:tempfile file)
                               errors (vubis/validate (.getPath tempfile))]
                           (if (empty? errors)
-                            (let [productions (vubis/read-file tempfile)]
+                            (let [productions (->> (vubis/read-file tempfile)
+                                                   (map prod/add-default-meta-data))]
                               (if-not (nom/anomaly? productions)
                                 (ok productions)
                                 (bad-request productions)))
