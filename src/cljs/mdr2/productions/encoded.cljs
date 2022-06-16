@@ -123,12 +123,12 @@
    (get-in db [:productions :encoded id])))
 
 (rf/reg-sub
- ::valid?
+ ::production-valid?
  (fn [db [_ id]]
    (validation/library-signature? (get-in db [:productions :encoded id :library_signature]))))
 
 (defn buttons [id]
-  (let [valid? @(rf/subscribe [::valid? id])
+  (let [valid? @(rf/subscribe [::production-valid? id])
         admin? @(rf/subscribe [::auth/is-admin?])]
     (if @(rf/subscribe [::notifications/button-loading? id :save])
       [:button.button.is-loading]
