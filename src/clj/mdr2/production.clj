@@ -135,8 +135,7 @@
               ;; access to the structured dir
               (and (= (:production_type production) "periodical")
                    (= (path/structured-path production) dir)))
-      (let [permissions (conj (fs/posix-file-permissions dir)
-                              (fs/str->posix "rw-rw---"))] ; group write
+      (let [permissions (fs/str->posix "rw-rw-r--")]
         (fs/set-posix-file-permissions dir permissions)))))
 
 (defn create!
