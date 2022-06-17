@@ -10,7 +10,7 @@
     [mdr2.ajax :as ajax]
     [mdr2.events]
     [mdr2.auth :as auth]
-    [mdr2.productions.in-production :as productions]
+    [mdr2.productions.in-production :as in-production]
     [mdr2.productions.archived :as archived]
     [mdr2.productions.encoded :as encoded]
     [mdr2.productions.repair :as repair]
@@ -40,7 +40,7 @@
                [:div#nav-menu.navbar-menu
                 {:class (when @expanded? :is-active)}
                 [:div.navbar-start
-                 [nav-link "#/in-production" "Productions" :productions]
+                 [nav-link "#/in-production" "Productions" :in-production]
                  [nav-link "#/archived" "Archived" :archived]
                  [nav-link "#/encoded" "Encoded" :encoded]
                  [nav-link "#/repair" "Repair" :repair]
@@ -66,9 +66,9 @@
                           :view #'production/page
                           :controllers [{:parameters {:path [:id]}
                                          :start (fn [params] (rf/dispatch [::production/init-current (-> params :path :id)]))}]}]
-     ["/in-production" {:name :productions
-                        :view #'productions/productions-page
-                        :controllers [{:start (fn [_] (rf/dispatch [::productions/fetch-productions]))}]}]
+     ["/in-production" {:name :in-production
+                        :view #'in-production/productions-page
+                        :controllers [{:start (fn [_] (rf/dispatch [::in-production/fetch-productions]))}]}]
      ["/archived" {:name :archived
                    :view #'archived/productions-page
                    :controllers [{:start (fn [_] (rf/dispatch [::archived/fetch-productions]))}]}]

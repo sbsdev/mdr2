@@ -29,7 +29,7 @@
    {:db (-> db
             (assoc-in [:credentials :token] token)
             (assoc-in [:credentials :user] user))
-    :common/navigate-fx! [:productions]}))
+    :common/navigate-fx! [:in-production]}))
 
 (rf/reg-event-db
  ::login-failure
