@@ -1,4 +1,4 @@
-(ns mdr2.production.validation
+(ns mdr2.production.spec
   (:require [spec-tools.data-spec :as spec]
             [clojure.spec.alpha :as s]))
 

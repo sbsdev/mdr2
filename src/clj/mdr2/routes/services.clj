@@ -18,7 +18,7 @@
     [mdr2.abacus.core :as abacus]
     [mdr2.vubis :as vubis]
     [mdr2.production :as prod]
-    [mdr2.production.validation :refer [production]]))
+    [mdr2.production.spec :as prod.spec]))
 
 (def default-limit 100)
 
@@ -88,7 +88,7 @@
       :put {:summary "Update or create a production"
             ;;:middleware [wrap-restricted wrap-authorized]
             ;;:swagger {:security [{:apiAuth []}]}
-            :parameters {:body production}
+            :parameters {:body prod.spec/production}
             :handler (fn [{{p :body} :parameters}]
                        (let [p (prod/create! p)]
                          (if-not (nom/anomaly? p)
