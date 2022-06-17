@@ -47,13 +47,16 @@
 
 (rf/reg-sub
   ::productions
-  (fn [db _]
-    (->> db :productions :archived vals (sort-by :id >))))
+  (fn [db _] (->> db :productions :archived vals)))
+
+(rf/reg-sub
+ ::productions-sorted
+ :<- [::productions]
+ (fn [productions] (->> productions (sort-by :id ))))
 
 (rf/reg-sub
   ::search
-  (fn [db _]
-    (get-in db [:search :archived])))
+  (fn [db _] (get-in db [:search :archived])))
 
 (rf/reg-event-fx
    ::set-search
@@ -137,6 +140,6 @@
             [:th (tr [:narrator])]
             [:th (tr [:produced_date])]]]
           [:tbody
-           (for [{:keys [uuid]} @(rf/subscribe [::productions])]
+           (for [{:keys [uuid]} @(rf/subscribe [::productions-sorted])]
              ^{:key uuid} [production uuid])]]
          [pagination/pagination :archived [::fetch-productions]]])]]))

@@ -77,13 +77,16 @@
 
 (rf/reg-sub
   ::productions
-  (fn [db _]
-    (->> db :productions :repair vals (sort-by :id >))))
+  (fn [db _] (->> db :productions :repair vals)))
+
+(rf/reg-sub
+ ::productions-sorted
+ :<- [::productions]
+ (fn [productions] (->> productions (sort-by :id >))))
 
 (rf/reg-sub
   ::search
-  (fn [db _]
-    (get-in db [:search :repair])))
+  (fn [db _] (get-in db [:search :repair])))
 
 (rf/reg-event-fx
    ::set-search
@@ -167,6 +170,6 @@
             [:th (tr [:creator])]
             [:th (tr [:action])]]]
           [:tbody
-           (for [{:keys [uuid]} @(rf/subscribe [::productions])]
+           (for [{:keys [uuid]} @(rf/subscribe [::productions-sorted])]
              ^{:key uuid} [production uuid])]]
          [pagination/pagination :repair [::fetch-productions]]])]]))

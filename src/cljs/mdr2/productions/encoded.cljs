@@ -78,13 +78,16 @@
 
 (rf/reg-sub
   ::productions
-  (fn [db _]
-    (->> db :productions :encoded vals (sort-by :id >))))
+  (fn [db _] (->> db :productions :encoded vals)))
+
+(rf/reg-sub
+ ::productions-sorted
+ :<- [::productions]
+ (fn [productions] (->> productions (sort-by :id >))))
 
 (rf/reg-sub
   ::search
-  (fn [db _]
-    (get-in db [:search :encoded])))
+  (fn [db _] (get-in db [:search :encoded])))
 
 (rf/reg-event-fx
    ::set-search
@@ -191,6 +194,6 @@
             [:th (tr [:library_signature])]
             [:th (tr [:action])]]]
           [:tbody
-           (for [{:keys [uuid]} @(rf/subscribe [::productions])]
+           (for [{:keys [uuid]} @(rf/subscribe [::productions-sorted])]
              ^{:key uuid} [production uuid])]]
          [pagination/pagination :encoded [::fetch-productions]]])]]))
