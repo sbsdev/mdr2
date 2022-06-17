@@ -8,7 +8,7 @@ SELECT *
 FROM production
 WHERE
 --~ (if (:state params) "state = :state" "state NOT IN ('archived', 'deleted')")
---~ (when (:search params) "AND LOWER(title) LIKE LOWER(:search)")
+--~ (when (:search params) "AND (LOWER(title) LIKE LOWER(:search) OR LOWER(creator) LIKE LOWER(:search))")
 ORDER BY id DESC
 LIMIT :limit OFFSET :offset
 
