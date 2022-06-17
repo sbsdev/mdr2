@@ -1,4 +1,4 @@
-(ns mdr2.productions.current
+(ns mdr2.productions.in-production
   (:require [ajax.core :as ajax]
             [mdr2.auth :as auth]
             [mdr2.ajax :refer [as-transit]]
@@ -12,8 +12,8 @@
   ::fetch-productions
   (fn [{:keys [db]} [_]]
     (let [search @(rf/subscribe [::search])
-          offset (pagination/offset db :current)]
-      {:db (assoc-in db [:loading :current] true)
+          offset (pagination/offset db :in-production)]
+      {:db (assoc-in db [:loading :in-production] true)
        :http-xhrio
        (as-transit {:method          :get
                     :uri             "/api/productions"
@@ -21,7 +21,7 @@
                                       :offset offset
                                       :limit pagination/page-size}
                     :on-success      [::fetch-productions-success]
-                    :on-failure      [::fetch-productions-failure :fetch-current-productions]})})))
+                    :on-failure      [::fetch-productions-failure :fetch-in-production-productions]})})))
 
 (rf/reg-event-db
  ::fetch-productions-success
@@ -30,9 +30,9 @@
                     (map #(assoc % :uuid (str (random-uuid)))))
          next? (-> productions count (= pagination/page-size))]
      (-> db
-         (assoc-in [:productions :current] (zipmap (map :uuid productions) productions))
-         (pagination/update-next :current next?)
-         (assoc-in [:loading :current] false)
+         (assoc-in [:productions :in-production] (zipmap (map :uuid productions) productions))
+         (pagination/update-next :in-production next?)
+         (assoc-in [:loading :in-production] false)
          ;; clear all button loading states
          (update-in [:loading] dissoc :buttons)))))
 
@@ -41,12 +41,12 @@
  (fn [db [_ request-type response]]
    (-> db
        (assoc-in [:errors request-type] (get response :status-text))
-       (assoc-in [:loading :current] false))))
+       (assoc-in [:loading :in-production] false))))
 
 (rf/reg-event-fx
   ::save-production
   (fn [{:keys [db]} [_ id]]
-    (let [production (get-in db [:productions :current id])
+    (let [production (get-in db [:productions :in-production id])
           cleaned (-> production
                       (select-keys [:untranslated :uncontracted :contracted :type :homograph-disambiguation]))]
       {:db (notifications/set-button-state db id :save)
@@ -62,7 +62,7 @@
 (rf/reg-event-fx
   ::delete-production
   (fn [{:keys [db]} [_ id]]
-    (let [production (get-in db [:productions :current id])]
+    (let [production (get-in db [:productions :in-production id])]
       {:db (notifications/set-button-state db id :delete)
        :http-xhrio
        (as-transit {:method          :delete
@@ -81,9 +81,9 @@
   ::ack-delete
   (fn [{:keys [db]} [_ id]]
     (let [db (-> db
-                 (update-in [:productions :current] dissoc id)
+                 (update-in [:productions :in-production] dissoc id)
                  (notifications/clear-button-state id :delete))
-          empty? (-> db (get-in [:productions :current]) count (< 1))]
+          empty? (-> db (get-in [:productions :in-production]) count (< 1))]
       (if empty?
         {:db db :dispatch [::fetch-productions]}
         {:db db}))))
@@ -97,26 +97,29 @@
        (notifications/clear-button-state id request-type))))
 
 (rf/reg-sub
-  ::productions
-  (fn [db _]
-    (->> db :productions :current vals (sort-by :id >))))
+ ::productions
+ (fn [db _] (->> db :productions :in-production vals)))
+
+(rf/reg-sub
+ ::productions-sorted
+ :<- [::productions]
+ (fn [productions] (->> productions (sort-by :id >))))
 
 (rf/reg-sub
   ::search
-  (fn [db _]
-    (get-in db [:search :current])))
+  (fn [db _] (get-in db [:search :in-production])))
 
 (rf/reg-event-fx
    ::set-search
    (fn [{:keys [db]} [_ new-search-value]]
-     (cond-> {:db (assoc-in db [:search :current] new-search-value)}
+     (cond-> {:db (assoc-in db [:search :in-production] new-search-value)}
        (> (count new-search-value) 2)
        ;; if the string has more than 2 characters fetch the productions
        ;; from the server
        (assoc :dispatch-n
               (list
                ;; when searching for a new production reset the pagination
-               [::pagination/reset :current]
+               [::pagination/reset :in-production]
                [::fetch-productions])))))
 
 (defn productions-search []
@@ -140,7 +143,7 @@
 (rf/reg-sub
  ::production
  (fn [db [_ id]]
-   (get-in db [:productions :current id])))
+   (get-in db [:productions :in-production id])))
 
 (defn buttons [id]
   (let [admin? @(rf/subscribe [::auth/is-admin?])]
@@ -181,7 +184,7 @@
      [:td {:width "15%"} [buttons uuid]]]))
 
 (defn productions-page []
-  (let [loading? @(rf/subscribe [::notifications/loading? :current])
+  (let [loading? @(rf/subscribe [::notifications/loading? :in-production])
         errors? @(rf/subscribe [::notifications/errors?])]
     [:section.section>div.container>div.content
      [:<>
@@ -200,6 +203,6 @@
             [:th (tr [:state])]
             [:th (tr [:action])]]]
           [:tbody
-           (for [{:keys [uuid]} @(rf/subscribe [::productions])]
+           (for [{:keys [uuid]} @(rf/subscribe [::productions-sorted])]
              ^{:key uuid} [production uuid])]]
-         [pagination/pagination :current [::fetch-productions]]])]]))
+         [pagination/pagination :in-production [::fetch-productions]]])]]))
