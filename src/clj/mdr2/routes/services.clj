@@ -18,7 +18,8 @@
     [mdr2.abacus.core :as abacus]
     [mdr2.vubis :as vubis]
     [mdr2.production :as prod]
-    [mdr2.production.spec :as prod.spec]))
+    [mdr2.production.spec :as prod.spec]
+    [mdr2.repair.core :as repair]))
 
 (def default-limit 100)
 
@@ -81,10 +82,21 @@
                                  (spec/opt :offset) int?}}
             :handler (fn [{{{:keys [limit offset search state]
                              :or {limit default-limit offset 0}} :query} :parameters}]
-                       (ok (db/get-productions
-                            {:limit limit :offset offset
-                             :search (if (blank? search) nil (db/search-to-sql search))
-                             :state state})))}
+                       (cond
+                         (repair/production-id? search)
+                         (ok (db/get-productions {:id (subs search 3) :state state
+                                                  :limit limit :offset offset}))
+                         (prod/library-signature? search)
+                         (ok (db/get-productions {:library_signature search :state state
+                                                  :limit limit :offset offset}))
+                         (repair/product-number? search)
+                         (ok (db/get-productions {:product_number search :state state
+                                                  :limit limit :offset offset}))
+                         :else
+                         (ok (db/get-productions
+                              {:limit limit :offset offset
+                               :search (if (blank? search) nil (db/search-to-sql search))
+                               :state state}))))}
       :put {:summary "Update or create a production"
             ;;:middleware [wrap-restricted wrap-authorized]
             ;;:swagger {:security [{:apiAuth []}]}

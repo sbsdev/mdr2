@@ -9,6 +9,9 @@ FROM production
 WHERE
 --~ (if (:state params) "state = :state" "state NOT IN ('archived', 'deleted')")
 --~ (when (:search params) "AND (LOWER(title) LIKE LOWER(:search) OR LOWER(creator) LIKE LOWER(:search))")
+--~ (when (:id params) "AND id = :id")
+--~ (when (:product_number params) "AND LOWER(product_number) LIKE LOWER(:product_number)")
+--~ (when (:library_signature params) "AND LOWER(library_signature) LIKE LOWER(:library_signature)")
 ORDER BY id DESC
 LIMIT :limit OFFSET :offset
 
