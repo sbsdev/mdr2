@@ -39,6 +39,7 @@
    (-> db
        (assoc-in [:errors :version] (or (get-in response [:response :status-text])
                                         (get response :status-text)))
+       (assoc-in [:loading :vubis] false)
        (notifications/clear-button-state :vubis :vubis-file))))
 
 (rf/reg-event-fx
