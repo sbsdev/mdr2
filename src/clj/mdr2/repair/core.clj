@@ -31,13 +31,7 @@
 (defn product-number?
   "Return true if `id` is a valid product number"
   [id]
-  (re-matches #"DY\d{5}" id))
-
-(defn archive-identifier?
-  "Return true if `id` is either a valid production id, i.e. a dam
-  number or a valid library signature"
-  [id]
-  (or (production-id? id) (prod/library-signature? id)))
+  (re-matches #"DY\d{1,5}" id))
 
 (defn archive-url
   "Return the url for an archived production given a `container-id`"

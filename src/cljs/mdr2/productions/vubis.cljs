@@ -1,7 +1,6 @@
 (ns mdr2.productions.vubis
   (:require [ajax.core :as ajax]
             [cljs-time.format :as tf]
-            [clojure.string :as string]
             [mdr2.ajax :refer [as-transit]]
             [mdr2.auth :as auth]
             [mdr2.i18n :refer [tr]]
