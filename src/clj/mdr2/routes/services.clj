@@ -16,6 +16,7 @@
     [mdr2.db.core :as db]
     [mdr2.auth :as auth]
     [mdr2.abacus.core :as abacus]
+    [mdr2.dtbook :as dtbook]
     [mdr2.vubis :as vubis]
     [mdr2.production :as prod]
     [mdr2.production.spec :as prod.spec]
@@ -131,7 +132,11 @@
             :parameters {:path {:id int?}}
             :handler (fn [{{{:keys [id]} :path} :parameters}]
                        (if-let [doc (db/get-production {:id id})]
-                         (ok doc)
+                         (-> doc
+                             dtbook/dtbook
+                             ok
+                             (content-type "text/xml")
+                             (charset "UTF-8"))
                          (not-found)))
             }}]]
 

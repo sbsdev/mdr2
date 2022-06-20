@@ -44,22 +44,6 @@
        (assoc-in [:loading :in-production] false))))
 
 (rf/reg-event-fx
-  ::save-production
-  (fn [{:keys [db]} [_ id]]
-    (let [production (get-in db [:productions :in-production id])
-          cleaned (-> production
-                      (select-keys [:untranslated :uncontracted :contracted :type :homograph-disambiguation]))]
-      {:db (notifications/set-button-state db id :save)
-       :http-xhrio
-       (as-transit {:method          :put
-                    :headers 	     (auth/auth-header db)
-                    :uri             (str "/api/productions")
-                    :params          cleaned
-                    :on-success      [::ack-save id]
-                    :on-failure      [::ack-failure id :save]
-                    })})))
-
-(rf/reg-event-fx
   ::delete-production
   (fn [{:keys [db]} [_ id]]
     (let [production (get-in db [:productions :in-production id])]
@@ -145,26 +129,27 @@
  (fn [db [_ id]]
    (get-in db [:productions :in-production id])))
 
-(defn buttons [id]
+(defn buttons [{:keys [uuid id state]}]
   (let [admin? @(rf/subscribe [::auth/is-admin?])]
     [:div.buttons.has-addons
-     (if @(rf/subscribe [::notifications/button-loading? id :save])
+     [:a.button
+      {:href (str "/api/productions/" id "/xml")
+       :download (str id ".xml")
+       ;; allow dtbook download only for state new and structured
+       :disabled (not (#{"new" "structured"} state))}
+      [:span.icon.is-small
+       [:span.material-icons "file_download"]]]
+     (if @(rf/subscribe [::notifications/button-loading? uuid :upload])
        [:button.button.is-loading]
        [:button.button
-        {:on-click (fn [e] (rf/dispatch [::save-production id]))}
-        [:span.icon.is-small
-         [:span.material-icons "file_download"]]])
-     (if @(rf/subscribe [::notifications/button-loading? id :upload])
-       [:button.button.is-loading]
-       [:button.button
-        {:on-click (fn [e] (rf/dispatch [::upload-production id]))}
+        {:on-click (fn [e] (rf/dispatch [::upload-production uuid]))}
         [:span.icon.is-small
          [:span.material-icons "file_upload"]]])
-     (if @(rf/subscribe [::notifications/button-loading? id :delete])
+     (if @(rf/subscribe [::notifications/button-loading? uuid :delete])
        [:button.button.is-danger.is-loading]
        [:button.button.is-danger
         {:disabled (not admin?)
-         :on-click (fn [e] (rf/dispatch [::delete-production id]))}
+         :on-click (fn [e] (rf/dispatch [::delete-production uuid]))}
         [:span.icon.is-small
          [:span.material-icons "delete"]]])]))
 
@@ -181,7 +166,7 @@
      [:td [production-link production]]
      [:td type]
      [:td state]
-     [:td {:width "15%"} [buttons uuid]]]))
+     [:td {:width "11%"} [buttons production]]]))
 
 (defn productions-page []
   (let [loading? @(rf/subscribe [::notifications/loading? :in-production])
