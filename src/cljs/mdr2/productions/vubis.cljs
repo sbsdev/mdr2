@@ -108,11 +108,11 @@
 
 (rf/reg-sub
  ::vubis-file
- (fn [db _] (-> db :vubis-file)))
+ (fn [db _] (get-in db [:upload :vubis])))
 
 (rf/reg-event-db
   ::set-vubis-file
-  (fn [db [_ file]] (assoc db :vubis-file file)))
+  (fn [db [_ file]] (assoc-in db [:upload :vubis] file)))
 
 (defn- file-input []
   (let [get-value (fn [e] (-> e .-target .-files (aget 0)))
