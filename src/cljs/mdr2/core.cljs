@@ -67,16 +67,16 @@
                           :controllers [{:parameters {:path [:id]}
                                          :start (fn [params] (rf/dispatch [::production/init-current (-> params :path :id)]))}]}]
      ["/in-production" {:name :in-production
-                        :view #'in-production/productions-page
+                        :view #'in-production/page
                         :controllers [{:start (fn [_] (rf/dispatch [::in-production/fetch-productions]))}]}]
      ["/archived" {:name :archived
-                   :view #'archived/productions-page
+                   :view #'archived/page
                    :controllers [{:start (fn [_] (rf/dispatch [::archived/fetch-productions]))}]}]
      ["/encoded" {:name :encoded
-                  :view #'encoded/productions-page
+                  :view #'encoded/page
                   :controllers [{:start (fn [_] (rf/dispatch [::encoded/fetch-productions]))}]}]
      ["/repair" {:name :repair
-                  :view #'repair/productions-page
+                  :view #'repair/page
                  :controllers [{:start (fn [_] (rf/dispatch [::repair/fetch-productions]))}]}]
      ["/vubis" {:name :vubis
                  :view #'vubis/page}]

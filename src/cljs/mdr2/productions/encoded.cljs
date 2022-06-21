@@ -167,7 +167,7 @@
      [:td [fields/input-field :encoded uuid :library_signature validation/library-signature?]]
      [:td [buttons uuid]]]))
 
-(defn productions-page []
+(defn page []
   (let [loading? @(rf/subscribe [::notifications/loading? :encoded])
         errors? @(rf/subscribe [::notifications/errors?])]
     [:section.section>div.container>div.content

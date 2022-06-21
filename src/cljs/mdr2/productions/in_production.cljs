@@ -168,7 +168,7 @@
      [:td state]
      [:td {:width "11%"} [buttons production]]]))
 
-(defn productions-page []
+(defn page []
   (let [loading? @(rf/subscribe [::notifications/loading? :in-production])
         errors? @(rf/subscribe [::notifications/errors?])]
     [:section.section>div.container>div.content

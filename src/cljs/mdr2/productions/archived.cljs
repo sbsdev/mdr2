@@ -115,7 +115,7 @@
      [:td narrator]
      [:td (tf/unparse (tf/formatters :date) produced_date)]]))
 
-(defn productions-page []
+(defn page []
   (let [loading? @(rf/subscribe [::notifications/loading? :archived])
         errors? @(rf/subscribe [::notifications/errors?])]
     [:section.section>div.container>div.content
