@@ -119,7 +119,7 @@
         save!     #(rf/dispatch [::set-vubis-file %])
         file      @(rf/subscribe [::vubis-file])]
     [:p.control
-     [:div.file.has-name.is-fullwidth
+     [:div.file.has-name
       [:label.file-label
        [:input.file-input
         {:type "file"
@@ -134,13 +134,14 @@
   (let [klass (when @(rf/subscribe [::notifications/button-loading? :vubis :vubis-file]) "is-loading")
         admin? @(rf/subscribe [::auth/is-admin?])
         file @(rf/subscribe [::vubis-file])]
-    [:div.field.is-grouped
+    [:div.field
      [file-input]
      [:p.control
       [:button.button
        {:disabled (or (nil? file) (not admin?))
         :class klass
         :on-click (fn [e] (rf/dispatch [::extract-productions file]))}
+       [:span (tr [:upload])]
        [:span.icon.is-small
         [:span.material-icons "upload_file"]]]]]))
 
