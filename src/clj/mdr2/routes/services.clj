@@ -130,7 +130,7 @@
                               (not-found))))}}]
 
     ["/:id/xml"
-     {:get {:summary "Get DTBook XML for production"
+     {:get {:summary "Get the DTBook XML structure for a production"
             :parameters {:path {:id int?}}
             :handler (fn [{{{:keys [id]} :path} :parameters}]
                        (if-let [doc (db/get-production {:id id})]
