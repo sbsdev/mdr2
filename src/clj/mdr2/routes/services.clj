@@ -20,7 +20,9 @@
     [mdr2.vubis :as vubis]
     [mdr2.production :as prod]
     [mdr2.production.spec :as prod.spec]
-    [mdr2.repair.core :as repair]))
+    [mdr2.pipeline1 :as pipeline]
+    [mdr2.repair.core :as repair]
+    [mdr2.dtbook.validation :as validation]))
 
 (def default-limit 100)
 
@@ -138,7 +140,24 @@
                              (content-type "text/xml")
                              (charset "UTF-8"))
                          (not-found)))
-            }}]]
+            }
+      :post {:summary "Upload the DTBook XML structure for a production"
+             :parameters {:path {:id int?}
+                          :multipart {:file multipart/temp-file-part}}
+             :handler (fn [{{{:keys [file]} :multipart {:keys [id]} :path} :parameters}]
+                        (let [tempfile (:tempfile file)
+                              production (db/get-production {:id id})
+                              errors (concat
+                                      ;; validate XML
+                                      (pipeline/validate (.getPath tempfile) :dtbook)
+                                      ;; validate meta data
+                                      (validation/validate-metadata (.getPath tempfile) production)
+                                      ;; make sure production is in the state that allows upload
+                                      (when (not (#{"new" "structured"} (:state production)))
+                                        ["Production not in state \"new\" or \"structured\""]))]
+                          (if-not (seq errors)
+                            (no-content)
+                            (bad-request {:status-text "Upload of DTBook XML structure failed" :errors errors}))))}}]]
 
    ["/abacus"
     {:swagger {:tags ["Abacus API"]}}
