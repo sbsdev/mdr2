@@ -86,13 +86,13 @@
             :handler (fn [{{{:keys [limit offset search state]
                              :or {limit default-limit offset 0}} :query} :parameters}]
                        (cond
-                         (repair/production-id? search)
+                         (repair/production-id? search) ;; DAM123
                          (ok (db/get-productions {:id (subs search 3) :state state
                                                   :limit limit :offset offset}))
-                         (prod/library-signature? search)
+                         (prod/library-signature? search) ;; ds12345
                          (ok (db/get-productions {:library_signature search :state state
                                                   :limit limit :offset offset}))
-                         (repair/product-number? search)
+                         (repair/product-number? search) ;; DY123
                          (ok (db/get-productions {:product_number search :state state
                                                   :limit limit :offset offset}))
                          :else
