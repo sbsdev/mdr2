@@ -27,7 +27,7 @@
     :class (when (= page @(rf/subscribe [:common/page-id])) :is-active)}
    title])
 
-(defn navbar [] 
+(defn navbar []
   (r/with-let [expanded? (r/atom false)]
               [:nav.navbar.is-info>div.container
                [:div.navbar-brand
@@ -65,7 +65,9 @@
      ["/productions/:id" {:name :production
                           :view #'production/page
                           :controllers [{:parameters {:path [:id]}
-                                         :start (fn [params] (rf/dispatch [::production/init-current (-> params :path :id)]))}]}]
+                                         :start (fn [params] (rf/dispatch [::production/init-current (-> params :path :id)]))
+                                         :stop (fn [_] (rf/dispatch [::production/clear-current]))}]}]
+
      ["/in-production" {:name :in-production
                         :view #'in-production/page
                         :controllers [{:start (fn [_] (rf/dispatch [::in-production/fetch-productions]))}]}]

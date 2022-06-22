@@ -16,6 +16,11 @@
   (fn [db [_ production]]
     (assoc db :current-production production)))
 
+(rf/reg-event-db
+  ::clear-current
+  (fn [db [_]]
+    (dissoc db :current-production)))
+
 (rf/reg-event-fx
   ::fetch-current
   (fn [_ [_ id]]
