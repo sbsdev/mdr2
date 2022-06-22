@@ -67,7 +67,11 @@
                           :controllers [{:parameters {:path [:id]}
                                          :start (fn [params] (rf/dispatch [::production/init-current (-> params :path :id)]))
                                          :stop (fn [_] (rf/dispatch [::production/clear-current]))}]}]
-
+     ["/productions/:id/upload" {:name :production-upload
+                                 :view #'in-production/upload-page
+                                 :controllers [{:stop (fn [_]
+                                                        (rf/dispatch [::production/clear-current])
+                                                        (rf/dispatch [::in-production/clear-upload-file]))}]}]
      ["/in-production" {:name :in-production
                         :view #'in-production/page
                         :controllers [{:start (fn [_] (rf/dispatch [::in-production/fetch-productions]))}]}]

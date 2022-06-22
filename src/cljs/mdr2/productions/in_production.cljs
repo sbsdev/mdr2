@@ -130,7 +130,86 @@
  (fn [db [_ id]]
    (get-in db [:productions :in-production id])))
 
-(defn buttons [{:keys [uuid id state]}]
+(rf/reg-event-fx
+  ::upload-dtbook
+  (fn [{:keys [db]} [_ js-file-value]]
+    (let [form-data (doto (js/FormData.)
+                      (.append "file" js-file-value "filename.txt"))
+          id (get-in db [:current-production :id])]
+      {:db (-> db
+               (notifications/set-button-state :in-production :upload-file))
+       :http-xhrio (as-transit
+                    {:method          :post
+                     :headers 	      (auth/auth-header db)
+                     :uri             (str "/api/productions/" id "/xml")
+                     :body            form-data
+                     :on-success      [::ack-upload-dtbook]
+                     :on-failure      [::ack-upload-failure]})})))
+
+(rf/reg-event-fx
+  ::ack-upload-dtbook
+  (fn [{:keys [db]} [_]]
+    {:db (notifications/clear-button-state db :in-production :upload-file)
+     :common/navigate-fx! [:in-production]}))
+
+(rf/reg-event-db
+ ::ack-upload-failure
+ (fn [db [_ response]]
+   (let [message (or (get-in response [:response :status-text])
+                     (get response :status-text))
+         errors (get-in response [:response :errors])]
+     (-> db
+         (notifications/set-errors :dtbook-upload message errors)
+         (notifications/clear-button-state :in-production :upload-file)))))
+
+(rf/reg-sub
+ ::upload-file
+ (fn [db _] (get-in db [:upload :in-production])))
+
+(rf/reg-event-db
+  ::set-upload-file
+  (fn [db [_ file]] (assoc-in db [:upload :in-production] file)))
+
+(rf/reg-event-db
+  ::clear-upload-file
+  (fn [db [_]] (update-in db [:upload] dissoc :in-production)))
+
+(defn- file-input []
+  (let [get-value (fn [e] (-> e .-target .-files (aget 0)))
+        save!     #(rf/dispatch [::set-upload-file %])
+        file      @(rf/subscribe [::upload-file])]
+    [:p.control
+     [:div.file.has-name
+      [:label.file-label
+       [:input.file-input
+        {:type "file"
+         :accept ".xml"
+         :files file
+         :on-change #(save! (get-value %))}]
+       [:span.file-cta
+        [:span.file-label (tr [:choose-structure])]]
+       [:span.file-name (if file (.-name file) (tr [:no-file]))]]]]))
+
+(defn- structure-upload []
+  (let [klass (when @(rf/subscribe [::notifications/button-loading? :in-production :upload-file]) "is-loading")
+        admin? @(rf/subscribe [::auth/is-admin?])
+        file @(rf/subscribe [::upload-file])
+        current @(rf/subscribe [::production/current])]
+    [:<>
+     [:div.field
+      [:label.label (tr [:upload-structure] [(:title current) (:id current)])]
+      [file-input]]
+     [:div.field.is-grouped
+      [:p.control
+       [:button.button
+        {:disabled (or (nil? file) (not admin?))
+         :class klass
+         :on-click (fn [e] (rf/dispatch [::upload-dtbook file]))}
+        [:span (tr [:upload])]
+        [:span.icon
+         [:span.material-icons "upload_file"]]]]]]))
+
+(defn buttons [{:keys [uuid id state] :as production}]
   (let [admin? @(rf/subscribe [::auth/is-admin?])]
     [:div.buttons.has-addons
      [:a.button
@@ -140,12 +219,12 @@
        :disabled (not (#{"new" "structured"} state))}
       [:span.icon.is-small
        [:span.material-icons "file_download"]]]
-     (if @(rf/subscribe [::notifications/button-loading? uuid :upload])
-       [:button.button.is-loading]
-       [:button.button
-        {:on-click (fn [e] (rf/dispatch [::upload-production uuid]))}
-        [:span.icon.is-small
-         [:span.material-icons "file_upload"]]])
+     [:a.button
+      {:disabled (not admin?)
+       :href (str "#/productions/" id "/upload")
+       :on-click (fn [e] (rf/dispatch [::production/set-current production]))}
+      [:span.icon.is-small
+       [:span.material-icons "file_upload"]]]
      (if @(rf/subscribe [::notifications/button-loading? uuid :delete])
        [:button.button.is-danger.is-loading]
        [:button.button.is-danger
@@ -169,6 +248,32 @@
      [:td state]
      [:td {:width "11%"} [buttons production]]]))
 
+(defn productions []
+  (let [productions @(rf/subscribe [::productions-sorted])]
+    [:<>
+     [:table.table.is-striped
+      [:thead
+       [:tr
+        [:th (tr [:dam])]
+        [:th (tr [:title])]
+        [:th (tr [:type])]
+        [:th (tr [:state])]
+        [:th (tr [:action])]]]
+      [:tbody
+       (for [{:keys [uuid]} productions]
+         ^{:key uuid} [production uuid])]]
+     [pagination/pagination :in-production [::fetch-productions]]]))
+
+(defn upload-page []
+  (let [loading? @(rf/subscribe [::notifications/loading? :in-production])
+        errors? @(rf/subscribe [::notifications/errors?])]
+    [:section.section>div.container>div.content
+     [:<>
+      (cond
+        errors? [notifications/error-notification]
+        loading? [notifications/loading-spinner]
+        :else [structure-upload])]])  )
+
 (defn page []
   (let [loading? @(rf/subscribe [::notifications/loading? :in-production])
         errors? @(rf/subscribe [::notifications/errors?])]
@@ -178,17 +283,4 @@
       (cond
         errors? [notifications/error-notification]
         loading? [notifications/loading-spinner]
-        :else
-        [:<>
-         [:table.table.is-striped
-          [:thead
-           [:tr
-            [:th (tr [:dam])]
-            [:th (tr [:title])]
-            [:th (tr [:type])]
-            [:th (tr [:state])]
-            [:th (tr [:action])]]]
-          [:tbody
-           (for [{:keys [uuid]} @(rf/subscribe [::productions-sorted])]
-             ^{:key uuid} [production uuid])]]
-         [pagination/pagination :in-production [::fetch-productions]]])]]))
+        :else [productions])]]))
