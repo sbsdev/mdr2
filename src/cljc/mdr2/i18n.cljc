@@ -63,7 +63,7 @@
                     :depth "Depth"
                     ;;
                     :transitions-state "Transition state to '%1'"
-                    :upload-structure "Upload structure for '%1'"
+                    :upload-structure "Upload structure for '%1' (DAM %2)"
                     :upload-vubis "Upload Vubis export file"
                     ;;
                     :details "Details"
@@ -145,7 +145,7 @@
                     :modified-at "Letzte Änderung"
                     ;;
                     :transitions-state "Status auf '%1' setzen"
-                    :upload-structure "Struktur Datei für '%1' hochladen"
+                    :upload-structure "Struktur Datei für '%1' (DAM %2) hochladen"
                     :upload-vubis "Vubis Export Datei hochladen"
                     ;;
                     :details "Details"
