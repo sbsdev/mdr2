@@ -213,7 +213,8 @@
                               (if-not (nom/anomaly? productions)
                                 (ok productions)
                                 (bad-request productions)))
-                            (bad-request errors))))}}]]
+                            (bad-request {:status-text "Not a valid Vubis export"
+                                          :errors errors}))))}}]]
 
    ["/files"
     {:swagger {:tags ["files"]}}

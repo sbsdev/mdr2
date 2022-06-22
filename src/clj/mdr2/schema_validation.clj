@@ -16,6 +16,10 @@
    :line (.getLineNumber exception)
    :column (.getColumnNumber exception)})
 
+(defn stringify
+  [{:keys [error line]}]
+  (format "%s on line %d" error line))
+
 (defn validation-errors
   "Return a list of validation errors when validating `file` against
   the given Relaxng `schema`. If the file is valid an empty list is

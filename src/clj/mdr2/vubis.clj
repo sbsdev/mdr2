@@ -4,7 +4,7 @@
             [clojure.xml :as xml]
             [clojure.zip :as zip]
             [clojure.data.zip.xml :refer [xml-> xml1-> attr= text]]
-            [mdr2.schema-validation :refer [validation-errors]]
+            [mdr2.schema-validation :as validation]
             [mdr2.production :as prod]))
 
 (def ^:private param-mapping
@@ -37,7 +37,9 @@
   "Returns an empty list on successful validation of `file` as a
   proper vubis export file or a list of error messages otherwise"
   [file]
-  (validation-errors file schema))
+  (->>
+   (validation/validation-errors file schema)
+   (map validation/stringify)))
 
 (defn get-subfield
   "Get the subfield text for the given `path` in the given `record`.
