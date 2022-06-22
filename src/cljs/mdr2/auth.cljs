@@ -16,7 +16,7 @@
                   :uri             "/api/login"
                   :params          {:username username :password password}
                   :on-success      [::login-success]
-                  :on-failure      [::login-failure :login]})}))
+                  :on-failure      [::login-failure]})}))
 
 (rf/reg-event-db
  ::logout
@@ -33,8 +33,8 @@
 
 (rf/reg-event-db
  ::login-failure
- (fn [db [_ request-type response]]
-   (assoc-in db [:errors request-type] (get-in response [:response :message]))))
+ (fn [db [_ response]]
+   (notifications/set-errors db :login (get-in response [:response :message]))))
 
 (rf/reg-sub
  ::authenticated?

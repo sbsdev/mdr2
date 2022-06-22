@@ -23,7 +23,7 @@
                                       :limit pagination/page-size
                                       :state "archived"}
                     :on-success      [::fetch-productions-success]
-                    :on-failure      [::fetch-productions-failure :fetch-archived-productions]})})))
+                    :on-failure      [::fetch-productions-failure]})})))
 
 (rf/reg-event-db
  ::fetch-productions-success
@@ -40,9 +40,9 @@
 
 (rf/reg-event-db
  ::fetch-productions-failure
- (fn [db [_ request-type response]]
+ (fn [db [_ response]]
    (-> db
-       (assoc-in [:errors request-type] (get response :status-text))
+       (notifications/set-errors :fetch-archived-productions (get response :status-text))
        (assoc-in [:loading :archived] false))))
 
 (rf/reg-sub

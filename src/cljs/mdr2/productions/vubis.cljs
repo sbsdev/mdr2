@@ -31,16 +31,18 @@
       (-> db
           (assoc-in [:productions :vubis] (zipmap (map :uuid productions) productions))
           (assoc-in [:loading :vubis] false)
-          (notifications/clear-button-state :vubis :vubis-file)))))
+          (notifications/clear-button-state :vubis :upload-file)))))
 
 (rf/reg-event-db
  ::ack-extract-failure
  (fn [db [_ response]]
-   (-> db
-       (assoc-in [:errors :version] (or (get-in response [:response :status-text])
-                                        (get response :status-text)))
-       (assoc-in [:loading :vubis] false)
-       (notifications/clear-button-state :vubis :vubis-file))))
+   (let [message (or (get-in response [:response :status-text])
+                     (get response :status-text))
+         errors (get-in response [:response :errors])]
+     (-> db
+         (notifications/set-errors :vubis message errors)
+         (assoc-in [:loading :vubis] false)
+         (notifications/clear-button-state :vubis :upload-file)))))
 
 (rf/reg-event-fx
   ::save-production
@@ -67,10 +69,11 @@
 (rf/reg-event-db
  ::ack-failure
  (fn [db [_ id request-type response]]
-   (-> db
-       (assoc-in [:errors request-type] (or (get-in response [:response :status-text])
-                                            (get response :status-text)))
-       (notifications/clear-button-state id request-type))))
+   (let [message (or (get-in response [:response :status-text])
+                     (get response :status-text))]
+     (-> db
+         (notifications/set-errors request-type message)
+         (notifications/clear-button-state id request-type)))))
 
 (rf/reg-event-fx
   ::save-all-productions

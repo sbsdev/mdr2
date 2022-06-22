@@ -21,7 +21,7 @@
                                       :offset offset
                                       :limit pagination/page-size}
                     :on-success      [::fetch-productions-success]
-                    :on-failure      [::fetch-productions-failure :fetch-in-production-productions]})})))
+                    :on-failure      [::fetch-productions-failure]})})))
 
 (rf/reg-event-db
  ::fetch-productions-success
@@ -38,9 +38,9 @@
 
 (rf/reg-event-db
  ::fetch-productions-failure
- (fn [db [_ request-type response]]
+ (fn [db [_ response]]
    (-> db
-       (assoc-in [:errors request-type] (get response :status-text))
+       (notifications/set-errors :fetch-in-production-productions (get response :status-text))
        (assoc-in [:loading :in-production] false))))
 
 (rf/reg-event-fx
@@ -75,10 +75,11 @@
 (rf/reg-event-db
  ::ack-failure
  (fn [db [_ id request-type response]]
-   (-> db
-       (assoc-in [:errors request-type] (or (get-in response [:response :status-text])
-                                            (get response :status-text)))
-       (notifications/clear-button-state id request-type))))
+   (let [message (or (get-in response [:response :status-text])
+                     (get response :status-text))]
+     (-> db
+         (notifications/set-errors request-type message)
+         (notifications/clear-button-state id request-type)))))
 
 (rf/reg-sub
  ::productions
