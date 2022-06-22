@@ -138,6 +138,7 @@
         admin? @(rf/subscribe [::auth/is-admin?])
         file @(rf/subscribe [::upload-file])]
     [:div.field
+     [:label.label (tr [:upload-vubis])]
      [file-input]
      [:p.control
       [:button.button

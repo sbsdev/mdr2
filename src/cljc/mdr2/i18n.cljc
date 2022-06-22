@@ -5,7 +5,6 @@
                    {:missing "missing translation"
                     :approve "Approve"
                     :approve-all "Approve all"
-                    :choose-vubis "Vubis export file"
                     :save "Save"
                     :delete "Delete"
                     :cancel "Cancel"
@@ -25,6 +24,8 @@
                     :password "Password"
                     :no-file "No file selected"
                     :upload "Upload"
+                    :choose-vubis "Vubis export file"
+                    :choose-structure "DTBook structure file"
                     ;;
                     :documents "Documents"
                     :confirm "Confirm"
@@ -62,6 +63,8 @@
                     :depth "Depth"
                     ;;
                     :transitions-state "Transition state to '%1'"
+                    :upload-structure "Upload structure for '%1'"
+                    :upload-vubis "Upload Vubis export file"
                     ;;
                     :details "Details"
                     :unknown-words "Unknown Words"
@@ -85,7 +88,6 @@
                    {:missing "Fehlende Übersetzung"
                     :approve "Bestätigen"
                     :approve-all "Alle Bestätigen"
-                    :choose-vubis "Vubis Export Datei"
                     :save "Speichern"
                     :delete "Löschen"
                     :cancel "Abbrechen"
@@ -105,6 +107,8 @@
                     :password "Passwort"
                     :no-file "Keine Datei ausgewählt"
                     :upload "Hochladen"
+                    :choose-vubis "Vubis Export Datei"
+                    :choose-structure "DTBook Struktur Datei"
                     ;;
                     :documents "Dokumente"
                     :confirm "Bestätigen"
@@ -141,6 +145,8 @@
                     :modified-at "Letzte Änderung"
                     ;;
                     :transitions-state "Status auf '%1' setzen"
+                    :upload-structure "Struktur Datei für '%1' hochladen"
+                    :upload-vubis "Vubis Export Datei hochladen"
                     ;;
                     :details "Details"
                     :unknown-words "Unbekannte Wörter"
