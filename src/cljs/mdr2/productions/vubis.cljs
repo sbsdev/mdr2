@@ -14,7 +14,7 @@
                       (.append "file" js-file-value "filename.txt"))]
       {:db (-> db
                (assoc-in [:loading :vubis] true)
-               (notifications/set-button-state :vubis :vubis-file))
+               (notifications/set-button-state :vubis :upload-file))
        :http-xhrio (as-transit
                     {:method          :post
                      :headers 	     (auth/auth-header db)
@@ -110,17 +110,17 @@
  (fn [db [_ id]] (get-in db [:productions :vubis id])))
 
 (rf/reg-sub
- ::vubis-file
+ ::upload-file
  (fn [db _] (get-in db [:upload :vubis])))
 
 (rf/reg-event-db
-  ::set-vubis-file
+  ::set-upload-file
   (fn [db [_ file]] (assoc-in db [:upload :vubis] file)))
 
 (defn- file-input []
   (let [get-value (fn [e] (-> e .-target .-files (aget 0)))
-        save!     #(rf/dispatch [::set-vubis-file %])
-        file      @(rf/subscribe [::vubis-file])]
+        save!     #(rf/dispatch [::set-upload-file %])
+        file      @(rf/subscribe [::upload-file])]
     [:p.control
      [:div.file.has-name
       [:label.file-label
@@ -134,9 +134,9 @@
        [:span.file-name (if file (.-name file) (tr [:no-file]))]]]]))
 
 (defn- file-upload []
-  (let [klass (when @(rf/subscribe [::notifications/button-loading? :vubis :vubis-file]) "is-loading")
+  (let [klass (when @(rf/subscribe [::notifications/button-loading? :vubis :upload-file]) "is-loading")
         admin? @(rf/subscribe [::auth/is-admin?])
-        file @(rf/subscribe [::vubis-file])]
+        file @(rf/subscribe [::upload-file])]
     [:div.field
      [file-input]
      [:p.control
