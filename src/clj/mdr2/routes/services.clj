@@ -146,18 +146,23 @@
                           :multipart {:file multipart/temp-file-part}}
              :handler (fn [{{{:keys [file]} :multipart {:keys [id]} :path} :parameters}]
                         (let [tempfile (:tempfile file)
+                              path (.getPath tempfile)
                               production (db/get-production {:id id})
                               errors (concat
                                       ;; validate XML
-                                      (pipeline/validate (.getPath tempfile) :dtbook)
+                                      (pipeline/validate path :dtbook)
                                       ;; validate meta data
-                                      (validation/validate-metadata (.getPath tempfile) production)
+                                      (validation/validate-metadata path production)
                                       ;; make sure production is in the state that allows upload
                                       (when (not (#{"new" "structured"} (:state production)))
                                         ["Production not in state \"new\" or \"structured\""]))]
                           (if-not (seq errors)
-                            (no-content)
-                            (bad-request {:status-text "Upload of DTBook XML structure failed" :errors errors}))))}}]]
+                            (let [p (prod/add-structure production tempfile)]
+                              (if-not (nom/anomaly? p)
+                                (no-content)
+                                (internal-server-error)))
+                            (bad-request {:status-text "Upload of DTBook XML structure failed"
+                                          :errors errors}))))}}]]
 
    ["/abacus"
     {:swagger {:tags ["Abacus API"]}}
