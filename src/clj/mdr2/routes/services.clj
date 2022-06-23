@@ -94,16 +94,16 @@
                          (->> (db/get-productions params)
                               (map prod/remove-null-values)
                               ok)))}
-      :put {:summary "Update or create a production"
-            ;;:middleware [wrap-restricted wrap-authorized]
-            ;;:swagger {:security [{:apiAuth []}]}
-            :parameters {:body prod.spec/production}
-            :handler (fn [{{p :body} :parameters}]
-                       (let [p (prod/create! p)]
-                         (if-not (nom/anomaly? p)
-                           (no-content)
-                           (bad-request {:status-text
-                                         (ex-message (:exception (nom/payload p)))}))))}}]
+      :post {:summary "Create a production"
+             ;;:middleware [wrap-restricted wrap-authorized]
+             ;;:swagger {:security [{:apiAuth []}]}
+             :parameters {:body prod.spec/production}
+             :handler (fn [{{p :body} :parameters}]
+                        (let [p (prod/create! p)]
+                          (if-not (nom/anomaly? p)
+                            (no-content)
+                            (bad-request {:status-text
+                                          (ex-message (:exception (nom/payload p)))}))))}}]
 
     ["/:id"
      {:get {:summary "Get a production by ID"
