@@ -50,22 +50,29 @@
 
 (rf/reg-event-fx
   ::save-production
-  (fn [{:keys [db]} [_ id]]
-    (let [production (get-in db [:productions :encoded id])
+  (fn [{:keys [db]} [_ uuid]]
+    (let [production (get-in db [:productions :encoded uuid])
+          id (:id production)
           cleaned (dissoc production :uuid)]
-      {:db (notifications/set-button-state db id :save)
+      {:db (notifications/set-button-state db uuid :save)
        :http-xhrio (as-transit
-                    {:method          :put
-                     :headers 	     (auth/auth-header db)
-                     :uri             (str "/api/productions")
+                    {:method          :post
+                     :headers 	      (auth/auth-header db)
+                     :uri             (str "/api/productions/" id "/library-signature")
                      :params          cleaned
-                     :on-success      [::ack-save id]
-                     :on-failure      [::ack-failure id :save]})})))
+                     :on-success      [::ack-save uuid]
+                     :on-failure      [::ack-failure uuid :save]})})))
 
-(rf/reg-event-db
+(rf/reg-event-fx
   ::ack-save
-  (fn [db [_ id]]
-    (notifications/clear-button-state db id :save)))
+  (fn [{:keys [db]} [_ id]]
+    (let [db (-> db
+                 (update-in [:productions :encoded] dissoc id)
+                 (notifications/clear-button-state id :save))
+          empty? (-> db (get-in [:productions :encoded]) count (< 1))]
+      (if empty?
+        {:db db :dispatch [::fetch-productions]}
+        {:db db}))))
 
 (rf/reg-event-db
  ::ack-failure
