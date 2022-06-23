@@ -148,8 +148,8 @@
   ;; FIXME: make sure nothing is inserted in the db if we cannot create the dirs
   ;;  (transaction)
   (nom/let-nom> [p (-> production
-                      add-default-meta-data
-                      db/insert-production)]
+                       add-default-meta-data
+                       db/insert-production)]
     (create-dirs p)
     (when (:product_number p)
       ;; notify the erp of the status change

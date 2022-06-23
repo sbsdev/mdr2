@@ -75,7 +75,7 @@
 
    ["/productions"
     {:swagger {:tags ["Productions"]}}
-    
+
     [""
      {:get {:summary "Get all productions"
             :description "Get all productions. Optionally limit the result set using a `search` term, a `limit` and an `offset`. If a `state` is given only return productions with that state, otherwise return all productions that are not 'archived' or 'deleted'"
