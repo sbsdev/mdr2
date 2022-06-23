@@ -5,6 +5,7 @@
     [reitit.ring.coercion :as coercion]
     [reitit.coercion.spec :as spec-coercion]
     [spec-tools.data-spec :as spec]
+    [clojure.spec.alpha :as s]
     [reitit.ring.middleware.muuntaja :as muuntaja]
     [reitit.ring.middleware.multipart :as multipart]
     [reitit.ring.middleware.parameters :as parameters]
@@ -122,6 +123,24 @@
                             (if (>= deleted 1)
                               (no-content)
                               (not-found))))}}]
+
+    ["/:id/library-signature"
+     {:post {:summary "Add a library signature to a production"
+             ;;:middleware [wrap-restricted wrap-authorized]
+             ;;:swagger {:security [{:apiAuth []}]}
+             :parameters {:body {:id int?
+                                 :library_signature ::prod.spec/library_signature
+                                 :state (s/and string? #{"encoded"})}}
+             :handler (fn [{{{:keys [id library_signature]} :body} :parameters}]
+                        (let [p (prod/get-production id)]
+                          (cond
+                            (nil? p) (not-found)
+                            (not= (:state p) "encoded") (method-not-allowed)
+                            :else (let [p (prod/set-state-cataloged! p)]
+                                    (if-not (nom/anomaly? p)
+                                      (no-content)
+                                      (bad-request {:status-text
+                                                    (ex-message (:exception (nom/payload p)))}))))))}}]
 
     ["/:id/xml"
      {:get {:summary "Get the DTBook XML structure for a production"
