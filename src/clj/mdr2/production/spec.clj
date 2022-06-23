@@ -17,6 +17,7 @@
    :date ::date
    (spec/opt :type) string?
    (spec/opt :format) string?
+   (spec/opt :id) int?
    :identifier string?
    (spec/opt :source) string?
    :language string?
