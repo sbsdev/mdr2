@@ -152,8 +152,8 @@
                              ok
                              (content-type "text/xml")
                              (charset "UTF-8"))
-                         (not-found)))
-            }
+                         (not-found)))}
+
       :post {:summary "Upload the DTBook XML structure for a production"
              :parameters {:path {:id int?}
                           :multipart {:file multipart/temp-file-part}}
