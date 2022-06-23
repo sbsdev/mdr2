@@ -158,6 +158,11 @@
 (defn remove-null-values [production]
   (medley/remove-vals nil? production))
 
+(defn get-production [id]
+  (-> {:id id}
+      db/get-production
+      remove-null-values))
+
 (defn update! [production]
   (db/update-production production))
 

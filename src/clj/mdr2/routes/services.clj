@@ -109,9 +109,7 @@
      {:get {:summary "Get a production by ID"
             :parameters {:path {:id int?}}
             :handler (fn [{{{:keys [id]} :path} :parameters}]
-                       (if-let [doc (-> {:id id}
-                                        db/get-production
-                                        prod/remove-null-values)]
+                       (if-let [doc (prod/get-production id)]
                          (ok doc)
                          (not-found)))}
 
@@ -129,7 +127,7 @@
      {:get {:summary "Get the DTBook XML structure for a production"
             :parameters {:path {:id int?}}
             :handler (fn [{{{:keys [id]} :path} :parameters}]
-                       (if-let [doc (db/get-production {:id id})]
+                       (if-let [doc (prod/get-production id)]
                          (-> doc
                              dtbook/dtbook
                              ok
@@ -143,7 +141,7 @@
              :handler (fn [{{{:keys [file]} :multipart {:keys [id]} :path} :parameters}]
                         (let [tempfile (:tempfile file)
                               path (.getPath tempfile)
-                              production (db/get-production {:id id})
+                              production (prod/get-production id)
                               errors (concat
                                       ;; validate XML
                                       (pipeline/validate path :dtbook)
