@@ -12,7 +12,8 @@
             [mdr2.obi :as obi]
             [mdr2.pipeline1 :as pipeline]
             [clojure.tools.logging :as log]
-            [de.otto.nom.core :as nom]))
+            [de.otto.nom.core :as nom]
+            [medley.core :as medley]))
 
 (defn library-signature?
   "Return true if `id` is a valid library signature"
@@ -153,6 +154,9 @@
     (when (:product_number p)
       ;; notify the erp of the status change
       (>!! queues/notify-abacus p))))
+
+(defn remove-null-values [production]
+  (medley/remove-vals nil? production))
 
 (defn update! [production]
   (db/update-production production))

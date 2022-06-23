@@ -84,22 +84,16 @@
                                  (spec/opt :limit) int?
                                  (spec/opt :offset) int?}}
             :handler (fn [{{{:keys [limit offset search state]
-                             :or {limit default-limit offset 0}} :query} :parameters}]
-                       (cond
-                         (repair/production-id? search) ;; DAM123
-                         (ok (db/get-productions {:id (subs search 3) :state state
-                                                  :limit limit :offset offset}))
-                         (prod/library-signature? search) ;; ds12345
-                         (ok (db/get-productions {:library_signature search :state state
-                                                  :limit limit :offset offset}))
-                         (repair/product-number? search) ;; DY123
-                         (ok (db/get-productions {:product_number search :state state
-                                                  :limit limit :offset offset}))
-                         :else
-                         (ok (db/get-productions
-                              {:limit limit :offset offset
-                               :search (if (blank? search) nil (db/search-to-sql search))
-                               :state state}))))}
+                             :or {search "" limit default-limit offset 0}} :query} :parameters}]
+                       (let [params (cond
+                                      (repair/production-id? search) {:id (subs search 3)} ;; DAM123
+                                      (prod/library-signature? search) {:library_signature search} ;; ds12345
+                                      (repair/product-number? search) {:product_number search} ;; DY123
+                                      :else {:search (if (blank? search) nil (db/search-to-sql search))})
+                             params (merge {:state state :limit limit :offset offset} params)]
+                         (->> (db/get-productions params)
+                              (map prod/remove-null-values)
+                              ok)))}
       :put {:summary "Update or create a production"
             ;;:middleware [wrap-restricted wrap-authorized]
             ;;:swagger {:security [{:apiAuth []}]}
@@ -115,7 +109,9 @@
      {:get {:summary "Get a production by ID"
             :parameters {:path {:id int?}}
             :handler (fn [{{{:keys [id]} :path} :parameters}]
-                       (if-let [doc (db/get-production {:id id})]
+                       (if-let [doc (-> {:id id}
+                                        db/get-production
+                                        prod/remove-null-values)]
                          (ok doc)
                          (not-found)))}
 
