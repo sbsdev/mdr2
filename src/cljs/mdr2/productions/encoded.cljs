@@ -52,8 +52,7 @@
   ::save-production
   (fn [{:keys [db]} [_ id]]
     (let [production (get-in db [:productions :encoded id])
-          cleaned (-> production
-                      (select-keys [:untranslated :uncontracted :contracted :type :homograph-disambiguation]))]
+          cleaned (dissoc production :uuid)]
       {:db (notifications/set-button-state db id :save)
        :http-xhrio (as-transit
                     {:method          :put
