@@ -242,7 +242,7 @@
          [:button.button
           {:on-click (fn [e] (rf/dispatch [::recorded-production uuid]))}
           [:span.icon.is-small
-           [:span.material-icons "mic"]]]))
+           [:span.material-icons "record_voice_over"]]]))
      ;; show the "Split" button if the next state is "split" and the user is
      ;; authorized
      (when (and (seq (set/intersection #{"madras2.it" "madras2.admin"} roles))
