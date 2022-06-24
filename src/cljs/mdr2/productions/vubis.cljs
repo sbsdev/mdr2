@@ -52,7 +52,7 @@
       {:db (notifications/set-button-state db id :vubis)
        :http-xhrio
        (as-transit
-        {:method          :put
+        {:method          :post
          :headers         (auth/auth-header db)
          :uri             "/api/productions"
          :params          cleaned
