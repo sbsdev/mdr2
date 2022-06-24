@@ -41,7 +41,7 @@
       [:tbody
        [:tr [:th {:width 200} (tr [:title])] [:td title]]
        [:tr [:th (tr [:creator])] [:td creator]]
-       [:tr [:th (tr [:source-publisher])] [:td source_publisher]]
+       [:tr [:th (tr [:source_publisher])] [:td source_publisher]]
        [:tr [:th (tr [:state])] [:td state]]]]])
 
 (defn details [production]
