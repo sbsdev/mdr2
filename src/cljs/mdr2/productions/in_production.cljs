@@ -6,7 +6,8 @@
             [mdr2.pagination :as pagination]
             [mdr2.productions.production :as production]
             [mdr2.productions.notifications :as notifications]
-            [re-frame.core :as rf]))
+            [re-frame.core :as rf]
+            [clojure.set :as set]))
 
 (rf/reg-event-fx
   ::fetch-productions
@@ -192,7 +193,7 @@
 
 (defn- structure-upload []
   (let [klass (when @(rf/subscribe [::notifications/button-loading? :in-production :upload-file]) "is-loading")
-        admin? @(rf/subscribe [::auth/is-admin?])
+        roles @(rf/subscribe [::auth/user-roles])
         file @(rf/subscribe [::upload-file])
         current @(rf/subscribe [::production/current])]
     [:<>
@@ -202,7 +203,7 @@
      [:div.field.is-grouped
       [:p.control
        [:button.button
-        {:disabled (or (nil? file) (not admin?))
+        {:disabled (or (nil? file) (empty? (set/intersection #{"madras2.it" "madras2.etext"} roles)))
          :class klass
          :on-click (fn [e] (rf/dispatch [::upload-dtbook file]))}
         [:span (tr [:upload])]
@@ -210,27 +211,31 @@
          [:span.material-icons "upload_file"]]]]]]))
 
 (defn buttons [{:keys [uuid id state] :as production}]
-  (let [admin? @(rf/subscribe [::auth/is-admin?])]
+  (let [roles @(rf/subscribe [::auth/user-roles])]
     [:div.buttons.has-addons
-     [:a.button
-      {:href (str "/api/productions/" id "/xml")
-       :download (str id ".xml")
-       ;; allow dtbook download only for state new and structured
-       :disabled (not (and admin? (#{"new" "structured"} state)))}
-      [:span.icon.is-small
-       [:span.material-icons "file_download"]]]
-     [:a.button
-      {:disabled (not (and admin? (#{"new" "structured"} state)))
-       :href (str "#/productions/" id "/upload")
-       :on-click (fn [e] (rf/dispatch [::production/set-current production]))}
-      [:span.icon.is-small
-       [:span.material-icons "file_upload"]]]
+     ;; show the download button while the production hasn't been recorded
+     (when (#{"new" "structured"} state)
+       [:a.button
+        {:href (str "/api/productions/" id "/xml")
+         :download (str id ".xml")}
+        [:span.icon.is-small
+         [:span.material-icons "file_download"]]])
+     ;; show the upload button if the production hasn't been recorded
+     ;; and the user is authorized
+     (when (and (seq (set/intersection #{"madras2.it" "madras2.etext"} roles))
+                (#{"new" "structured"} state))
+       [:a.button
+        {:href (str "#/productions/" id "/upload")
+         :on-click (fn [e] (rf/dispatch [::production/set-current production]))}
+        [:span.icon.is-small
+         [:span.material-icons "file_upload"]]])
      ;; show the "Recorded" button if the next state is "recorded",
      ;; the user is authorized, and the production has been imported
      ;; from the libary, i.e. is not handled via ABACUS or the
      ;; production has a revision greater than zero as is the case
      ;; with productions that are repaired
-     (when (and admin? (#{"structured"} state)
+     (when (and (seq (set/intersection #{"madras2.it" "madras2.admin"} roles))
+                (#{"structured"} state)
                 (or (:library_number production) (> (:revision production) 0)))
        (if @(rf/subscribe [::notifications/button-loading? uuid :recorded])
          [:button.button.is-loading]
@@ -240,20 +245,21 @@
            [:span.material-icons "mic"]]]))
      ;; show the "Split" button if the next state is "split" and the user is
      ;; authorized
-     (when (and admin? (#{"pending-split"} state))
+     (when (and (seq (set/intersection #{"madras2.it" "madras2.admin"} roles))
+                (#{"pending-split"} state))
          (if @(rf/subscribe [::notifications/button-loading? uuid :split])
            [:button.button.is-loading]
            [:button.button
             {:on-click (fn [e] (rf/dispatch [::split-production uuid]))}
             [:span.icon.is-small
              [:span.material-icons "call_split"]]]))
-     (if @(rf/subscribe [::notifications/button-loading? uuid :delete])
-       [:button.button.is-danger.is-loading]
-       [:button.button.is-danger
-        {:disabled (not admin?)
-         :on-click (fn [e] (rf/dispatch [::delete-production uuid]))}
-        [:span.icon.is-small
-         [:span.material-icons "delete"]]])]))
+     (when (seq (set/intersection #{"madras2.it"} roles))
+       (if @(rf/subscribe [::notifications/button-loading? uuid :delete])
+         [:button.button.is-danger.is-loading]
+         [:button.button.is-danger
+          {:on-click (fn [e] (rf/dispatch [::delete-production uuid]))}
+          [:span.icon.is-small
+           [:span.material-icons "delete"]]]))]))
 
 (defn production-link [{:keys [id title] :as production}]
   [:a {:href (str "#/productions/" id)

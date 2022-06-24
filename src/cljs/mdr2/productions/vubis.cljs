@@ -5,7 +5,8 @@
             [mdr2.auth :as auth]
             [mdr2.i18n :refer [tr]]
             [mdr2.productions.notifications :as notifications]
-            [re-frame.core :as rf]))
+            [re-frame.core :as rf]
+            [clojure.set :as set]))
 
 (rf/reg-event-fx
   ::extract-productions
@@ -135,14 +136,14 @@
 
 (defn- file-upload []
   (let [klass (when @(rf/subscribe [::notifications/button-loading? :vubis :upload-file]) "is-loading")
-        admin? @(rf/subscribe [::auth/is-admin?])
+        roles @(rf/subscribe [::auth/user-roles])
         file @(rf/subscribe [::upload-file])]
     [:div.field
      [:label.label (tr [:upload-vubis])]
      [file-input]
      [:p.control
       [:button.button
-       {:disabled (or (nil? file) (not admin?))
+       {:disabled (or (nil? file) (empty? (set/intersection #{"madras2.it" "madras2.admin"} roles)))
         :class klass
         :on-click (fn [e] (rf/dispatch [::extract-productions file]))}
        [:span (tr [:upload])]
@@ -150,20 +151,20 @@
         [:span.material-icons "upload_file"]]]]]))
 
 (defn buttons [id]
-  (let [admin? @(rf/subscribe [::auth/is-admin?])]
+  (let [roles @(rf/subscribe [::auth/user-roles])]
     (if @(rf/subscribe [::notifications/button-loading? id :save])
       [:button.button.is-loading]
       [:div.field.has-addons
        [:p.control
         [:button.button.is-danger
-         {:disabled (not admin?)
+         {:disabled (empty? (set/intersection #{"madras2.it" "madras2.admin"} roles))
           :on-click (fn [e] (rf/dispatch [::ignore-production id]))}
          #_[:span.is-sr-only (tr [:ignore])]
          [:span.icon
           [:span.material-icons "cancel"]]]]
        [:p.control
         [:button.button.is-success
-         {:disabled (not admin?)
+         {:disabled (empty? (set/intersection #{"madras2.it" "madras2.admin"} roles))
           :on-click (fn [e] (rf/dispatch [::save-production id]))}
          #_[:span (tr [:save])]
          [:span.icon

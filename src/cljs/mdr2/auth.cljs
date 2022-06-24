@@ -42,11 +42,6 @@
    (-> db :credentials some?)))
 
 (rf/reg-sub
- ::is-admin?
- (fn [db [_ _]]
-   (-> db :credentials :user utils/is-admin?)))
-
-(rf/reg-sub
  ::user
  (fn [db [_ _]]
    (-> db :credentials :user)))
@@ -60,6 +55,11 @@
  ::user-given-name
  :<- [::user]
  (fn [user] (-> user :givenName)))
+
+(rf/reg-sub
+ ::user-roles
+ :<- [::user]
+ (fn [user] (-> user :roles)))
 
 (defn auth-header [db]
   (let [token (get-in db [:credentials :token])]

@@ -1,5 +1,6 @@
 (ns mdr2.productions.repair
   (:require [ajax.core :as ajax]
+            [clojure.set :as set]
             [mdr2.auth :as auth]
             [mdr2.ajax :refer [as-transit]]
             [mdr2.i18n :refer [tr]]
@@ -126,11 +127,11 @@
    (get-in db [:productions :repair id])))
 
 (defn buttons [id]
-  (let [admin? @(rf/subscribe [::auth/is-admin?])]
+  (let [roles @(rf/subscribe [::auth/user-roles])]
     (if @(rf/subscribe [::notifications/button-loading? id :repair])
        [:button.button.is-loading]
        [:button.button
-        {:disabled (not admin?)
+        {:disabled (empty? (set/union #{"madras2.it" "madras2.admin" "madras2.studio"} roles))
          :on-click (fn [e] (rf/dispatch [::repair-production id]))}
         [:span (tr [:repair])]
         [:span.icon.is-small

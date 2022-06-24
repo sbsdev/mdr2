@@ -1,5 +1,6 @@
 (ns mdr2.productions.encoded
   (:require [ajax.core :as ajax]
+            [clojure.set :as set]
             [cljs-time.format :as tf]
             [mdr2.auth :as auth]
             [mdr2.i18n :refer [tr]]
@@ -139,11 +140,12 @@
 
 (defn buttons [id]
   (let [valid? @(rf/subscribe [::production-valid? id])
-        admin? @(rf/subscribe [::auth/is-admin?])]
+        roles @(rf/subscribe [::auth/user-roles])]
     (if @(rf/subscribe [::notifications/button-loading? id :save])
       [:button.button.is-loading]
       [:button.button
-       {:disabled (not (and valid? admin?))
+       {:disabled (or (not valid?)
+                      (empty? (set/union #{"madras2.it" "madras2.catalog"} roles)))
         :on-click (fn [e] (rf/dispatch [::save-production id]))}
        #_[:span (tr [:save])]
        [:span.icon

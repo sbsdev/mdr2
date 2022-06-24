@@ -18,7 +18,8 @@
     [mdr2.productions.vubis :as vubis]
     [reitit.core :as reitit]
     [reitit.frontend.easy :as rfe]
-    [clojure.string :as string])
+    [clojure.string :as string]
+    [clojure.set :as set])
   (:import goog.History))
 
 (defn nav-link [uri title page]
@@ -29,25 +30,29 @@
 
 (defn navbar []
   (r/with-let [expanded? (r/atom false)]
-              [:nav.navbar.is-info>div.container
-               [:div.navbar-brand
-                [:a.navbar-item {:style {:font-weight :bold}} "Madras 2"]
-                [:span.navbar-burger.burger
-                 {:data-target :nav-menu
-                  :on-click #(swap! expanded? not)
-                  :class (when @expanded? :is-active)}
-                 [:span][:span][:span]]]
-               [:div#nav-menu.navbar-menu
-                {:class (when @expanded? :is-active)}
-                [:div.navbar-start
-                 [nav-link "#/in-production" "Productions" :in-production]
-                 [nav-link "#/archived" "Archived" :archived]
-                 [nav-link "#/encoded" "Encoded" :encoded]
-                 [nav-link "#/repair" "Repair" :repair]
-                 [nav-link "#/vubis" "Upload" :vubis]]
-                [:div.navbar-end
-                 [:div.navbar-item
-                  (auth/user-buttons)]]]]))
+    (let [roles @(rf/subscribe [::auth/user-roles])]
+          [:nav.navbar.is-info>div.container
+           [:div.navbar-brand
+            [:a.navbar-item {:style {:font-weight :bold}} "Madras 2"]
+            [:span.navbar-burger.burger
+             {:data-target :nav-menu
+              :on-click #(swap! expanded? not)
+              :class (when @expanded? :is-active)}
+             [:span][:span][:span]]]
+           [:div#nav-menu.navbar-menu
+            {:class (when @expanded? :is-active)}
+            [:div.navbar-start
+             [nav-link "#/in-production" "Productions" :in-production]
+             [nav-link "#/archived" "Archived" :archived]
+             (when (seq (set/intersection #{"madras2.it" "madras2.catalog"} roles))
+                 [nav-link "#/encoded" "Encoded" :encoded])
+             (when (seq (set/intersection #{"madras2.it" "madras2.admin" "madras2.studio"} roles))
+                 [nav-link "#/repair" "Repair" :repair])
+             (when (seq (set/intersection #{"madras2.it" "madras2.admin"} roles))
+               [nav-link "#/vubis" "Upload" :vubis])]
+            [:div.navbar-end
+             [:div.navbar-item
+              (auth/user-buttons)]]]])))
 
 (defn page []
   (if-let [page @(rf/subscribe [:common/page])]
