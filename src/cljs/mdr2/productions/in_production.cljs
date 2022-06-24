@@ -240,13 +240,13 @@
 
 
 (defn production [id]
-  (let [{:keys [uuid id title type state] :as production} @(rf/subscribe [::production id])]
+  (let [{:keys [uuid id production_type state] :as production} @(rf/subscribe [::production id])]
     [:tr
      [:td id]
      [:td [production-link production]]
-     [:td type]
+     [:td production_type]
      [:td state]
-     [:td {:width "11%"} [buttons production]]]))
+     [:td {:width "14%"} [buttons production]]]))
 
 (defn productions []
   (let [productions @(rf/subscribe [::productions-sorted])]
@@ -256,7 +256,7 @@
        [:tr
         [:th (tr [:dam])]
         [:th (tr [:title])]
-        [:th (tr [:type])]
+        [:th (tr [:production_type])]
         [:th (tr [:state])]
         [:th (tr [:action])]]]
       [:tbody
