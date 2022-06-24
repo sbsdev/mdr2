@@ -274,7 +274,7 @@
      [:td [production-link production]]
      [:td production_type]
      [:td state]
-     [:td {:width "14%"} [buttons production]]]))
+     [:td #_{:width "14%"} [buttons production]]]))
 
 (defn productions []
   (let [productions @(rf/subscribe [::productions-sorted])]
