@@ -216,15 +216,37 @@
       {:href (str "/api/productions/" id "/xml")
        :download (str id ".xml")
        ;; allow dtbook download only for state new and structured
-       :disabled (not (#{"new" "structured"} state))}
+       :disabled (not (and admin? (#{"new" "structured"} state)))}
       [:span.icon.is-small
        [:span.material-icons "file_download"]]]
      [:a.button
-      {:disabled (not admin?)
+      {:disabled (not (and admin? (#{"new" "structured"} state)))
        :href (str "#/productions/" id "/upload")
        :on-click (fn [e] (rf/dispatch [::production/set-current production]))}
       [:span.icon.is-small
        [:span.material-icons "file_upload"]]]
+     ;; show the "Recorded" button if the next state is "recorded",
+     ;; the user is authorized, and the production has been imported
+     ;; from the libary, i.e. is not handled via ABACUS or the
+     ;; production has a revision greater than zero as is the case
+     ;; with productions that are repaired
+     (when (and admin? (#{"structured"} state)
+                (or (:library_number production) (> (:revision production) 0)))
+       (if @(rf/subscribe [::notifications/button-loading? uuid :recorded])
+         [:button.button.is-loading]
+         [:button.button
+          {:on-click (fn [e] (rf/dispatch [::recorded-production uuid]))}
+          [:span.icon.is-small
+           [:span.material-icons "mic"]]]))
+     ;; show the "Split" button if the next state is "split" and the user is
+     ;; authorized
+     (when (and admin? (#{"pending-split"} state))
+         (if @(rf/subscribe [::notifications/button-loading? uuid :split])
+           [:button.button.is-loading]
+           [:button.button
+            {:on-click (fn [e] (rf/dispatch [::split-production uuid]))}
+            [:span.icon.is-small
+             [:span.material-icons "call_split"]]]))
      (if @(rf/subscribe [::notifications/button-loading? uuid :delete])
        [:button.button.is-danger.is-loading]
        [:button.button.is-danger
