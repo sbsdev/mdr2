@@ -5,7 +5,6 @@
     [reitit.ring.coercion :as coercion]
     [reitit.coercion.spec :as spec-coercion]
     [spec-tools.data-spec :as spec]
-    [clojure.spec.alpha :as s]
     [reitit.ring.middleware.muuntaja :as muuntaja]
     [reitit.ring.middleware.multipart :as multipart]
     [reitit.ring.middleware.parameters :as parameters]
@@ -130,7 +129,7 @@
              ;;:swagger {:security [{:apiAuth []}]}
              :parameters {:body {:id int?
                                  :library_signature ::prod.spec/library_signature
-                                 :state (s/and string? #{"encoded"})}}
+                                 :state ::prod.spec/state}}
              :handler (fn [{{{:keys [id library_signature]} :body} :parameters}]
                         (let [p (prod/get-production id)]
                           (cond
