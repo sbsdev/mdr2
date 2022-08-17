@@ -132,14 +132,13 @@
                          (let [p (prod/get-production id)]
                            (cond
                              (nil? p) (not-found)
-                             library_signature (if (= (:state p) "encoded")
-                                                 (let [p (prod/set-state-cataloged! p)]
-                                                   (if-not (nom/anomaly? p)
-                                                     (no-content)
-                                                     (bad-request {:status-text
-                                                                   (ex-message (:exception (nom/payload p)))})))
-                                                 (conflict {:status-text "Production not in state \"encoded\""}))
-                             :else (bad-request))))}}]
+                             (not= (:state p) "encoded") (conflict {:status-text "Only encoded productions can be assigned a library signature"})
+                             :else (let [p (prod/set-state-cataloged! p)]
+                                     (if-not (nom/anomaly? p)
+                                       (no-content)
+                                       (bad-request {:status-text
+                                                     (ex-message (:exception (nom/payload p)))}))))))}}]
+
 
     ["/:id/xml"
      {:get {:summary "Get the DTBook XML structure for a production"
