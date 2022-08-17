@@ -52,15 +52,13 @@
 (rf/reg-event-fx
   ::save-production
   (fn [{:keys [db]} [_ uuid]]
-    (let [production (get-in db [:productions :encoded uuid])
-          id (:id production)
-          cleaned (dissoc production :uuid)]
+    (let [{:keys [id library_signature]} (get-in db [:productions :encoded uuid])]
       {:db (notifications/set-button-state db uuid :save)
        :http-xhrio (as-transit
-                    {:method          :post
+                    {:method          :patch
                      :headers 	      (auth/auth-header db)
-                     :uri             (str "/api/productions/" id "/library-signature")
-                     :params          cleaned
+                     :uri             (str "/api/productions/" id)
+                     :params          {:library_signature library_signature}
                      :on-success      [::ack-save uuid]
                      :on-failure      [::ack-failure uuid :save]})})))
 

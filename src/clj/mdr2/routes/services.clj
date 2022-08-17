@@ -121,25 +121,25 @@
                           (let [deleted (db/delete-production {:id id})]
                             (if (>= deleted 1)
                               (no-content)
-                              (not-found))))}}]
+                              (not-found))))}
 
-    ["/:id/library-signature"
-     {:post {:summary "Add a library signature to a production"
-             ;;:middleware [wrap-restricted wrap-authorized]
-             ;;:swagger {:security [{:apiAuth []}]}
-             :parameters {:body {:id int?
-                                 :library_signature ::prod.spec/library_signature
-                                 :state ::prod.spec/state}}
-             :handler (fn [{{{:keys [id library_signature]} :body} :parameters}]
-                        (let [p (prod/get-production id)]
-                          (cond
-                            (nil? p) (not-found)
-                            (not= (:state p) "encoded") (method-not-allowed)
-                            :else (let [p (prod/set-state-cataloged! p)]
-                                    (if-not (nom/anomaly? p)
-                                      (no-content)
-                                      (bad-request {:status-text
-                                                    (ex-message (:exception (nom/payload p)))}))))))}}]
+      :patch {:summary "Patch a production, e.g. update the library_signature"
+              ;;:middleware [wrap-restricted wrap-authorized]
+              ;;:swagger {:security [{:apiAuth []}]}
+              :parameters {:path {:id int?}
+                           :body {:library_signature ::prod.spec/library_signature}}
+              :handler (fn [{{{:keys [id]} :path {:keys [library_signature]} :body} :parameters}]
+                         (let [p (prod/get-production id)]
+                           (cond
+                             (nil? p) (not-found)
+                             library_signature (if (= (:state p) "encoded")
+                                                 (let [p (prod/set-state-cataloged! p)]
+                                                   (if-not (nom/anomaly? p)
+                                                     (no-content)
+                                                     (bad-request {:status-text
+                                                                   (ex-message (:exception (nom/payload p)))})))
+                                                 (conflict {:status-text "Production not in state \"encoded\""}))
+                             :else (bad-request))))}}]
 
     ["/:id/xml"
      {:get {:summary "Get the DTBook XML structure for a production"
