@@ -30,10 +30,10 @@ mp3 and the whole thing is packed up in one or more iso files
   ;; how to do this see
   ;; https://github.com/technomancy/leiningen/blob/stable/doc/DEPLOY.md
 
-  (:require [clojure.java.jdbc :as jdbc]
-            [clojure.java.io :refer [file]]
+  (:require [clojure.java.io :refer [file]]
             [clojure.tools.logging :as log]
             [mdr2.config :refer [env]]
+            [mdr2.db.core :as db]
             [java-time :as time]
             [babashka.fs :as fs]
             [mdr2.production :as prod]
@@ -103,10 +103,10 @@ mp3 and the whole thing is packed up in one or more iso files
     (if update
       (let [container-id (repair/container-id production sektion)]
         (log/debugf "Updating %s (%s, %s) in archive db" (:id production) sektion container-id)
-        (jdbc/update! db :container job ["id = ?" container-id]))
+        (db/update-archive-container-job (assoc job :container-id container-id)))
       (do
         (log/debugf "Adding %s (%s) to archive db" (:id production) sektion)
-        (jdbc/insert! db :container job)))))
+        (db/insert-archive-container-job job)))))
 
 (defn set-file-permissions
   "Set file permissions on `file-tree` to g+w recursively"
@@ -220,3 +220,15 @@ mp3 and the whole thing is packed up in one or more iso files
         (fs/copy (path/iso-name production volume) iso-archive-path)
         (set-file-permissions (file iso-archive-path))))
     (prod/set-state-archived! production)))
+
+(comment
+  (let [p {:id 50000 :revision 0 :library_signature "ds70000"}]
+    (db-job p :master))
+
+  (let [p {:id 50000 :revision 0 :library_signature "ds70000"}]
+    (add-to-db p :master))
+
+  (let [p {:id 50000 :revision 2 :library_signature "ds70000"}]
+    (add-to-db p :master))
+
+  )
