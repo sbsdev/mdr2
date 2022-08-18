@@ -1,0 +1,145 @@
+# -*- mode: restclient; -*-
+
+#################################
+# Manual tests for the REST API #
+#################################
+
+########
+# Auth #
+########
+
+# Get a token
+POST http://localhost:3000/api/login
+Content-Type: application/json
+{
+  "username": "ada",
+  "password": "lovelace"
+}
+
+# Get a token
+POST http://localhost:3000/api/login
+Content-Type: application/json
+{
+  "username": "berta",
+  "password": "lovelace"
+}
+
+###############
+# Productions #
+###############
+
+# Get productions
+GET http://localhost:3000/api/productions
+
+# Get one production
+GET http://localhost:3000/api/productions?limit=1
+
+# Get a specific production
+GET http://localhost:3000/api/productions/31411
+
+# Get a specific production in the form of transit
+GET http://localhost:3000/api/productions/31411
+Accept: application/transit+json
+
+# Get a specific production
+GET http://localhost:3000/api/productions?product_number=DY33514
+
+# Add a production
+PUT http://localhost:3000/api/productions
+Content-Type: application/json
+{
+  "title": "Hehe",
+  "creator": "Foo",
+  "description": "not much",
+  "source": "978-3-257-07184-11",
+  "language": "de",
+  "source_date": "2022-06-16T09:38:03.196Z",
+  "source_publisher": "Vargos",
+  "library_number": "PNX 8434"
+}
+
+# Add a production using transit
+PUT http://localhost:3000/api/productions
+Content-Type: application/transit+json
+[
+  "^ ",
+  "~:description",
+  "Der Held muss in die Welt hinaus und Abenteuer erleben, um ein Held zu werden. Und was ist mit der Heldin? Doris Dörrie erzählt von drei Reisen nach San Francisco, Japan und Marokko und davon, als Frau in der Welt unterwegs zu sein. Sich dem Ungewissen, Fremden auszusetzen heisst immer auch, den eigenen Ängsten, Abhängigkeiten, Verlusten ins Auge zu sehen. Und dabei zur Heldin der eigenen Geschichte zu werden.",
+  "~:creator",
+  "Dörrie, Doris",
+  "~:source",
+  "978-3-257-07184-9",
+  "~:title",
+  "Die Heldin reist",
+  "~:source_publisher",
+  "Diogenes",
+  "~:language",
+  "de",
+  "~:source_date",
+  [
+    "~#LocalDate",
+    "2022-01-01"
+  ],
+  "~:library_number",
+  "PNX 8434"
+]
+
+# Get the xml for a production
+GET http://localhost:3000/api/productions/31017/xml
+Content-Type: application/json
+
+# Set the xml for a production
+POST http://localhost:3000/api/productions/31017/xml
+Accept: application/json
+Content-Type: multipart/form-data
+
+< /home/eglic/Downloads/31515.xml
+
+################################
+# Assign the library signature #
+################################
+
+# Assign a library signature to a production
+# should produce a 204
+PATCH http://localhost:3000/api/productions/30111
+Accept: application/json
+Content-Type: application/json
+{
+ "library_signature": "ds70000"
+}
+
+# Assign a library signature to a non-existing production
+# should produce a 404
+PATCH http://localhost:3000/api/productions/301111111
+Accept: application/json
+Content-Type: application/json
+{
+ "library_signature": "ds70000"
+}
+
+# Assign an invalid library signature to a production
+# should produce a 400
+PATCH http://localhost:3000/api/productions/30111
+Accept: application/json
+Content-Type: application/json
+{
+ "library_signature": "haha"
+}
+
+# Assign an invalid library signature to a production
+# should produce a 400
+PATCH http://localhost:3000/api/productions/30111
+Accept: application/json
+Content-Type: application/json
+{
+ "library_signature": "ds123"
+}
+
+# Assign an invalid library signature to a production which doesn't have the right state
+# should produce a 409
+PATCH http://localhost:3000/api/productions/31298
+Accept: application/json
+Content-Type: application/json
+{
+ "library_signature": "ds12345"
+}
