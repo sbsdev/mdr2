@@ -133,7 +133,9 @@
                            (cond
                              (nil? p) (not-found)
                              (not= (:state p) "encoded") (conflict {:status-text "Only encoded productions can be assigned a library signature"})
-                             :else (let [p (prod/set-state-cataloged! p)]
+                             :else (let [p (-> p
+                                            (assoc :library_signature library_signature)
+                                            prod/set-state-cataloged!)]
                                      (if-not (nom/anomaly? p)
                                        (no-content)
                                        (bad-request {:status-text
