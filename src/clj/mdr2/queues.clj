@@ -13,6 +13,11 @@
   
   :stop (when archive (close! archive)))
 
+(defstate repair
+  :start (chan (buffer 30))
+
+  :stop (when repair (close! repair)))
+
 (defstate notify-abacus
   :start (chan (buffer 30))
   
