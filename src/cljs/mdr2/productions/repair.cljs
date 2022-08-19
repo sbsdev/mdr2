@@ -51,17 +51,12 @@
 (rf/reg-event-fx
   ::repair-production
   (fn [{:keys [db]} [_ id]]
-    (let [production (get-in db [:productions :repair id])
-          cleaned (-> production
-                      (select-keys [:untranslated :uncontracted :contracted :type :homograph-disambiguation]))]
-      {:db (notifications/set-button-state db id :repair)
-       :http-xhrio
-       (as-transit {:method          :put
-                    :headers 	     (auth/auth-header db)
-                    :uri             (str "/api/productions")
-                    :params          cleaned
-                    :on-success      [::ack-repair id]
-                    :on-failure      [::ack-failure id :repair]})})))
+    {:db (notifications/set-button-state db id :repair)
+     :http-xhrio (as-transit {:method          :post
+                              :headers         (auth/auth-header db)
+                              :uri             (str "/api/" id "/repair")
+                              :on-success      [::ack-repair id]
+                              :on-failure      [::ack-failure id :repair]})}))
 
 (rf/reg-event-db
   ::ack-repair

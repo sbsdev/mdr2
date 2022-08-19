@@ -141,6 +141,21 @@
                                        (bad-request {:status-text
                                                      (ex-message (:exception (nom/payload p)))}))))))}}]
 
+    ["/:id/repair"
+     {:post {:summary "Repair a production"
+             ;;:middleware [wrap-restricted wrap-authorized]
+             ;;:swagger {:security [{:apiAuth []}]}
+             :parameters {:path {:id int?}}
+             :handler (fn [{{{:keys [id]} :path} :parameters}]
+                        (let [p (prod/get-production id)]
+                          (cond
+                            (nil? p) (not-found)
+                            (not= (:state p) "archived") (conflict {:status-text "Only archived productions can be repaired"})
+                            :else (let [p (prod/repair! p)]
+                                    (if-not (nom/anomaly? p)
+                                      (no-content)
+                                      (bad-request {:status-text
+                                                    (ex-message (:exception (nom/payload p)))}))))))}}]
 
     ["/:id/xml"
      {:get {:summary "Get the DTBook XML structure for a production"

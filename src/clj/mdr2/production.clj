@@ -254,6 +254,10 @@
   (delete-all-dirs! production)
   (set-state! production "archived"))
 
+(defn repair!
+  [production]
+  (>!! queues/repair production))
+
 (defn delete!
   "Delete a `production`"
   [production]
