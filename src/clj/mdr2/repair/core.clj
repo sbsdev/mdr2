@@ -79,7 +79,8 @@
         (log/error error-msg)
         [error-msg])
       :else
-      (let [container-id (container-id production)
+      (let [production (prod/set-state! production "repairing")
+            container-id (container-id production)
             url (archive-url container-id)
             response (client/get url
                                  {:as :stream
