@@ -4,7 +4,8 @@
 
 (s/def ::state (s/and string?
                       #{"new" "archived" "cataloged" "deleted" "encoded"
-                        "failed" "pending-split" "recorded" "split" "structured"}))
+                        "failed" "pending-split" "recorded" "split" "structured"
+                        "repairing"}))
 (s/def ::production_type (s/and string? #{"book" "periodical" "other"}))
 (s/def ::library_signature (s/and string? #(re-matches #"^ds\d{5,}$" %)))
 (s/def ::date #(instance? java.time.LocalDate %))
