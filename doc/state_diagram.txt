@@ -11,6 +11,7 @@ state Cataloged
 state Archived
 state Deleted
 state Failed
+state Repairing
 '/
 
 New: all folders created
@@ -19,6 +20,7 @@ PendingVolumeSplit: waiting for manual split
 Encoded: mp3 generated,\n iso generated
 Cataloged: ds number assigned
 Archived: production archived,\n all files removed
+Repairing: asynchronous, while files are\n retrieved from the archive
 
 [*] --> New : @abacus
 [*] --> Structured : @admin, @studio, @it\n via repair
@@ -31,6 +33,9 @@ Cataloged --> Archived
 Split --> Encoded
 Recorded --> PendingVolumeSplit
 PendingVolumeSplit --> Split : @admin, @it
+
+Archived --> Repairing
+Repairing --> Structured
 
 Recorded --> Failed
 New --> Deleted : @it
