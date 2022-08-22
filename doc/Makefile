@@ -1,3 +1,7 @@
 
-state_diagram.png: state_diagram.txt
+all: state_diagram.png context_diagram.png
+
+%.png: %.txt
 	plantuml $<
+
+

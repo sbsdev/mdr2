@@ -1,0 +1,28 @@
+@startuml
+
+[Obi]
+[Madras2]
+[ABACUS]
+[Library]
+[DAISY Pipeline] as dp2
+[Archive]
+
+Madras2 -- Obi
+Madras2 ..> ABACUS : notifies
+ABACUS ..> Madras2 : notifies
+Madras2 -- Library
+Madras2 ..> dp2 : use
+Madras2 -- Archive
+
+/'
+ ' ABACUS
+ '     Order management and initiation of productions is typically done in the ERP namely ABACUS.
+ ' Library
+ '     Some production orders come directly from the library as they are not managed in the ERP.
+ ' Obi
+ '     The actual recording of the production is done in Obi.
+ ' DAISY Pipeline
+ '     The recorded productions are validated and converted to DAISY Talking Books using software from both the DAISY Pipeline 1 and DAISY Pipeline 2 projects
+ ' Archive
+ '/
+@enduml
