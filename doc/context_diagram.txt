@@ -1,28 +1,24 @@
 @startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
 
-[Obi]
-[Madras2]
-[ABACUS]
-[Library]
-[DAISY Pipeline] as dp2
-[Archive]
+System(Madras2, "Madras")
+System_Ext(Obi, "Obi", "The actual recording of the production is done in Obi")
+System_Ext(ABACUS, "ABACUS", "Order management and initiation of productions is typically done in the ERP namely ABACUS")
+System(dp2, "DAISY Pipeline", "The recorded productions are validated and converted to DAISY Talking Books using software from both the DAISY Pipeline 1 and DAISY Pipeline 2 projects")
+System_Ext(archive, "Archive", "")
+Person(libary, "Library", "Some production orders come directly from the library as they are not managed in the ERP")
+Person(studio, "Studio")
+Person(narrator, "Narrator")
 
-Madras2 -- Obi
-Madras2 ..> ABACUS : notifies
-ABACUS ..> Madras2 : notifies
-Madras2 -- Library
-Madras2 ..> dp2 : use
-Madras2 -- Archive
+Rel(Madras2, dp2, "Uses")
+Rel(studio, Madras2, "Uses")
+Rel(studio, ABACUS, "Uses")
+Rel(narrator, Obi, "narrate")
 
-/'
- ' ABACUS
- '     Order management and initiation of productions is typically done in the ERP namely ABACUS.
- ' Library
- '     Some production orders come directly from the library as they are not managed in the ERP.
- ' Obi
- '     The actual recording of the production is done in Obi.
- ' DAISY Pipeline
- '     The recorded productions are validated and converted to DAISY Talking Books using software from both the DAISY Pipeline 1 and DAISY Pipeline 2 projects
- ' Archive
- '/
+Rel(libary, Madras2, "add productions, assign library number")
+BiRel(Madras2, ABACUS, "notify", "state changes")
+BiRel(Madras2, archive, "archive/repair")
+
+BiRel(Madras2, Obi, "Create Obi config file, read narrated production")
+
 @enduml
