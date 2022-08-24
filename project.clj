@@ -58,7 +58,8 @@
                  [de.otto/nom "0.2.0"]
                  [clj-http "3.12.3"]
                  [org.clojure/data.csv "1.0.1"]
-                 [org.clojars.pntblnk/clj-ldap "0.0.17"]]
+                 [org.clojars.pntblnk/clj-ldap "0.0.17"]
+                 [failjure "2.2.0"]]
 
   :min-lein-version "2.0.0"
   

@@ -10,18 +10,18 @@
   all the relevant files are copied to the structured path and the
   production is set to state \"structured\". After that the repair
   takes its course down the same route as a normal production."
-  (:require [clojure.java.io :as io]
-            [clojure.tools.logging :as log]
-            [clj-http.client :as client]
-            [clojure.java.shell :as shell]
-            [mdr2.obi :as obi]
-            [mdr2.config :refer [env]]
-            [mdr2.production :as prod]
-            [mdr2.db.core :as db]
-            [mdr2.production.path :as path]
-            [babashka.fs :as fs]
-            [clojure.java.shell :as shell]
-            [mdr2.db.core :as db]))
+  (:require
+   [babashka.fs :as fs]
+   [clj-http.client :as client]
+   [clojure.java.io :as io]
+   [clojure.java.shell :as shell]
+   [clojure.tools.logging :as log]
+   [mdr2.config :refer [env]]
+   [mdr2.db.core :as db]
+   [mdr2.obi :as obi]
+   [mdr2.production :as prod]
+   [mdr2.production.path :as path]
+   [failjure.core :as fail]))
 
 (defn production-id?
   "Return true if `id` is a valid production id"
@@ -65,7 +65,7 @@
       (not= (:state production) "archived")
       (let [error-msg "Production is not in state \"archived\""]
         (log/error error-msg)
-        [error-msg])
+        (fail/fail error-msg))
       ;; checking for the state is not enough: there is a race
       ;; condition as the state is only set after all the files have
       ;; been copied. This takes time. So we also check for the
@@ -73,11 +73,11 @@
       (fs/exists? dest-path)
       (let [error-msg (format "Directory %s already exists" dest-path)]
         (log/error error-msg)
-        [error-msg])
+        (fail/fail error-msg))
       (fs/exists? tmp-dir)
       (let [error-msg (format "Directory %s already exists" tmp-dir)]
         (log/error error-msg)
-        [error-msg])
+        (fail/fail error-msg))
       :else
       (let [production (prod/set-state! production "repairing")
             container-id (container-id production)
@@ -88,31 +88,37 @@
         (log/infof "Repairing %s" id)
         (if (client/success? response)
           (let [dam-number (prod/dam-number production)
-                tar-file (fs/path tmp-dir (str dam-number ".tar"))
-                tar-dir (fs/path tmp-dir dam-number)]
-            ;; FIXME: fail fast if any of the filesystem operations below fail
-            ;; create all dirs for this production
-            (prod/create-dirs production)
-            ;; copy tar to tmpdir
-            (fs/create-dirs tmp-dir)
-            (with-open [input (:body response)]
-              (fs/copy input tar-file))
-            ;; extract the tar
-            ;;(compress/untar tar-file tar-dir)
-            (shell/sh "tar" "xzf" tar-file tar-dir)
-            ;; extract the relevant parts to the structured-path
-            (let [src-path (io/file tar-dir dam-number "produkt" dam-number)]
-              (doseq [f (filter #(.isFile %) (file-seq src-path))]
-                (fs/move f (io/file dest-path (fs/file-name f)))))
-            ;; clear the temporary files
-            (fs/delete-tree tmp-dir)
-            ;; create the obi config file
-            (obi/config-file production)
-            ;; set the state
-            (prod/set-state! production "structured"))
+                tar-file (fs/path tmp-dir (str dam-number ".tar"))]
+            (fail/try*
+              ;; fail fast if any of the filesystem operations below fail
+              ;; create all dirs for this production
+              (log/info "Create dirs" id)
+              (prod/create-dirs production)
+              ;; copy tar to tmpdir
+              (log/infof "Copy tar to tmpdir" tmp-dir)
+              (fs/create-dirs tmp-dir)
+              (with-open [input (:body response)]
+                (io/copy input (fs/file tar-file)))
+              ;; extract the tar
+              (log/infof "extract tar %s to %s" tar-file tmp-dir)
+              (shell/sh "tar" "--extract" (str "--file=" tar-file) :dir (fs/file tmp-dir))
+              ;; extract the relevant parts to the structured-path
+              (let [src-path (fs/file tmp-dir dam-number "produkt" dam-number)]
+                (log/infof "extract the relevant parts to the structured-path %s" src-path)
+                (doseq [f (filter #(.isFile %) (file-seq src-path))]
+                  (fs/move f (io/file dest-path (fs/file-name f)))))
+              ;; clear the temporary files
+              (log/info "clear the temporary files")
+              (fs/delete-tree tmp-dir)
+              ;; create the obi config file
+              (log/info "create the obi config file")
+              (obi/config-file production)
+              ;; set the state
+              (log/info "set the state")
+              (prod/set-state! production "structured")))
           (let [error-msg (format "Couldn't get %s from archive (%s)" id url)]
             ;; close the stream
             (.close (:body response))
             (log/error error-msg)
-            [error-msg]))))))
+            (fail/fail error-msg)))))))
 
