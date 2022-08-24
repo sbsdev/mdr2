@@ -1,0 +1,34 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+System_Boundary(mdr2, "Madras2") {
+	Container(Madras2, "Madras2")
+	ContainerDb(db, "Production Database", "MySQL", "Stores productions and their state")
+	Container(dp2, "DAISY Pipeline")
+	Container(spa, "SPA", "React, ClojureScript")
+	ContainerQueue(queue, "Queue", "Clojure core.async")
+}
+
+System_Ext(Obi, "Obi", "Narrate the production")
+System_Ext(erp, "ERP", "ABACUS")
+System_Ext(archive, "Archive", "Agadir")
+Person(libary, "Library")
+Person(studio, "Studio")
+Person(narrator, "Narrator")
+
+Rel(Madras2, queue, "Uses")
+Rel(queue, dp2, "Uses", "asynchronous handling of long running jobs")
+BiRel(Madras2, db, "Reads and writes", "JDBC")
+BiRel_L(Madras2, spa, "Reads and writes", "REST API")
+Rel(studio, spa, "Uses")
+Rel(studio, erp, "Uses")
+Rel(narrator, Obi, "narrate")
+
+Rel_L(libary, spa, "add productions, assign library number")
+BiRel_U(Madras2, erp, "notify", "File based events, state changes")
+Rel(Madras2, archive, "archive", "SQL + Filesystem (NFS)")
+Rel(archive, Madras2, "repair", "HTTP GET")
+Rel_L(Madras2, Obi, "Create Obi config file", "Filesystem (NFS)")
+Rel_R(Obi, Madras2, "Read narrated production", "Filesystem (NFS)")
+
+@enduml
