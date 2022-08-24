@@ -143,3 +143,23 @@ Content-Type: application/json
 {
  "library_signature": "ds12345"
 }
+
+##########################
+# Repairing a production #
+##########################
+
+# Repair a production
+POST http://localhost:3000/api/productions/31356/repair
+Accept: application/json
+
+# Repair a production which is not archived
+# should produce a 409
+POST http://localhost:3000/api/productions/31412/repair
+Accept: application/json
+
+# Repair a production which doesn't exist
+# should produce a 404
+POST http://localhost:3000/api/productions/3000000/repair
+Accept: application/json
+
+
