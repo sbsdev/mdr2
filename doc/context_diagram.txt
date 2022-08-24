@@ -2,9 +2,9 @@
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
 
 System(Madras2, "Madras")
-System_Ext(Obi, "Obi", "The actual recording of the production is done in Obi")
-System_Ext(erp, "ERP", "Order management and initiation of productions is typically done in the ERP namely ABACUS")
-System(dp2, "DAISY Pipeline", "The recorded productions are validated and converted to DAISY Talking Books using software from both the DAISY Pipeline 1 and DAISY Pipeline 2 projects")
+System_Ext(Obi, "Obi", "Narrate the production")
+System_Ext(erp, "ERP", "Order management and initiation of productions is done in the ERP (ABACUS)")
+System(dp2, "DAISY Pipeline", "The narrated productions are validated and converted to DAISY 2.02 using software from DAISY Pipeline 1 and DAISY Pipeline 2")
 System_Ext(archive, "Archive", "")
 Person(libary, "Library", "Some production orders come directly from the library as they are not managed in the ERP")
 Person(studio, "Studio")
@@ -15,10 +15,9 @@ Rel(studio, Madras2, "Uses")
 Rel(studio, erp, "Uses")
 Rel(narrator, Obi, "narrate")
 
-Rel(libary, Madras2, "add productions, assign library number")
-BiRel(Madras2, erp, "notify", "state changes")
+Rel_L(libary, Madras2, "add productions, assign library number")
+BiRel_U(Madras2, erp, "notify", "state changes")
 BiRel(Madras2, archive, "archive/repair")
-
-BiRel(Madras2, Obi, "Create Obi config file, read narrated production")
+BiRel_L(Madras2, Obi, "Create Obi config file, read narrated production")
 
 @enduml
