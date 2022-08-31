@@ -5,6 +5,7 @@
     [luminus.http-server :as http]
     [luminus-migrations.core :as migrations]
     [mdr2.config :refer [env]]
+    [mdr2.queue-consumers] ;; start the queue consumers
     [clojure.tools.cli :refer [parse-opts]]
     [clojure.tools.logging :as log]
     [mount.core :as mount])
