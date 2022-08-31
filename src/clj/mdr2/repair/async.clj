@@ -11,9 +11,8 @@
 (defstate repair-consumer
   :start (go-loop []
            (when-let [production (<! queues/repair)]
-             (let [p (repair/repair production)]
-               (when (fail/failed? p)
-                 (log/errorf "Failed to repair %s" production)))
+             (fail/when-let-failed? [cause (repair/repair production)]
+               (log/errorf "Failed to repair %s because %s" production cause))
              (recur)))
 
   :stop (when repair-consumer
