@@ -4,13 +4,17 @@
    [mdr2.repair.core :as archive]
    [mdr2.queues :as queues]
    [mount.core :refer [defstate]]
-   [mdr2.repair.core :as repair]))
+   [mdr2.repair.core :as repair]
+   [failjure.core :as fail]
+   [clojure.tools.logging :as log]))
 
 (defstate repair-consumer
   :start (go-loop []
            (when-let [production (<! queues/repair)]
-                   (repair/repair production)
-                   (recur)))
+             (let [p (repair/repair production)]
+               (when (fail/failed? p)
+                 (log/errorf "Failed to repair %s" production)))
+             (recur)))
 
   :stop (when repair-consumer
           (close! repair-consumer)))
