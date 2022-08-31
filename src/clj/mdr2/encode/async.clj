@@ -1,4 +1,4 @@
-(ns mdr2.archive.async
+(ns mdr2.encode.async
   (:require
    [clojure.core.async :refer [<! close! go-loop]]
    [mdr2.encode.core :as encode]
