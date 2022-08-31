@@ -22,7 +22,8 @@
     [mdr2.production.spec :as prod.spec]
     [mdr2.pipeline1 :as pipeline]
     [mdr2.repair.core :as repair]
-    [mdr2.dtbook.validation :as validation]))
+    [mdr2.dtbook.validation :as validation]
+    [failjure.core :as fail]))
 
 (def default-limit 100)
 
@@ -152,10 +153,9 @@
                             (nil? p) (not-found)
                             (not= (:state p) "archived") (conflict {:status-text "Only archived productions can be repaired"})
                             :else (let [p (prod/repair! p)]
-                                    (if-not (nom/anomaly? p)
+                                    (if-not (fail/failed? p)
                                       (no-content)
-                                      (bad-request {:status-text
-                                                    (ex-message (:exception (nom/payload p)))}))))))}}]
+                                      (bad-request {:status-text (fail/message p)}))))))}}]
 
     ["/:id/xml"
      {:get {:summary "Get the DTBook XML structure for a production"
