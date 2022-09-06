@@ -221,3 +221,116 @@ Content-Type: application/xml
 </AbaConnectContainer>
 --e82bc39c68f1417d9ea12c5456182f3c--
 
+# Add a production with faulty xml (missing language)
+POST http://localhost:3000/api/abacus/new
+Accept: application/json
+Content-Type: multipart/form-data; boundary=e82bc39c68f1417d9ea12c5456182f3c
+
+--e82bc39c68f1417d9ea12c5456182f3c
+Content-Disposition: form-data; name="file"; filename="SN1_DY99999.xml"
+Content-Type: application/xml
+
+<?xml version="1.0" encoding="utf-8"?>
+<AbaConnectContainer>
+  <Task>
+    <Parameter>
+      <Application>MadrasApi</Application>
+      <Id>Document</Id>
+      <Version>1.0</Version>
+    </Parameter>
+    <Transaction>
+      <DocumentData command="mdaDocAdd">
+        <artikel_nr>DY99997</artikel_nr>
+        <priority>none</priority>
+        <deadline>2015-06-29</deadline>
+        <title>Test - whout</title>
+        <process_status>New</process_status>
+        <is_meta>yes</is_meta>
+        <mvl_only>no</mvl_only>
+        <MetaData>
+          <dc>
+            <title>Test - whout</title>
+            <creator>Test - Gubser, Paul</creator>
+            <source>978-3-570-15263-0</source>
+            <date>2015-06-29</date>
+          </dc>
+          <sbs>
+            <idVorstufe>DY99997</idVorstufe>
+            <printPageNumber>103</printPageNumber>
+            <idPrint>0</idPrint>
+            <kostenstelle>54120</kostenstelle>
+          </sbs>
+          <ncc>
+            <sourcePublisher>Paul Gubser</sourcePublisher>
+            <sourceDate>1967</sourceDate>
+            <narrator>N.N.</narrator>
+            <setInfo>1</setInfo>
+            <revisionDate>2015-06-25</revisionDate>
+            <VubisRecordID>378657</VubisRecordID>
+          </ncc>
+        </MetaData>
+      </DocumentData>
+    </Transaction>
+  </Task>
+</AbaConnectContainer>
+--e82bc39c68f1417d9ea12c5456182f3c--
+
+# Mark a production as recorded
+POST http://localhost:3000/api/abacus/recorded
+Accept: application/json
+Content-Type: multipart/form-data; boundary=e82bc39c68f1417d9ea12c5456182f3c
+
+--e82bc39c68f1417d9ea12c5456182f3c
+Content-Disposition: form-data; name="file"; filename="SN1_DY99999.xml"
+Content-Type: application/xml
+
+<?xml version="1.0" encoding="utf-8"?>
+<AbaConnectContainer>
+  <Task>
+    <Parameter>
+      <Application>MadrasApi</Application>
+      <Id>Document</Id>
+      <Version>1.0</Version>
+    </Parameter>
+    <Transaction>
+      <DocumentData command="mdaDocModify">
+	<artikel_nr>DY15745</artikel_nr>
+	<identifier>dam15388</identifier>
+	<priority>none</priority>
+	<deadline>2014-03-03</deadline>
+	<title>Die lustigen Jungs von Atzavara</title>
+	<old_process_status>Structured</old_process_status>
+	<process_status>Recorded</process_status>
+	<MetaData>
+          <dc>
+            <title>Die lustigen Jungs von Atzavara</title>
+            <creator>Vázquez Montalbán, Manuel</creator>
+            <source>3-8031-2356-9</source>
+            <language>de</language>
+            <identifier>dam15388</identifier>
+            <date>2014-03-07</date>
+          </dc>
+          <sbs>
+            <printPageNumber>316</printPageNumber>
+            <idMaster>dam15388</idMaster>
+            <idPrint>0</idPrint>
+            <kostenstelle>54130</kostenstelle>
+          </sbs>
+          <ncc>
+            <sourcePublisher>Wagenbach</sourcePublisher>
+            <sourceDate>2002</sourceDate>
+            <narrator>Madrid, Venus</narrator>
+            <narrator>Störmer, Cathrin</narrator>
+            <narrator>Hitz, Heiner</narrator>
+            <narrator>Schätzle, Claudia</narrator>
+            <narrator>Steccanella, Manuel</narrator>
+            <setInfo>1</setInfo>
+            <revisionDate>2014-03-03</revisionDate>
+          </ncc>
+	</MetaData>
+      </DocumentData>
+    </Transaction>
+  </Task>
+</AbaConnectContainer>
+--e82bc39c68f1417d9ea12c5456182f3c--
+
