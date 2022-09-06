@@ -201,36 +201,40 @@
              :handler (fn [{{{:keys [file]} :multipart} :parameters}]
                         (let [tempfile (:tempfile file)
                               p (abacus/import-new-production tempfile)]
-                          (if-not (nom/anomaly? p)
-                            (created)
-                            (bad-request p))))}}]
+                          (if-not (fail/failed? p)
+                            (created (str (:id p)))
+                            (bad-request {:status-text "Upload of ABACUS XML failed"
+                                          :error (fail/message p)}))))}}]
     ["/recorded"
      {:post {:summary "Mark a production as recorded"
              :parameters {:multipart {:file multipart/temp-file-part}}
              :handler (fn [{{{:keys [file]} :multipart} :parameters}]
                         (let [tempfile (:tempfile file)
                               p (abacus/import-recorded-production tempfile)]
-                          (if-not (nom/anomaly? p)
+                          (if-not (fail/failed? p)
                             (no-content)
-                            (bad-request p))))}}]
+                            (bad-request {:status-text "Upload of ABACUS XML failed"
+                                          :error (fail/message p)}))))}}]
     ["/status"
      {:post {:summary "Request the status of a production"
              :parameters {:multipart {:file multipart/temp-file-part}}
              :handler (fn [{{{:keys [file]} :multipart} :parameters}]
                         (let [tempfile (:tempfile file)
                               p (abacus/import-status-request tempfile)]
-                          (if-not (nom/anomaly? p)
+                          (if-not (fail/failed? p)
                             (no-content)
-                            (bad-request p))))}}]
+                            (bad-request {:status-text "Upload of ABACUS XML failed"
+                                          :error (fail/message p)}))))}}]
     ["/metadata"
      {:post {:summary "Update the meta data of a production"
              :parameters {:multipart {:file multipart/temp-file-part}}
              :handler (fn [{{{:keys [file]} :multipart} :parameters}]
                         (let [tempfile (:tempfile file)
                               p (abacus/import-metadata-update tempfile)]
-                          (if-not (nom/anomaly? p)
+                          (if-not (fail/failed? p)
                             (no-content)
-                            (bad-request p))))}}]]
+                            (bad-request {:status-text "Upload of ABACUS XML failed"
+                                          :error (fail/message p)}))))}}]]
    ["/vubis"
     {:swagger {:tags ["Upload of Vubis export data"]}}
 

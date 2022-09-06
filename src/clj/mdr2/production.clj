@@ -12,8 +12,8 @@
             [mdr2.obi :as obi]
             [mdr2.pipeline1 :as pipeline]
             [clojure.tools.logging :as log]
-            [de.otto.nom.core :as nom]
-            [medley.core :as medley]))
+            [medley.core :as medley]
+            [failjure.core :as fail]))
 
 (defn library-signature?
   "Return true if `id` is a valid library signature"
@@ -147,13 +147,15 @@
   [production]
   ;; FIXME: make sure nothing is inserted in the db if we cannot create the dirs
   ;;  (transaction)
-  (nom/let-nom> [p (-> production
-                       add-default-meta-data
-                       db/insert-production)]
-    (create-dirs p)
-    (when (:product_number p)
-      ;; notify the erp of the status change
-      (>!! queues/notify-abacus p))))
+  (let [p (-> production
+              add-default-meta-data
+              db/insert-production)]
+    (when-not (fail/failed? p)
+      (create-dirs p)
+      (when (:product_number p)
+        ;; notify the erp of the status change
+        (>!! queues/notify-abacus p)))
+    p))
 
 (defn remove-null-values [production]
   (medley/remove-vals nil? production))
