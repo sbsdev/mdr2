@@ -1,13 +1,13 @@
 (ns mdr2.db.core
   (:require
-    [next.jdbc.date-time]
-    [next.jdbc.result-set]
-    [clojure.string :as string]
-    [clojure.tools.logging :as log]
-    [conman.core :as conman]
-    [mdr2.config :refer [env]]
-    [mount.core :refer [defstate]]
-    [de.otto.nom.core :as nom]))
+   [next.jdbc.date-time]
+   [next.jdbc.result-set]
+   [clojure.string :as string]
+   [clojure.tools.logging :as log]
+   [conman.core :as conman]
+   [mdr2.config :refer [env]]
+   [mount.core :refer [defstate]]
+   [failjure.core :as fail]))
 
 (defstate ^:dynamic *db*
   :start (if-let [jdbc-url (env :database-url)]
@@ -62,7 +62,7 @@
 (defn insert-production
   "Insert the given `production`. Return it with the updated primary key `id`"
   [production]
-  (nom/try-nom
+  (fail/try*
     (if-let [key (-> (insert-raw production) first :generated_key)]
       (assoc production :id key)
       production)))
