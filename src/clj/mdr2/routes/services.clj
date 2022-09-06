@@ -12,7 +12,6 @@
     [ring.util.http-response :refer :all]
     [clojure.string :refer [blank?]]
     [clojure.java.io :as io]
-    [de.otto.nom.core :as nom]
     [mdr2.db.core :as db]
     [mdr2.auth :as auth]
     [mdr2.abacus.core :as abacus]
@@ -101,10 +100,10 @@
              :parameters {:body prod.spec/production}
              :handler (fn [{{p :body} :parameters}]
                         (let [p (prod/create! p)]
-                          (if-not (nom/anomaly? p)
-                            (no-content)
-                            (bad-request {:status-text
-                                          (ex-message (:exception (nom/payload p)))}))))}}]
+                          (if-not (fail/failed? p)
+                            (created (str (:id p)))
+                            (bad-request {:status-text "Creation of production failed"
+                                          :error (fail/message p)}))))}}]
 
     ["/:id"
      {:get {:summary "Get a production by ID"
@@ -137,10 +136,10 @@
                              :else (let [p (-> p
                                             (assoc :library_signature library_signature)
                                             prod/set-state-cataloged!)]
-                                     (if-not (nom/anomaly? p)
+                                     (if-not (fail/failed? p)
                                        (no-content)
-                                       (bad-request {:status-text
-                                                     (ex-message (:exception (nom/payload p)))}))))))}}]
+                                       (bad-request {:status-text "Failed to update the production"
+                                                     :error (fail/message p)}))))))}}]
 
     ["/:id/repair"
      {:post {:summary "Repair a production"
@@ -186,7 +185,7 @@
                                         ["Production not in state \"new\" or \"structured\""]))]
                           (if-not (seq errors)
                             (let [p (prod/add-structure production tempfile)]
-                              (if-not (nom/anomaly? p)
+                              (if-not (fail/failed? p)
                                 (no-content)
                                 (internal-server-error)))
                             (bad-request {:status-text "Upload of DTBook XML structure failed"
@@ -247,8 +246,9 @@
                           (if (empty? errors)
                             (let [productions (->> (vubis/read-file tempfile)
                                                    (map prod/add-default-meta-data))]
-                              (if-not (nom/anomaly? productions)
+                              (if-not (fail/failed? productions)
                                 (ok productions)
-                                (bad-request productions)))
+                                (bad-request {:status-text "Upload from Vubis export failed"
+                                              :error (fail/message productions)})))
                             (bad-request {:status-text "Not a valid Vubis export"
                                           :errors errors}))))}}]]])
