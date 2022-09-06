@@ -162,4 +162,62 @@ Accept: application/json
 POST http://localhost:3000/api/productions/3000000/repair
 Accept: application/json
 
+##############
+# Abacus API #
+##############
+
+# Add a production
+POST http://localhost:3000/api/abacus/new
+Accept: application/json
+Content-Type: multipart/form-data; boundary=e82bc39c68f1417d9ea12c5456182f3c
+
+--e82bc39c68f1417d9ea12c5456182f3c
+Content-Disposition: form-data; name="file"; filename="SN1_DY99999.xml"
+Content-Type: application/xml
+
+<?xml version="1.0" encoding="utf-8"?>
+<AbaConnectContainer>
+  <Task>
+    <Parameter>
+      <Application>MadrasApi</Application>
+      <Id>Document</Id>
+      <Version>1.0</Version>
+    </Parameter>
+    <Transaction>
+      <DocumentData command="mdaDocAdd">
+        <artikel_nr>DY99997</artikel_nr>
+        <priority>none</priority>
+        <deadline>2015-06-29</deadline>
+        <title>Test - whout</title>
+        <process_status>New</process_status>
+        <is_meta>yes</is_meta>
+        <mvl_only>no</mvl_only>
+        <MetaData>
+          <dc>
+            <title>Test - whout</title>
+            <creator>Test - Gubser, Paul</creator>
+            <source>978-3-570-15263-0</source>
+            <language>de</language>
+            <date>2015-06-29</date>
+          </dc>
+          <sbs>
+            <idVorstufe>DY99997</idVorstufe>
+            <printPageNumber>103</printPageNumber>
+            <idPrint>0</idPrint>
+            <kostenstelle>54120</kostenstelle>
+          </sbs>
+          <ncc>
+            <sourcePublisher>Paul Gubser</sourcePublisher>
+            <sourceDate>1967</sourceDate>
+            <narrator>N.N.</narrator>
+            <setInfo>1</setInfo>
+            <revisionDate>2015-06-25</revisionDate>
+            <VubisRecordID>378657</VubisRecordID>
+          </ncc>
+        </MetaData>
+      </DocumentData>
+    </Transaction>
+  </Task>
+</AbaConnectContainer>
+--e82bc39c68f1417d9ea12c5456182f3c--
 
