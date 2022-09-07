@@ -153,8 +153,12 @@
     (if (seq errors)
       (->AnnotatedFailure "The provided xml is not valid" errors)
       (let [{product_number :product_number} (read-file f)
-            production (prod/find-by-productnumber product_number)]
-        (>!! queues/notify-abacus production)
+            production (-> product_number
+                           prod/find-by-productnumber
+                           (fail/assert-not-nil?
+                            (format "Product %s number not found" product_number)))]
+        (when-not (fail/failed? production)
+          (>!! queues/notify-abacus production))
         production))))
 
 (defn import-metadata-update
