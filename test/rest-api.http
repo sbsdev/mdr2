@@ -428,7 +428,60 @@ Content-Type: application/xml
             <jahr>1999</jahr>
           </sbs>
           <ncc>
-            <sourcePublisher>Neue Zürcher Zeitung</sourcePublisher>
+            <sourcePublisher>Alte Zürcher Zeitung</sourcePublisher>
+            <sourceDate>1999</sourceDate>
+            <narrator>Treichler, Hans Peter</narrator>
+            <setInfo>1</setInfo>
+            <revisionDate>2015-04-15</revisionDate>
+          </ncc>
+        </MetaData>
+      </DocumentData>
+    </Transaction>
+  </Task>
+</AbaConnectContainer>
+--e82bc39c68f1417d9ea12c5456182f3c--
+
+# Update the metadata of a (non-existing) production
+POST http://localhost:3000/api/abacus/metadata
+Accept: application/json
+Content-Type: multipart/form-data; boundary=e82bc39c68f1417d9ea12c5456182f3c
+
+--e82bc39c68f1417d9ea12c5456182f3c
+Content-Disposition: form-data; name="file"; filename="SNMeta_DY10339.xml"
+Content-Type: application/xml
+
+<?xml version="1.0" encoding="utf-8"?>
+<AbaConnectContainer>
+  <Task>
+    <Parameter>
+      <Application>MadrasApi</Application>
+      <Id>Document</Id>
+      <Version>1.0</Version>
+    </Parameter>
+    <Transaction>
+      <DocumentData command="mdaDocModify">
+        <artikel_nr>DY90001</artikel_nr>
+        <identifier>dam15562</identifier>
+        <title>Die Löwenbraut</title>
+        <MetaData>
+          <dc>
+            <title>Die Löwenbraut</title>
+            <creator>Treichler, Hans Peter</creator>
+            <source>978-3-85823-796-5</source>
+            <language>de</language>
+            <identifier>dam15562</identifier>
+            <date>2008-07-08</date>
+          </dc>
+          <sbs>
+            <idVorstufe>DY10339</idVorstufe>
+            <printPageNumber>336</printPageNumber>
+            <idMaster>dam15562</idMaster>
+            <idPrint>0</idPrint>
+            <kostenstelle>54120</kostenstelle>
+            <jahr>1999</jahr>
+          </sbs>
+          <ncc>
+            <sourcePublisher>Alte Zürcher Zeitung</sourcePublisher>
             <sourceDate>1999</sourceDate>
             <narrator>Treichler, Hans Peter</narrator>
             <setInfo>1</setInfo>

@@ -161,17 +161,23 @@
           (>!! queues/notify-abacus production))
         production))))
 
+(def assert-pos? (partial fail/assert-with pos?))
+
 (defn import-metadata-update
   "Import a metadata update request from file `f`"
   [f]
   (let [errors (validation/metadata-sync-errors f)]
     (if (seq errors)
       (->AnnotatedFailure "The provided xml is not valid" errors)
-      (prod/update!
-       (-> (read-file f)
-           ;; ignore production_type and the revision date when
-           ;; updating metadata
-           (dissoc :production_type :revision_date))))))
+      (let [production (read-file f)]
+        (-> production
+            ;; ignore production_type and the revision date when
+            ;; updating metadata
+            (dissoc :production_type :revision_date)
+            prod/update!
+            ;; if the update could not find the product number it will return
+            ;; 0 modified records. In that case return a failure
+            (assert-pos? (format"Product %s number not found" (:product_number production))))))))
 
 (defn- export-sexp
   [{:keys [product_number total_time state audio_format
