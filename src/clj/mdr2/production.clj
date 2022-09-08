@@ -13,7 +13,8 @@
             [mdr2.pipeline1 :as pipeline]
             [clojure.tools.logging :as log]
             [medley.core :as medley]
-            [failjure.core :as fail]))
+            [failjure.core :as fail]
+            [mdr2.utils :as utils]))
 
 (defn library-signature?
   "Return true if `id` is a valid library signature"
@@ -252,8 +253,8 @@
   (if (obi/directory-valid? production)
     ;; only delete if nothing is fishy with the directories
     (doseq [dir (path/all production)] (fs/delete-tree dir))
-    (log/errorf "Obi directory for production %s is not valid. Not removing."
-                (:id production))))
+    (utils/log-and-fail
+     (format "Failed to remove %s as the Obi directory is not valid" (:id production)))))
 
 (defn set-state-archived! [production]
   (delete-all-dirs! production)
