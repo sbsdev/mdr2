@@ -21,7 +21,7 @@
    [mdr2.obi :as obi]
    [mdr2.production :as prod]
    [mdr2.production.path :as path]
-   [failjure.core :as fail]))
+   [mdr2.utils :as utils]))
 
 (defn production-id?
   "Return true if `id` is a valid production id"
@@ -54,12 +54,6 @@
               :dist-master (:library_signature production))]
      (-> {:id id} db/production-id-to-archive-id :id))))
 
-(defn- log-and-fail
-  "Log an error with given `msg` and return a (Failjure) failure"
-  [msg]
-  (log/error msg)
-  (fail/fail msg))
-
 (defn repair
   "Get a production from the archive and prepare it for repairing"
   [{id :id :as production}]
@@ -69,15 +63,15 @@
         tmp-dir (fs/path (fs/parent dest-path) (str id "_repair"))]
     (cond
       (not= (:state production) "archived")
-      (log-and-fail "Production is not in state \"archived\"")
+      (utils/log-and-fail "Production is not in state \"archived\"")
       ;; checking for the state is not enough: there is a race
       ;; condition as the state is only set after all the files have
       ;; been copied. This takes time. So we also check for the
       ;; existence of some important directories
       (fs/exists? dest-path)
-      (log-and-fail (format "Directory %s already exists" dest-path))
+      (utils/log-and-fail (format "Directory %s already exists" dest-path))
       (fs/exists? tmp-dir)
-      (log-and-fail (format "Directory %s already exists" tmp-dir))
+      (utils/log-and-fail (format "Directory %s already exists" tmp-dir))
       :else
       (let [production (prod/set-state! production "repairing")
             container-id (container-id production)
@@ -89,7 +83,7 @@
         (if-not (client/success? response)
           (do
             (.close (:body response)) ;; close the stream
-            (log-and-fail (format "Couldn't get %s from archive (%s)" id url)))
+            (utils/log-and-fail (format "Couldn't get %s from archive (%s)" id url)))
           (let [dam-number (prod/dam-number production)
                 tar-file (fs/path tmp-dir (str dam-number ".tar"))]
 
@@ -109,7 +103,7 @@
                   (do
                     ;; re-set the state back to archived
                     (prod/set-state! production "archived")
-                    (log-and-fail (format "Failed to extract the tar file %s inside %s" tar-file tmp-dir)))
+                    (utils/log-and-fail (format "Failed to extract the tar file %s inside %s" tar-file tmp-dir)))
                   (do
                     ;; extract the relevant parts to the structured-path
                     (let [src-path (fs/file tmp-dir dam-number "produkt" dam-number)]
@@ -119,7 +113,7 @@
                     (if-not (fs/delete-tree tmp-dir)
                       ;; we probably do not need to roll back the state just because we couldn't
                       ;; clean up some temporary files
-                      (log-and-fail (format "Failed to remove temporary files in %s" tmp-dir))
+                      (utils/log-and-fail (format "Failed to remove temporary files in %s" tmp-dir))
                       (do
                         ;; create the obi config file
                         (obi/config-file production)
