@@ -118,10 +118,12 @@
                ;;:swagger {:security [{:apiAuth []}]}
                :parameters {:path {:id int?}}
                :handler (fn [{{{:keys [id]} :path} :parameters}]
-                          (let [deleted (db/delete-production {:id id})]
-                            (if (>= deleted 1)
-                              (no-content)
-                              (not-found))))}
+                          (if-let [p (prod/get-production id)]
+                            (let [res (prod/delete! p)]
+                              (if-not (fail/failed? res)
+                                (no-content)
+                                (internal-server-error)))
+                            (not-found)))}
 
       :patch {:summary "Patch a production, e.g. update the library_signature"
               ;;:middleware [wrap-restricted wrap-authorized]
