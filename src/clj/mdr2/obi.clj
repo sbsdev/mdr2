@@ -54,11 +54,32 @@
   (let [config-file-name (file (path/structured-path production) "obiconfig.xml")]
     (spit config-file-name (config production))))
 
-(defn directory-valid?
-  "Validate an Obi working directory. Check if it contains
-  `obiconfig.xml`, `project.obi`, a `Data` and a `Backup` directory.
-  Also ensure that it doesn't contain any numerical subdirectories.
-  Those might be other Obi projects."
+(defn contains-obi-subdirs?
+  "Return true if a `production` contains subdirs that contain a file
+  named `obiconfig.xml`. If true this is a strong indication that
+  something isn't quite right."
   [production]
-  (let [root-dir (file (path/structured-path production) "obiconfig.xml")]
-    (fs/exists? root-dir)))
+  (let [root-dir (path/structured-path production)]
+    (some? (seq (fs/glob root-dir "**/obiconfig.xml")))))
+
+(defn contains-necessary-files?
+  "Return true if a `production` contains at least `obiconfig.xml`,
+  `project.obi`, a `Data` and a `Backup` directory."
+  [production]
+  (let [root-dir (path/structured-path production)]
+    (and (->> ["obiconfig.xml" "project.obi"]
+              (map (partial fs/path root-dir))
+              (every? fs/exists?))
+         (->> ["Data" "Backup"]
+              (map (partial fs/path root-dir))
+              (every? fs/directory?)))))
+
+(defn directory-valid?
+  "Validate an Obi working directory for given production. Return true
+  if the production contains all necessary files,
+  see [[contains-necessary-files?]] and does not contains any subdirs
+  containing a `obiconfig.xml`, see [[contains-obi-subdirs?]]"
+  [production]
+  (and
+   (contains-necessary-files? production)
+   (not (contains-obi-subdirs? production))))

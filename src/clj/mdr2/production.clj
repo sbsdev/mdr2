@@ -249,11 +249,16 @@
 (defn delete-all-dirs!
   "Delete all artifacts on the file system for a production"
   [production]
-  (doseq [dir (path/all production)] (fs/delete-tree dir)))
+  (if (obi/directory-valid? production)
+    ;; only delete if nothing is fishy with the directories
+    (doseq [dir (path/all production)] (fs/delete-tree dir))
+    (log/errorf "Obi directory for production %s is not valid. Not removing."
+                (:id production))))
 
 (defn set-state-archived! [production]
-;;    (transaction)
   (delete-all-dirs! production)
+  ;; even if for some reason the directories were not deleted we set
+  ;; the state to "archived" anyway
   (set-state! production "archived"))
 
 (defn repair!
