@@ -72,21 +72,25 @@
       (fs/exists? tmp-dir)
       (throw (ex-info (format "Directory %s already exists" tmp-dir) {:error-id ::directory-already-exists}))
       :else
-      (let [production (prod/set-state! production "repairing")
-            container-id (container-id production)
-            url (archive-url container-id)
-            response (client/get url
-                                 {:as :stream
-                                  :basic-auth [(env :archive-web-user) (env :archive-web-password)]})]
-        (log/infof "Repairing %s" id)
-        (if (client/success? response)
-          (let [dam-number (prod/dam-number production)
-                tar-file (fs/path tmp-dir (str dam-number ".tar"))]
+      ;; rollback to the archived state if any exceptions occur in the process of repairing. But at
+      ;; the same time we want others to see that we are in the process of repairing, i.e. we want
+      ;; to have an isolation level of :none. Unfortunately that is not supported by MySQL, so we
+      ;; have to resort to a "manual" transaction using try/catch.
+      ;;      (conman/with-transaction [db/*db* {:isolation :none}]
+      (try
+        (let [production (prod/set-state! production "repairing")
+              container-id (container-id production)
+              url (archive-url container-id)
+              response (client/get url
+                                   {:as :stream
+                                    :basic-auth [(env :archive-web-user) (env :archive-web-password)]})]
+          (log/infof "Repairing %s" id)
+          (if (client/success? response)
+            (let [dam-number (prod/dam-number production)
+                  tar-file (fs/path tmp-dir (str dam-number ".tar"))]
 
-            ;; fail fast if any of the filesystem operations fail. If
-            ;; the filesystem operations silently ignore failures we
-            ;; check the results.
-            (try
+              ;; fail fast if any of the filesystem operations fail. Where filesystem operations
+              ;; silently ignore failures, we check the results and throw an exception.
               ;;create all dirs for this production
               (prod/create-dirs production)
               ;; copy tar to tmpdir
@@ -111,15 +115,13 @@
                         (obi/config-file production)
                         ;; set the state
                         (prod/set-state! production "structured"))))
-                  (do
-                    ;; re-set the state back to archived
-                    (prod/set-state! production "archived")
-                    (throw (ex-info (format "Failed to extract the tar file %s inside %s" tar-file tmp-dir) {:error-id ::tar-extract-failed})))))
-              (catch Exception e ;; FIXME: catch a more specific Exception and migrate to transactions for rollback
-                ;; re-set the state back to archived
-                (prod/set-state! production "archived")
-                e)))
-          (do
-            (.close (:body response)) ;; close the stream
-            (throw (ex-info (format "Couldn't get %s from archive (%s)" id url) {:error-id ::archive-fetch-failed}))))))))
+                  ;; if the extracting of the tar failed throw an exception which will roll back the
+                  ;; transaction and undo all changes in the database
+                  (throw (ex-info (format "Failed to extract the tar file %s inside %s" tar-file tmp-dir) {:error-id ::tar-extract-failed})))))
+            (do
+              (.close (:body response)) ;; close the stream
+              (throw (ex-info (format "Couldn't get %s from archive (%s)" id url) {:error-id ::archive-fetch-failed})))))
+        (catch Exception e
+          (prod/set-state! production "archived")
+          (throw e))))))
 
