@@ -149,7 +149,7 @@ Content-Type: application/json
 ##########################
 
 # Repair a production
-POST http://localhost:3000/api/productions/31356/repair
+POST http://localhost:3000/api/productions/302/repair
 Accept: application/json
 
 # Repair a production which is not archived
