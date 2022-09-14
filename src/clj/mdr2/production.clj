@@ -175,7 +175,6 @@
   "Set `production` to `state`"
   [production state]
   (let [p (assoc production :state state)]
-;;    (transaction)
     (update! p)
     (when (:product_number p)
       ;; notify the erp of the status change
@@ -198,7 +197,6 @@
 
 (defn set-state-recorded! [production]
   (log/debugf "Setting production state of %s to recorded" (:id production))
-;;  (transaction)
   (let [new-production
         (-> production
             (merge (dtb/meta-data (path/recorded-path production)))
@@ -210,7 +208,6 @@
     new-production))
 
 (defn set-state-split! [production volumes sample-rate bitrate]
-;;  (transaction)
   (as-> production p
     (assoc p :volumes volumes)
     (set-state! p "split")
@@ -220,7 +217,6 @@
           :bitrate bitrate})))
 
 (defn set-state-cataloged! [production]
-;;  (transaction)
   (as-> production p
     (set-state! p "cataloged")
     (>!! queues/archive p)))
@@ -235,7 +231,6 @@
     ;; When repairing a production we already have a library
     ;; signature, so no need to ask the library for another one; go
     ;; directly to archiving
-;;    (transaction)
     (as-> production p
       (set-state! p "cataloged")
       (>!! queues/archive p))
