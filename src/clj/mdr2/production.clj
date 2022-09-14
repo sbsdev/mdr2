@@ -12,9 +12,7 @@
             [mdr2.obi :as obi]
             [mdr2.pipeline1 :as pipeline]
             [clojure.tools.logging :as log]
-            [medley.core :as medley]
-            [failjure.core :as fail]
-            [mdr2.utils :as utils]))
+            [medley.core :as medley]))
 
 (defn library-signature?
   "Return true if `id` is a valid library signature"
@@ -151,11 +149,10 @@
   (let [p (-> production
               add-default-meta-data
               db/insert-production)]
-    (when-not (fail/failed? p)
-      (create-dirs p)
-      (when (:product_number p)
-        ;; notify the erp of the status change
-        (>!! queues/notify-abacus p)))
+    (create-dirs p)
+    (when (:product_number p)
+      ;; notify the erp of the status change
+      (>!! queues/notify-abacus p))
     p))
 
 (defn remove-null-values [production]
@@ -253,8 +250,9 @@
   (if (obi/directory-valid? production)
     ;; only delete if nothing is fishy with the directories
     (doseq [dir (path/all production)] (fs/delete-tree dir))
-    (utils/log-and-fail
-     (format "Failed to remove %s as the Obi directory is not valid" (:id production)))))
+    (throw
+     (ex-info (format "Failed to remove invalid Obi directory (%s)" (:id production))
+              {:error-id :invalid-obi-directory}))))
 
 (defn set-state-archived! [production]
   (delete-all-dirs! production)

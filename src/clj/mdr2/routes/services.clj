@@ -21,8 +21,7 @@
     [mdr2.production.spec :as prod.spec]
     [mdr2.pipeline1 :as pipeline]
     [mdr2.repair.core :as repair]
-    [mdr2.dtbook.validation :as validation]
-    [failjure.core :as fail]))
+    [mdr2.dtbook.validation :as validation]))
 
 (def default-limit 100)
 
@@ -99,11 +98,14 @@
              ;;:swagger {:security [{:apiAuth []}]}
              :parameters {:body prod.spec/production}
              :handler (fn [{{p :body} :parameters}]
-                        (let [p (prod/create! p)]
-                          (if-not (fail/failed? p)
-                            (created (str (:id p)))
-                            (bad-request {:status-text "Creation of production failed"
-                                          :error (fail/message p)}))))}}]
+                        (try
+                          (let [p (prod/create! p)]
+                            (created (str (:id p))))
+                          (catch clojure.lang.ExceptionInfo e
+                            (let [{:keys [error-id errors]} (ex-data e)]
+                              (case error-id
+                                :duplicate-key (bad-request {:status-text (ex-message e)})
+                                (internal-server-error {:status-text (ex-message e)}))))))}}]
 
     ["/:id"
      {:get {:summary "Get a production by ID"
@@ -119,10 +121,11 @@
                :parameters {:path {:id int?}}
                :handler (fn [{{{:keys [id]} :path} :parameters}]
                           (if-let [p (prod/get-production id)]
-                            (let [res (prod/delete! p)]
-                              (if-not (fail/failed? res)
-                                (no-content)
-                                (internal-server-error)))
+                            (try
+                              (prod/delete! p)
+                              (no-content)
+                              (catch clojure.lang.ExceptionInfo e
+                                (internal-server-error {:status-text (ex-message e)})))
                             (not-found)))}
 
       :patch {:summary "Patch a production, e.g. update the library_signature"
@@ -135,13 +138,11 @@
                            (cond
                              (nil? p) (not-found)
                              (not= (:state p) "encoded") (conflict {:status-text "Only encoded productions can be assigned a library signature"})
-                             :else (let [p (-> p
-                                            (assoc :library_signature library_signature)
-                                            prod/set-state-cataloged!)]
-                                     (if-not (fail/failed? p)
-                                       (no-content)
-                                       (bad-request {:status-text "Failed to update the production"
-                                                     :error (fail/message p)}))))))}}]
+                             :else (try
+                                     (prod/set-state-cataloged! (assoc p :library_signature library_signature))
+                                     (no-content)
+                                     (catch clojure.lang.ExceptionInfo e
+                                       (internal-server-error {:status-text (ex-message e)}))))))}}]
 
     ["/:id/repair"
      {:post {:summary "Repair a production"
@@ -153,10 +154,11 @@
                           (cond
                             (nil? p) (not-found)
                             (not= (:state p) "archived") (conflict {:status-text "Only archived productions can be repaired"})
-                            :else (let [p (prod/repair! p)]
-                                    (if-not (fail/failed? p)
-                                      (no-content)
-                                      (bad-request {:status-text (fail/message p)}))))))}}]
+                            :else (try
+                                    (prod/repair! p)
+                                    (no-content)
+                                    (catch clojure.lang.ExceptionInfo e
+                                      (internal-server-error {:status-text (ex-message e)}))))))}}]
 
     ["/:id/xml"
      {:get {:summary "Get the DTBook XML structure for a production"
@@ -185,11 +187,12 @@
                                       ;; make sure production is in the state that allows upload
                                       (when (not (#{"new" "structured"} (:state production)))
                                         ["Production not in state \"new\" or \"structured\""]))]
-                          (if-not (seq errors)
-                            (let [p (prod/add-structure production tempfile)]
-                              (if-not (fail/failed? p)
-                                (no-content)
-                                (internal-server-error)))
+                          (if (empty? errors)
+                            (try
+                              (prod/add-structure production tempfile)
+                              (no-content)
+                              (catch clojure.lang.ExceptionInfo e
+                                (internal-server-error {:status-text (ex-message e)})))
                             (bad-request {:status-text "Upload of DTBook XML structure failed"
                                           :errors errors}))))}}]]
 
@@ -200,42 +203,65 @@
      {:post {:summary "Add a production"
              :parameters {:multipart {:file multipart/temp-file-part}}
              :handler (fn [{{{:keys [file]} :multipart} :parameters}]
-                        (let [tempfile (:tempfile file)
-                              p (abacus/import-new-production tempfile)]
-                          (if-not (fail/failed? p)
-                            (created (str (:id p)))
-                            (bad-request {:status-text "Upload of ABACUS XML failed"
-                                          :error (fail/message p)}))))}}]
+                        (try
+                          (let [tempfile (:tempfile file)
+                                p (abacus/import-new-production tempfile)]
+                            (created (str (:id p))))
+                          (catch clojure.lang.ExceptionInfo e
+                            (let [{:keys [error-id errors]} (ex-data e)]
+                              (case error-id
+                                :duplicate-key
+                                (bad-request {:status-text (ex-message e)})
+                                :invalid-xml
+                                (bad-request {:status-text "Upload of ABACUS XML failed"
+                                              :errors errors})
+                                (internal-server-error {:status-text (ex-message e)}))))))}}]
     ["/recorded"
      {:post {:summary "Mark a production as recorded"
              :parameters {:multipart {:file multipart/temp-file-part}}
              :handler (fn [{{{:keys [file]} :multipart} :parameters}]
-                        (let [tempfile (:tempfile file)
-                              p (abacus/import-recorded-production tempfile)]
-                          (if-not (fail/failed? p)
+                        (let [tempfile (:tempfile file)]
+                          (try
+                            (abacus/import-recorded-production tempfile)
                             (no-content)
-                            (bad-request {:status-text "Upload of ABACUS XML failed"
-                                          :error (fail/message p)}))))}}]
+                            (catch clojure.lang.ExceptionInfo e
+                              (let [{:keys [error-id errors]} (ex-data e)]
+                                (case error-id
+                                  :product-not-found (not-found)
+                                  :invalid-state (bad-request {:status-text (ex-message e)})
+                                  :invalid-daisy-export (bad-request {:status-text (ex-message e)})
+                                  :invalid-xml (bad-request {:status-text "Upload of ABACUS XML failed" :errors errors})
+                                  :invalid-exported-production (bad-request {:status-text (ex-message e) :errors errors})
+                                  (internal-server-error {:status-text (ex-message e)})))))))}}]
     ["/status"
      {:post {:summary "Request the status of a production"
              :parameters {:multipart {:file multipart/temp-file-part}}
              :handler (fn [{{{:keys [file]} :multipart} :parameters}]
-                        (let [tempfile (:tempfile file)
-                              p (abacus/import-status-request tempfile)]
-                          (if-not (fail/failed? p)
+                        (let [tempfile (:tempfile file)]
+                          (try
+                            (abacus/import-status-request tempfile)
                             (no-content)
-                            (bad-request {:status-text "Upload of ABACUS XML failed"
-                                          :error (fail/message p)}))))}}]
+                            (catch clojure.lang.ExceptionInfo e
+                              (let [{:keys [error-id errors]} (ex-data e)]
+                                (case error-id
+                                  :product-not-found (not-found)
+                                  :invalid-xml (bad-request {:status-text "Upload of ABACUS XML failed" :errors errors})
+                                  (internal-server-error {:status-text (ex-message e)})))))))}}]
     ["/metadata"
      {:post {:summary "Update the meta data of a production"
              :parameters {:multipart {:file multipart/temp-file-part}}
              :handler (fn [{{{:keys [file]} :multipart} :parameters}]
-                        (let [tempfile (:tempfile file)
-                              p (abacus/import-metadata-update tempfile)]
-                          (if-not (fail/failed? p)
-                            (no-content)
-                            (bad-request {:status-text "Upload of ABACUS XML failed"
-                                          :error (fail/message p)}))))}}]]
+                        (try
+                          (let [tempfile (:tempfile file)]
+                            (abacus/import-metadata-update tempfile)
+                            (no-content))
+                          (catch clojure.lang.ExceptionInfo e
+                            (let [{:keys [error-id errors]} (ex-data e)]
+                              (case error-id
+                                :invalid-xml (bad-request {:status-text "Upload of ABACUS XML failed"
+                                                           :errors errors})
+                                :product-not-found (not-found {:status-text (ex-message e)})
+                                (internal-server-error))))))}}]]
    ["/vubis"
     {:swagger {:tags ["Upload of Vubis export data"]}}
 
@@ -246,11 +272,11 @@
                         (let [tempfile (:tempfile file)
                               errors (vubis/validate (.getPath tempfile))]
                           (if (empty? errors)
-                            (let [productions (->> (vubis/read-file tempfile)
-                                                   (map prod/add-default-meta-data))]
-                              (if-not (fail/failed? productions)
-                                (ok productions)
-                                (bad-request {:status-text "Upload from Vubis export failed"
-                                              :error (fail/message productions)})))
+                            (try
+                              (let [productions (->> (vubis/read-file tempfile)
+                                                     (map prod/add-default-meta-data))]
+                                (ok productions))
+                              (catch clojure.lang.ExceptionInfo e
+                                (internal-server-error {:status-text (ex-message e)})))
                             (bad-request {:status-text "Not a valid Vubis export"
                                           :errors errors}))))}}]]])

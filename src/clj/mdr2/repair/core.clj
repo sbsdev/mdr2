@@ -20,8 +20,7 @@
    [mdr2.db.core :as db]
    [mdr2.obi :as obi]
    [mdr2.production :as prod]
-   [mdr2.production.path :as path]
-   [mdr2.utils :as utils]))
+   [mdr2.production.path :as path]))
 
 (defn production-id?
   "Return true if `id` is a valid production id"
@@ -63,15 +62,15 @@
         tmp-dir (fs/path (fs/parent dest-path) (str id "_repair"))]
     (cond
       (not= (:state production) "archived")
-      (utils/log-and-fail "Production is not in state \"archived\"")
+      (throw (ex-info "Production is not in state \"archived\"" {:error-id :invalid-state}))
       ;; checking for the state is not enough: there is a race
       ;; condition as the state is only set after all the files have
       ;; been copied. This takes time. So we also check for the
       ;; existence of some important directories
       (fs/exists? dest-path)
-      (utils/log-and-fail (format "Directory %s already exists" dest-path))
+      (throw (ex-info (format "Directory %s already exists" dest-path) {:error-id ::directory-already-exists}))
       (fs/exists? tmp-dir)
-      (utils/log-and-fail (format "Directory %s already exists" tmp-dir))
+      (throw (ex-info (format "Directory %s already exists" tmp-dir) {:error-id ::directory-already-exists}))
       :else
       (let [production (prod/set-state! production "repairing")
             container-id (container-id production)
@@ -80,10 +79,7 @@
                                  {:as :stream
                                   :basic-auth [(env :archive-web-user) (env :archive-web-password)]})]
         (log/infof "Repairing %s" id)
-        (if-not (client/success? response)
-          (do
-            (.close (:body response)) ;; close the stream
-            (utils/log-and-fail (format "Couldn't get %s from archive (%s)" id url)))
+        (if (client/success? response)
           (let [dam-number (prod/dam-number production)
                 tar-file (fs/path tmp-dir (str dam-number ".tar"))]
 
@@ -99,11 +95,7 @@
                 (io/copy input (fs/file tar-file)))
               ;; extract the tar
               (let [{exit :exit} (shell/sh "tar" "--extract" (format "--file=%s" tar-file) :dir (fs/file tmp-dir))]
-                (if-not (= exit 0)
-                  (do
-                    ;; re-set the state back to archived
-                    (prod/set-state! production "archived")
-                    (utils/log-and-fail (format "Failed to extract the tar file %s inside %s" tar-file tmp-dir)))
+                (if (= exit 0)
                   (do
                     ;; extract the relevant parts to the structured-path
                     (let [src-path (fs/file tmp-dir dam-number "produkt" dam-number)]
@@ -113,14 +105,21 @@
                     (if-not (fs/delete-tree tmp-dir)
                       ;; we probably do not need to roll back the state just because we couldn't
                       ;; clean up some temporary files
-                      (utils/log-and-fail (format "Failed to remove temporary files in %s" tmp-dir))
+                      (throw (ex-info (format "Failed to remove temporary files in %s" tmp-dir) {:error-id ::tmp-file-remove-failed}))
                       (do
                         ;; create the obi config file
                         (obi/config-file production)
                         ;; set the state
-                        (prod/set-state! production "structured"))))))
-              (catch Exception e
+                        (prod/set-state! production "structured"))))
+                  (do
+                    ;; re-set the state back to archived
+                    (prod/set-state! production "archived")
+                    (throw (ex-info (format "Failed to extract the tar file %s inside %s" tar-file tmp-dir) {:error-id ::tar-extract-failed})))))
+              (catch Exception e ;; FIXME: catch a more specific Exception and migrate to transactions for rollback
                 ;; re-set the state back to archived
                 (prod/set-state! production "archived")
-                e))))))))
+                e)))
+          (do
+            (.close (:body response)) ;; close the stream
+            (throw (ex-info (format "Couldn't get %s from archive (%s)" id url) {:error-id ::archive-fetch-failed}))))))))
 

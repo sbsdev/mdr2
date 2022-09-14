@@ -1,18 +1,18 @@
 (ns mdr2.repair.async
   (:require
    [clojure.core.async :refer [<! close! go-loop]]
-   [mdr2.repair.core :as archive]
+   [clojure.tools.logging :as log]
    [mdr2.queues :as queues]
-   [mount.core :refer [defstate]]
    [mdr2.repair.core :as repair]
-   [failjure.core :as fail]
-   [clojure.tools.logging :as log]))
+   [mount.core :refer [defstate]]))
 
 (defstate repair-consumer
   :start (go-loop []
            (when-let [production (<! queues/repair)]
-             (fail/when-let-failed? [cause (repair/repair production)]
-               (log/errorf "Failed to repair %s because %s" production cause))
+             (try
+               (repair/repair production)
+               (catch Exception e
+                 (log/errorf "Failed to repair %s because %s" production (ex-message e))))
              (recur)))
 
   :stop (when repair-consumer

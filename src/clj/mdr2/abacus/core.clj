@@ -26,9 +26,7 @@
             [mdr2.queues :as queues]
             [mdr2.production :as prod]
             [mdr2.production.path :as path]
-            [mdr2.abacus.validation :as validation]
-            [mdr2.failjure :refer [->AnnotatedFailure]]
-            [failjure.core :as fail]))
+            [mdr2.abacus.validation :as validation]))
 
 (def ^:private root-path [:Task :Transaction :DocumentData])
 
@@ -103,17 +101,19 @@
   "Import a new production from file `f`"
   [f]
   (let [errors (validation/open-validation-errors f)]
-    (if (seq errors)
-      (->AnnotatedFailure "The provided xml is not valid" errors)
-      (prod/create! (read-file f)))))
+    (if (empty? errors)
+      (prod/create! (read-file f))
+      (throw
+       (ex-info "The provided xml is not valid"
+                {:error-id :invalid-xml
+                 :errors errors})))))
 
 (defn import-recorded-production
   "Import a recorded production from file `f`"
   [f]
   (log/debugf "Importing recorded production from file %s" f)
   (let [errors (validation/recorded-validation-errors f)]
-    (if (seq errors)
-      (->AnnotatedFailure "The provided xml is not valid" errors)
+    (if (empty? errors)
       (let [{product_number :product_number :as new-production}
             (-> (read-file f)
                 ;; ignore production_type and periodical_number when
@@ -128,11 +128,11 @@
           (log/debugf "Importing recorded event for production %s" (:id production))
           (cond
             (empty? production)
-            (fail/fail (format "Non-existing product number %s" product_number))
+            (throw (ex-info (format "Non-existing product number %s" product_number) {:error-id :product-not-found}))
             (not= "structured" state)
-            (fail/fail (format "Production %s (%s) is not structured (%s instead)" id product_number state))
+            (throw (ex-info (format "Production %s (%s) is not structured (%s instead)" id product_number state) {:error-id :invalid-state}))
             (not (prod/manifest? production))
-            (fail/fail (format "Production %s (%s) has no DAISY Export in %s" id product_number (path/manifest-path production)))
+            (throw (ex-info (format "Production %s (%s) has no DAISY Export in %s" id product_number (path/manifest-path production)) {:error-id :invalid-daisy-export}))
             :else
             ;; check if the exported production is even valid
             ;; for validation purposes pretend there is only one volume. At
@@ -140,44 +140,47 @@
             ;; should be a split into that many volumes. The volumes aren't
             ;; actually there yet
             (let [errors (prod/manifest-validate (assoc production :volumes 1))]
-              (if (seq errors)
-                (->AnnotatedFailure "The exported production is not valid" errors)
+              (if (empty? errors)
                 (-> production
                     (merge new-production)
-                    prod/set-state-recorded!)))))))))
+                    prod/set-state-recorded!)
+                (throw (ex-info "The exported production is not valid" {:error-id :invalid-exported-production :errors errors})))))))
+      (throw (ex-info "The provided xml is not valid" {:error-id :invalid-xml :errors errors})))))
 
 (defn import-status-request
   "Import a status request from file `f`"
   [f]
   (let [errors (validation/status-request-errors f)]
-    (if (seq errors)
-      (->AnnotatedFailure "The provided xml is not valid" errors)
-      (let [{product_number :product_number} (read-file f)
-            production (-> product_number
-                           prod/find-by-productnumber
-                           (fail/assert-not-nil?
-                            (format "Product %s number not found" product_number)))]
-        (when-not (fail/failed? production)
-          (>!! queues/notify-abacus production))
-        production))))
-
-(def assert-pos? (partial fail/assert-with pos?))
+    (if (empty? errors)
+      (let [{product_number :product_number} (read-file f)]
+        (if-some [production (prod/find-by-productnumber product_number)]
+          (do
+            (>!! queues/notify-abacus production)
+            production)
+          (throw (ex-info (format "Product %s number not found" product_number)
+                          {:error-id :product-not-found}))))
+      (throw (ex-info "The provided xml is not valid"
+                      {:error-id :invalid-xml :errors errors})))))
 
 (defn import-metadata-update
   "Import a metadata update request from file `f`"
   [f]
   (let [errors (validation/metadata-sync-errors f)]
-    (if (seq errors)
-      (->AnnotatedFailure "The provided xml is not valid" errors)
-      (let [production (read-file f)]
-        (-> production
-            ;; ignore production_type and the revision date when
-            ;; updating metadata
-            (dissoc :production_type :revision_date)
-            prod/update!
-            ;; if the update could not find the product number it will return
-            ;; 0 modified records. In that case return a failure
-            (assert-pos? (format"Product %s number not found" (:product_number production))))))))
+    (if (empty? errors)
+      (let [production (read-file f)
+            updates (-> production
+                        ;; ignore production_type and the revision date when
+                        ;; updating metadata
+                        (dissoc :production_type :revision_date)
+                        prod/update!)]
+        (if (= 1 updates)
+          updates
+          ;; if the update could not find the product number it will return
+          ;; 0 modified records. In that case return a failure
+          (throw (ex-info (format "Product %s number not found" (:product_number production))
+                          {:error-id :product-not-found}))))
+      (throw (ex-info "The provided xml is not valid"
+                      {:error-id :invalid-xml :errors errors})))))
 
 (defn- export-sexp
   [{:keys [product_number total_time state audio_format
@@ -219,5 +222,4 @@
   [{product_number :product_number :as production}]
   ;; file names are supposed to be "Ax_product_number.xml, e.g. Ax_DY15000.xml"
   (let [file-name (.getPath (io/file (env :abacus-export-dir) (str "Ax_" product_number ".xml")))]
-    (fail/try*
-     (spit file-name (export production)))))
+    (spit file-name (export production))))

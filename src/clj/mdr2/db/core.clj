@@ -6,8 +6,7 @@
    [clojure.tools.logging :as log]
    [conman.core :as conman]
    [mdr2.config :refer [env]]
-   [mount.core :refer [defstate]]
-   [failjure.core :as fail]))
+   [mount.core :refer [defstate]]))
 
 (defstate ^:dynamic *db*
   :start (if-let [jdbc-url (env :database-url)]
@@ -62,7 +61,11 @@
 (defn insert-production
   "Insert the given `production`. Return it with the updated primary key `id`"
   [production]
-  (fail/try*
+  (try
     (if-let [key (-> (insert-raw production) first :generated_key)]
       (assoc production :id key)
-      production)))
+      production)
+    (catch clojure.lang.ExceptionInfo e
+      (condp = (type (ex-cause e))
+        java.sql.SQLIntegrityConstraintViolationException (throw (ex-info (ex-message e) {:error-id :duplicate-key}))
+        (throw e))))) ; any other exception is just passed on
