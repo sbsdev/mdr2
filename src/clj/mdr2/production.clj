@@ -5,6 +5,7 @@
             [babashka.fs :as fs]
             [java-time :as time]
             [clojure.core.async :refer [>!!]]
+            [conman.core :as conman]
             [mdr2.queues :as queues]
             [mdr2.db.core :as db]
             [mdr2.dtb :as dtb]
@@ -144,16 +145,17 @@
 (defn create!
   "Create a production"
   [production]
-  ;; FIXME: make sure nothing is inserted in the db if we cannot create the dirs
-  ;;  (transaction)
-  (let [p (-> production
-              add-default-meta-data
-              db/insert-production)]
-    (create-dirs p)
-    (when (:product_number p)
-      ;; notify the erp of the status change
-      (>!! queues/notify-abacus p))
-    p))
+  ;; make sure nothing is inserted in the db if we cannot create the
+  ;; dirs
+  (conman/with-transaction [db/*db*]
+    (let [p (-> production
+                add-default-meta-data
+                db/insert-production)]
+      (create-dirs p)
+      (when (:product_number p)
+        ;; notify the erp of the status change
+        (>!! queues/notify-abacus p))
+      p)))
 
 (defn remove-null-values [production]
   (medley/remove-vals nil? production))
