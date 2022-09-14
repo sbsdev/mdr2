@@ -42,10 +42,10 @@ GET http://localhost:3000/api/productions/31411
 Accept: application/transit+json
 
 # Get a specific production
-GET http://localhost:3000/api/productions?product_number=DY33514
+GET http://localhost:3000/api/productions?search=DY33722
 
 # Add a production
-PUT http://localhost:3000/api/productions
+POST http://localhost:3000/api/productions
 Content-Type: application/json
 {
   "title": "Hehe",
@@ -59,7 +59,7 @@ Content-Type: application/json
 }
 
 # Add a production using transit
-PUT http://localhost:3000/api/productions
+POST http://localhost:3000/api/productions
 Content-Type: application/transit+json
 [
   "^ ",
@@ -428,7 +428,7 @@ Content-Type: application/xml
             <jahr>1999</jahr>
           </sbs>
           <ncc>
-            <sourcePublisher>Alte Zürcher Zeitung</sourcePublisher>
+            <sourcePublisher>Neue Zürcher Zeitung</sourcePublisher>
             <sourceDate>1999</sourceDate>
             <narrator>Treichler, Hans Peter</narrator>
             <setInfo>1</setInfo>
