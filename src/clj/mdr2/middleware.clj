@@ -13,7 +13,7 @@
     [buddy.auth.middleware :refer [wrap-authentication wrap-authorization]]
     [buddy.auth.accessrules :refer [restrict]]
     [buddy.auth :refer [authenticated?]]
-    [buddy.auth.backends.session :refer [session-backend]])
+    [buddy.auth.backends.token :refer [jws-backend]])
   )
 
 (defn wrap-internal-error [handler]
@@ -52,7 +52,7 @@
                      :on-error on-error}))
 
 (defn wrap-auth [handler]
-  (let [backend (session-backend)]
+  (let [backend (jws-backend {:secret (env :jwt-secret)})]
     (-> handler
         (wrap-authentication backend)
         (wrap-authorization backend))))

@@ -8,6 +8,7 @@
     [reitit.ring.middleware.muuntaja :as muuntaja]
     [reitit.ring.middleware.multipart :as multipart]
     [reitit.ring.middleware.parameters :as parameters]
+    [mdr2.middleware :refer [wrap-restricted]]
     [mdr2.middleware.formats :as formats]
     [ring.util.http-response :refer :all]
     [clojure.string :refer [blank?]]
@@ -29,7 +30,11 @@
   ["/api"
    {:coercion spec-coercion/coercion
     :muuntaja formats/instance
-    :swagger {:id ::api}
+    :swagger {:id ::api
+              :securityDefinitions {:apiAuth
+                                    {:type "apiKey"
+                                     :name "Authorization"
+                                     :in "header"}}}
     :middleware [;; query-params & form-params
                  parameters/parameters-middleware
                  ;; content-negotiation
@@ -94,8 +99,8 @@
                               (map prod/remove-null-values)
                               ok)))}
       :post {:summary "Create a production"
-             ;;:middleware [wrap-restricted wrap-authorized]
-             ;;:swagger {:security [{:apiAuth []}]}
+             :middleware [wrap-restricted]
+             :swagger {:security [{:apiAuth []}]}
              :parameters {:body prod.spec/production}
              :handler (fn [{{p :body} :parameters}]
                         (try
@@ -116,8 +121,9 @@
                          (not-found)))}
 
       :delete {:summary "Delete a production"
-               ;;:middleware [wrap-restricted wrap-authorized]
-               ;;:swagger {:security [{:apiAuth []}]}
+               :description "Mark a production as deleted"
+               :middleware [wrap-restricted]
+               :swagger {:security [{:apiAuth []}]}
                :parameters {:path {:id int?}}
                :handler (fn [{{{:keys [id]} :path} :parameters}]
                           (if-let [p (prod/get-production id)]
@@ -129,8 +135,8 @@
                             (not-found)))}
 
       :patch {:summary "Patch a production, e.g. update the library_signature"
-              ;;:middleware [wrap-restricted wrap-authorized]
-              ;;:swagger {:security [{:apiAuth []}]}
+              :middleware [wrap-restricted]
+              :swagger {:security [{:apiAuth []}]}
               :parameters {:path {:id int?}
                            :body {:library_signature ::prod.spec/library_signature}}
               :handler (fn [{{{:keys [id]} :path {:keys [library_signature]} :body} :parameters}]
@@ -146,8 +152,8 @@
 
     ["/:id/repair"
      {:post {:summary "Repair a production"
-             ;;:middleware [wrap-restricted wrap-authorized]
-             ;;:swagger {:security [{:apiAuth []}]}
+             :middleware [wrap-restricted]
+             :swagger {:security [{:apiAuth []}]}
              :parameters {:path {:id int?}}
              :handler (fn [{{{:keys [id]} :path} :parameters}]
                         (let [p (prod/get-production id)]
@@ -173,6 +179,8 @@
                          (not-found)))}
 
       :post {:summary "Upload the DTBook XML structure for a production"
+             :middleware [wrap-restricted]
+             :swagger {:security [{:apiAuth []}]}
              :parameters {:path {:id int?}
                           :multipart {:file multipart/temp-file-part}}
              :handler (fn [{{{:keys [file]} :multipart {:keys [id]} :path} :parameters}]
@@ -267,6 +275,8 @@
 
     ["/upload"
      {:post {:summary "Upload XML from a Vubis export"
+             :middleware [wrap-restricted]
+             :swagger {:security [{:apiAuth []}]}
              :parameters {:multipart {:file multipart/temp-file-part}}
              :handler (fn [{{{:keys [file]} :multipart} :parameters}]
                         (let [tempfile (:tempfile file)
