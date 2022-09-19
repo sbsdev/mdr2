@@ -5,11 +5,13 @@
     [mdr2.layout :refer [error-page]]
     [ring.middleware.anti-forgery :refer [wrap-anti-forgery]]
     [mdr2.middleware.formats :as formats]
+    [mdr2.i18n :refer [tr]]
     [muuntaja.middleware :refer [wrap-format wrap-params]]
     [mdr2.config :refer [env]]
     [ring.middleware.flash :refer [wrap-flash]]
     [ring.adapter.undertow.middleware.session :refer [wrap-session]]
     [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
+    [ring.util.http-response :refer [unauthorized forbidden]]
     [buddy.auth.middleware :refer [wrap-authentication wrap-authorization]]
     [buddy.auth.accessrules :refer [restrict]]
     [buddy.auth :refer [authenticated?]]
@@ -43,10 +45,13 @@
       ;; since they're not compatible with this middleware
       ((if (:websocket? request) handler wrapped) request))))
 
-(defn on-error [request response]
-  (error-page
-    {:status 403
-     :title (str "Access to " (:uri request) " is not authorized")}))
+(defn on-unauthenticated [request response]
+  (unauthorized
+   {:status-text (tr [:not-authenticated] [(:uri request)])}))
+
+(defn on-unauthorized [request response]
+  (forbidden
+   {:status-text (tr [:not-authorized] [(:uri request)])}))
 
 ;; https://learning.oreilly.com/library/view/web-development-with/9781680508833/f_0048.xhtml#:-:text=get-roles-from-match
 (defn get-roles-from-match [request]
@@ -72,11 +77,11 @@
 
 (defn wrap-authorized [handler]
   (restrict handler {:handler authorized?
-                     :on-error on-error})  )
+                     :on-error on-unauthorized})  )
 
 (defn wrap-restricted [handler]
   (restrict handler {:handler authenticated?
-                     :on-error on-error}))
+                     :on-error on-unauthenticated}))
 
 (defn wrap-auth [handler]
   (let [backend (jws-backend {:secret (env :jwt-secret)})]
