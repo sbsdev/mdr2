@@ -1,0 +1,77 @@
+#+title: Roles and allowed Actions
+#+date: <2022-09-19 Mo>
+#+author: Christian Egli
+#+email: christian.egli@sbs.ch
+#+language: en
+
+#+COLUMNS: %25ITEM %ETEXT(etext) %ADMIN(admin) %CATALOG(catalog) %STUDIO(studio) %IT(it)
+#+PROPERTY: ETEXT_ALL "X"
+#+PROPERTY: ADMIN_ALL "X"
+#+PROPERTY: CATALOG_ALL "X"
+#+PROPERTY: STUDIO_ALL "X"
+#+PROPERTY: IT_ALL "X"
+
+* Actions
+  :PROPERTIES:
+  :ID:       a82cb433-c923-4790-862b-9b95f0bae726
+  :END:
+** Upload structure
+   :PROPERTIES:
+   :ETEXT:    X
+   :IT:       X
+   :END:
+Upload the DTBook XML structure for a production
+** Download structure
+   :PROPERTIES:
+   :ETEXT:    X
+   :ADMIN:    X
+   :CATALOG:  X
+   :STUDIO:   X
+   :IT:       X
+   :END:
+Get the DTBook XML structure for a production
+
+** Mark as recorded
+   :PROPERTIES:
+   :ADMIN:    X
+   :IT:       X
+   :END:
+** Import a production
+   :PROPERTIES:
+   :ADMIN:    X
+   :IT:       X
+   :END:
+** Split a production
+   :PROPERTIES:
+   :IT:       X
+   :ADMIN:    X
+   :END:
+** Repair a production
+   :PROPERTIES:
+   :IT:       X
+   :STUDIO:   X
+   :ADMIN:    X
+   :END:
+** Assign a library signature
+   :PROPERTIES:
+   :IT:       X
+   :CATALOG:  X
+   :END:
+** Delete a production
+   :PROPERTIES:
+   :IT:       X
+   :END:
+
+* Role/Action
+#+BEGIN: columnview :hlines 1 :id "a82cb433-c923-4790-862b-9b95f0bae726" :skip-empty-rows t
+| ITEM                       | etext | admin | catalog | studio | it |
+|----------------------------+-------+-------+---------+--------+----|
+| Upload structure           | X     |       |         |        | X  |
+| Download structure         | X     | X     | X       | X      | X  |
+| Mark as recorded           |       | X     |         |        | X  |
+| Import a production        |       | X     |         |        | X  |
+| Split a production         |       | X     |         |        | X  |
+| Repair a production        |       | X     |         | X      | X  |
+| Assign a library signature |       |       | X       |        | X  |
+| Delete a production        |       |       |         |        | X  |
+#+END:
