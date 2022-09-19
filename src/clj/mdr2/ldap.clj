@@ -25,7 +25,8 @@
 
 (defn- extract-role [s]
   (->> s
-   (re-matches #"cn=([a-z_.]+),cn=roles,cn=accounts,dc=sbszh,dc=ch")
+   ;; only extract roles related to Madras2
+   (re-matches #"cn=madras2.([a-z_.]+),cn=roles,cn=accounts,dc=sbszh,dc=ch")
    second))
 
 (defn- add-groups [{memberships :memberOf :as user}]
