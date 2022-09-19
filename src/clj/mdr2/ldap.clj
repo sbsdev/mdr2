@@ -38,9 +38,11 @@
 (defn- add-roles [{memberships :memberOf :as user}]
   (let [roles (->> memberships
                    (map extract-role)
-                   (remove nil?))
-        roles (conj roles "madras2.admin")] ; FIXME: this is a temporary workaround
-    (assoc user :roles (apply hash-set roles))))
+                   (map keyword)
+                   (remove nil?)
+                   set)
+        roles (conj (conj roles :admin) :it)] ; FIXME: this is a temporary workaround
+    (assoc user :roles roles)))
 
 (defn authenticate [username password & [attributes]]
   (let [conn           (ldap/get-connection ldap-pool)
