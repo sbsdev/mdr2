@@ -203,7 +203,7 @@
      [:div.field.is-grouped
       [:p.control
        [:button.button
-        {:disabled (or (nil? file) (empty? (set/intersection #{"madras2.it" "madras2.etext"} roles)))
+        {:disabled (or (nil? file) (empty? (set/intersection #{:it :etext} roles)))
          :class klass
          :on-click (fn [e] (rf/dispatch [::upload-dtbook file]))}
         [:span (tr [:upload])]
@@ -222,7 +222,7 @@
          [:span.material-icons "file_download"]]])
      ;; show the upload button if the production hasn't been recorded
      ;; and the user is authorized
-     (when (and (seq (set/intersection #{"madras2.it" "madras2.etext"} roles))
+     (when (and (seq (set/intersection #{:it :etext} roles))
                 (#{"new" "structured"} state))
        [:a.button
         {:href (str "#/productions/" id "/upload")
@@ -234,7 +234,7 @@
      ;; from the libary, i.e. is not handled via ABACUS or the
      ;; production has a revision greater than zero as is the case
      ;; with productions that are repaired
-     (when (and (seq (set/intersection #{"madras2.it" "madras2.admin"} roles))
+     (when (and (seq (set/intersection #{:it :admin} roles))
                 (#{"structured"} state)
                 (or (:library_number production) (> (:revision production) 0)))
        (if @(rf/subscribe [::notifications/button-loading? uuid :recorded])
@@ -245,7 +245,7 @@
            [:span.material-icons "record_voice_over"]]]))
      ;; show the "Split" button if the next state is "split" and the user is
      ;; authorized
-     (when (and (seq (set/intersection #{"madras2.it" "madras2.admin"} roles))
+     (when (and (seq (set/intersection #{:it :admin} roles))
                 (#{"pending-split"} state))
          (if @(rf/subscribe [::notifications/button-loading? uuid :split])
            [:button.button.is-loading]
@@ -253,7 +253,7 @@
             {:on-click (fn [e] (rf/dispatch [::split-production uuid]))}
             [:span.icon.is-small
              [:span.material-icons "call_split"]]]))
-     (when (seq (set/intersection #{"madras2.it"} roles))
+     (when (seq (set/intersection #{:it} roles))
        (if @(rf/subscribe [::notifications/button-loading? uuid :delete])
          [:button.button.is-danger.is-loading]
          [:button.button.is-danger

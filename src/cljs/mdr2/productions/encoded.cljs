@@ -143,7 +143,7 @@
       [:button.button.is-loading]
       [:button.button
        {:disabled (or (not valid?)
-                      (empty? (set/union #{"madras2.it" "madras2.catalog"} roles)))
+                      (empty? (set/intersection #{:it :catalog} roles)))
         :on-click (fn [e] (rf/dispatch [::save-production id]))}
        #_[:span (tr [:save])]
        [:span.icon

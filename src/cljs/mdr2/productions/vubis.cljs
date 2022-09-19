@@ -143,7 +143,7 @@
      [file-input]
      [:p.control
       [:button.button
-       {:disabled (or (nil? file) (empty? (set/intersection #{"madras2.it" "madras2.admin"} roles)))
+       {:disabled (or (nil? file) (empty? (set/intersection #{:it :admin} roles)))
         :class klass
         :on-click (fn [e] (rf/dispatch [::extract-productions file]))}
        [:span (tr [:upload])]
@@ -157,14 +157,14 @@
       [:div.field.has-addons
        [:p.control
         [:button.button.is-danger
-         {:disabled (empty? (set/intersection #{"madras2.it" "madras2.admin"} roles))
+         {:disabled (empty? (set/intersection #{:it :admin} roles))
           :on-click (fn [e] (rf/dispatch [::ignore-production id]))}
          #_[:span.is-sr-only (tr [:ignore])]
          [:span.icon
           [:span.material-icons "cancel"]]]]
        [:p.control
         [:button.button.is-success
-         {:disabled (empty? (set/intersection #{"madras2.it" "madras2.admin"} roles))
+         {:disabled (empty? (set/intersection #{:it :admin} roles))
           :on-click (fn [e] (rf/dispatch [::save-production id]))}
          #_[:span (tr [:save])]
          [:span.icon

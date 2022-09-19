@@ -44,11 +44,11 @@
             [:div.navbar-start
              [nav-link "#/in-production" "Productions" :in-production]
              [nav-link "#/archived" "Archived" :archived]
-             (when (seq (set/intersection #{"madras2.it" "madras2.catalog"} roles))
+             (when (seq (set/intersection #{:it :catalog} roles))
                  [nav-link "#/encoded" "Encoded" :encoded])
-             (when (seq (set/intersection #{"madras2.it" "madras2.admin" "madras2.studio"} roles))
+             (when (seq (set/intersection #{:it :admin :studio} roles))
                  [nav-link "#/repair" "Repair" :repair])
-             (when (seq (set/intersection #{"madras2.it" "madras2.admin"} roles))
+             (when (seq (set/intersection #{:it :admin} roles))
                [nav-link "#/vubis" "Upload" :vubis])]
             [:div.navbar-end
              [:div.navbar-item

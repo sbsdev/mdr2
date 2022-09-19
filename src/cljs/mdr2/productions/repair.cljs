@@ -126,7 +126,7 @@
     (if @(rf/subscribe [::notifications/button-loading? id :repair])
        [:button.button.is-loading]
        [:button.button
-        {:disabled (empty? (set/union #{"madras2.it" "madras2.admin" "madras2.studio"} roles))
+        {:disabled (empty? (set/intersection #{:it :admin :studio} roles))
          :on-click (fn [e] (rf/dispatch [::repair-production id]))}
         [:span (tr [:repair])]
         [:span.icon.is-small
