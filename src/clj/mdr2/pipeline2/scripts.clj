@@ -4,7 +4,7 @@
   invoke specific scripts."
   (:require
    [babashka.fs :as fs]
-   [mdr2.pipeline2.utils :as dp2]))
+   [mdr2.pipeline2.core :as dp2]))
 
 (defn validate [input & {:keys [mathml-version check-images] :as opts}]
   (dp2/create-job-and-wait "dtbook-validator" {} (merge opts {:input-dtbook input})))

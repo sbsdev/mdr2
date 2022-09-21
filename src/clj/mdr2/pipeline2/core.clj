@@ -106,3 +106,52 @@
 (defn alive? []
   (let [url (str ws-url "/alive")]
     (client/success? (client/get url))))
+
+(defn get-id [job]
+  (-> job xml-zip (xml1-> (attr :id))))
+
+(defn- get-status [job]
+  (-> job xml-zip (xml1-> (attr :status))))
+
+(defn get-results [job]
+  ;; unfortunately `(xml-> :results :result :result (attr :href))`
+  ;; doesn't work here as `xml->` has a problem with that, see
+  ;; https://dev.clojure.org/jira/browse/DZIP-6
+  (-> job xml-zip (xml-> (qname "results") (qname "result") zf/children (attr :href))))
+
+(defn get-stream [url]
+  (let [response (client/get url (merge (auth-query-params url) {:as :stream}))]
+    (when (client/success? response)
+      (-> response :body))))
+
+(defmacro with-job
+  [[job job-create-form] & body]
+  `(let [~job ~job-create-form]
+     (try
+       ~@body
+       (finally
+         (when ~job
+           (job-delete (get-id ~job)))))))
+
+(defn wait-for-result [job]
+  (Thread/sleep poll-interval) ; wait a bit before polling the first time
+  (let [id (get-id job)]
+    (loop [result (get-job id)]
+      (let [status (get-status result)]
+        (if (= "RUNNING" status)
+          (do
+            (Thread/sleep poll-interval)
+            (recur (get-job id)))
+          result)))))
+
+(defn create-job-and-wait [script inputs options]
+  (let [id (get-id (job-create script inputs options))]
+    (Thread/sleep poll-interval) ; wait a bit before polling the first time
+    (loop [result (get-job id)]
+      (let [status (get-status result)
+            _ (println "Status: " status)]
+        (if (= "RUNNING" status)
+          (do
+            (Thread/sleep poll-interval)
+            (recur (get-job id)))
+          result)))))
