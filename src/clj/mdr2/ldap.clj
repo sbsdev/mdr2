@@ -41,7 +41,8 @@
                    (map keyword)
                    (remove nil?)
                    set)
-        roles (conj (conj roles :admin) :it)] ; FIXME: this is a temporary workaround
+        roles (conj (conj roles :admin) :it) ; FIXME: this is a temporary workaround
+        ]
     (assoc user :roles roles)))
 
 (defn authenticate [username password & [attributes]]
