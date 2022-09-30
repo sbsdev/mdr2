@@ -1,19 +1,25 @@
 (ns mdr2.pipeline2.core
   "Thin layer on top of the [Pipeline2 Web Service
-  API](https://code.google.com/p/daisy-pipeline/wiki/WebServiceAPI)"
-  (:require [clojure.data.xml :as xml]
-            [java-time :as time]
-            [pandect.core :as pandect]
+  API](https://daisy.github.io/pipeline/WebServiceAPI)"
+  (:require [clj-http.client :as client]
+            [clj-http.util :refer [url-encode]]
             [clojure.data.codec.base64 :as b64]
+            [clojure.data.xml :as xml]
+            [clojure.data.zip :as zf]
+            [clojure.data.zip.xml :refer [attr xml-> xml1->]]
+            [clojure.java.io :as io]
+            [clojure.zip :refer [xml-zip]]
             [crypto.random :as crypt-rand]
-            [clj-http.client :as client]
-            [clj-http.util :refer [url-encode]]))
+            [java-time :as time]
+            [mdr2.config :refer [env]]
+            [pandect.algo.sha1 :as pandect]
+            [clojure.tools.logging :as log])
+  (:import [java.util.zip ZipEntry ZipOutputStream]))
 
 (def ws-url "http://localhost:8181/ws")
 
-(def ^:private auth-id "clientid")
-(def ^:private secret "supersekret")
-(def ^:private remote false)
+(def ^:private timeout 1000)
+(def ^:private poll-interval 3000)
 
 (defn- create-hash [message signing-key]
   (-> (pandect/sha1-hmac-bytes message signing-key)
@@ -21,30 +27,33 @@
       String.))
 
 (defn auth-query-params [uri]
-  (let [timestamp (str (time/local-date-time))
+  (let [timestamp (time/format :iso-local-date-time (time/local-date-time))
         nonce (crypt-rand/base64 32)
+        auth-id (env :pipeline2-auth-id)
         params {"authid" auth-id "time" timestamp "nonce" nonce}
         query-string (str uri "?" (client/generate-query-string params))
-        hashcode (create-hash query-string secret)]
+        hashcode (create-hash query-string (env :pipeline2-secret))]
     {:query-params
      {"authid" auth-id "time" timestamp "nonce" nonce "sign" hashcode}}))
 
+(def qname (partial xml/qname "http://www.daisy.org/ns/pipeline/data"))
+
 (defn job-sexp [script inputs options]
-  (let [script-url (str ws-url "/script/" script)]
-    [:jobRequest {:xmlns "http://www.daisy.org/ns/pipeline/data"}
-     [:script {:href script-url}]
+  (let [script-url (str ws-url "/scripts/" script)]
+    [(qname "jobRequest")
+     [(qname "script") {:href script-url}]
      (for [[port file] inputs]
-       [:input {:name (name port)}
-        [:item {:value (str "file:" (url-encode file))}]])
+       [(qname "input") {:name (name port)}
+        [(qname "item") {:value (if-not (env :pipeline2-remote)
+                         (str "file:" (url-encode file))
+                         (url-encode (.getName (io/file file))))}]])
      (for [[key value] options]
-       [:option {:name (name key)} value])]))
+       [(qname "option") {:name (name key)} value])]))
 
 (defn job-request [script inputs options]
   (-> (job-sexp script inputs options)
       xml/sexp-as-element
       xml/emit-str))
-
-(defn wait [job])
 
 (defn jobs []
   (let [url (str ws-url "/jobs")
@@ -52,18 +61,38 @@
     (when (client/success? response)
       (-> response :body xml/parse-str))))
 
-(defn job [id]
+(defn get-job [id]
   (let [url (str ws-url "/jobs/" id)
-        response (client/get url (auth-query-params url))]
+        response (client/get url (merge (auth-query-params url)
+                                        #_{:socket-timeout timeout :conn-timeout timeout}))]
     (when (client/success? response)
       (-> response :body xml/parse-str))))
+
+(defn- zip-files [files]
+  (let [tmp-name (.getAbsolutePath (java.io.File/createTempFile "pipeline2-client" ".zip"))]
+    (with-open [zip (ZipOutputStream. (io/output-stream tmp-name))]
+      (doseq [f (map io/file files)]
+        (.putNextEntry zip (ZipEntry. (.getName f)))
+        (io/copy f zip)
+        (.closeEntry zip)))
+    tmp-name))
+
+(defn- multipart-request [inputs body]
+  {:multipart
+   [{:name "job-data" :content (io/file (zip-files (vals inputs)))}
+    {:name "job-request" :content body}]})
+
+(defn- maybe-multipart [inputs body]
+  (if (empty? inputs) body (multipart-request inputs body)))
 
 (defn job-create [script inputs options]
   (let [url (str ws-url "/jobs")
         request (job-request script inputs options)
         auth (auth-query-params url)
         body {:body request}
-        response (client/post url (merge auth body))]
+        multipart (maybe-multipart inputs request)
+        ;;response (client/post url (merge multipart auth))]
+        response (client/post url (merge body auth))]
     (when (client/success? response)
       (-> response :body xml/parse-str))))
 
