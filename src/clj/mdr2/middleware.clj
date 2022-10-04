@@ -17,7 +17,9 @@
     [ring.middleware.anti-forgery :refer [wrap-anti-forgery]]
     [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
     [ring.middleware.flash :refer [wrap-flash]]
-    [ring.util.http-response :refer [forbidden unauthorized]]))
+    [ring.util.http-response :refer [forbidden unauthorized]]
+    [iapetos.collector.ring :as prometheus]
+    [mdr2.metrics :as metrics]))
 
 (defn wrap-internal-error [handler]
   (fn [req]
@@ -97,4 +99,6 @@
         (-> site-defaults
             (assoc-in [:security :anti-forgery] false)
             (dissoc :session)))
+      (prometheus/wrap-metrics
+       metrics/registry {:path "/metrics"})
       wrap-internal-error))

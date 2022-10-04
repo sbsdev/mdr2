@@ -493,3 +493,6 @@ Content-Type: application/xml
   </Task>
 </AbaConnectContainer>
 --e82bc39c68f1417d9ea12c5456182f3c--
+
+# Metrics
+GET http://localhost:3000/metrics

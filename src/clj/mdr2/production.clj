@@ -13,7 +13,9 @@
             [mdr2.obi :as obi]
             [mdr2.pipeline1 :as pipeline]
             [clojure.tools.logging :as log]
-            [medley.core :as medley]))
+            [medley.core :as medley]
+            [iapetos.collector.fn :as prometheus]
+            [mdr2.metrics :as metrics]))
 
 (defn library-signature?
   "Return true if `id` is a valid library signature"
@@ -276,3 +278,10 @@
   ;; move the file to the right place
   (fs/move f (xml-path production) {:replace-existing true})
   (set-state-structured! production))
+
+(prometheus/instrument! metrics/registry #'create!)
+(prometheus/instrument! metrics/registry #'get-production)
+(prometheus/instrument! metrics/registry #'delete!)
+(prometheus/instrument! metrics/registry #'set-state-cataloged!)
+(prometheus/instrument! metrics/registry #'repair!)
+(prometheus/instrument! metrics/registry #'add-structure)

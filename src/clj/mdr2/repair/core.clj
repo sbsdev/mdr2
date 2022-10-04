@@ -20,7 +20,9 @@
    [mdr2.db.core :as db]
    [mdr2.obi :as obi]
    [mdr2.production :as prod]
-   [mdr2.production.path :as path]))
+   [mdr2.production.path :as path]
+   [iapetos.collector.fn :as prometheus]
+   [mdr2.metrics :as metrics]))
 
 (defn production-id?
   "Return true if `id` is a valid production id"
@@ -125,3 +127,4 @@
           (prod/set-state! production "archived")
           (throw e))))))
 
+(prometheus/instrument! metrics/registry #'repair)

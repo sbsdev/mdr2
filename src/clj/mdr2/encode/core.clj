@@ -10,7 +10,9 @@
             [mdr2.dtb :as dtb]
             [mdr2.dtb.xml :as xml]
             [mdr2.pipeline1 :as pipeline]
-            [mdr2.pipeline2.scripts :as pipeline2])
+            [mdr2.pipeline2.scripts :as pipeline2]
+            [iapetos.collector.fn :as prometheus]
+            [mdr2.metrics :as metrics])
   (:import java.text.Normalizer
            java.text.Normalizer$Form))
 
@@ -206,4 +208,6 @@
    {:pre [(= state "split")]}
    (log/debugf "Encoding split production %s with bitrate %s and sample-rate %s" (:id production) bitrate sample-rate)
    (encode production bitrate sample-rate)))
+
+(prometheus/instrument! metrics/registry #'encode-or-split)
 

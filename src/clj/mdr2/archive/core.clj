@@ -39,7 +39,9 @@ mp3 and the whole thing is packed up in one or more iso files
             [mdr2.production :as prod]
             [mdr2.production.path :as path]
             [mdr2.repair.core :as repair]
-            [mdr2.rdf :as rdf]))
+            [mdr2.rdf :as rdf]
+            [iapetos.collector.fn :as prometheus]
+            [mdr2.metrics :as metrics]))
 
 ;;(def ^:private db {:factory factory :name "java:jboss/datasources/archive"})
 (def ^:private db {:name "java:jboss/datasources/archive"})
@@ -220,6 +222,8 @@ mp3 and the whole thing is packed up in one or more iso files
         (fs/copy (path/iso-name production volume) iso-archive-path)
         (set-file-permissions (file iso-archive-path))))
     (prod/set-state-archived! production)))
+
+(prometheus/instrument! metrics/registry #'archive)
 
 (comment
   (let [p {:id 50000 :revision 0 :library_signature "ds70000"}]

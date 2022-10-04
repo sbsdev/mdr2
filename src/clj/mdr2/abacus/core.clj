@@ -26,7 +26,9 @@
             [mdr2.queues :as queues]
             [mdr2.production :as prod]
             [mdr2.production.path :as path]
-            [mdr2.abacus.validation :as validation]))
+            [mdr2.abacus.validation :as validation]
+            [iapetos.collector.fn :as prometheus]
+            [mdr2.metrics :as metrics]))
 
 (def ^:private root-path [:Task :Transaction :DocumentData])
 
@@ -223,3 +225,9 @@
   ;; file names are supposed to be "Ax_product_number.xml, e.g. Ax_DY15000.xml"
   (let [file-name (.getPath (io/file (env :abacus-export-dir) (str "Ax_" product_number ".xml")))]
     (spit file-name (export production))))
+
+(prometheus/instrument! metrics/registry #'import-new-production)
+(prometheus/instrument! metrics/registry #'import-recorded-production)
+(prometheus/instrument! metrics/registry #'import-status-request)
+(prometheus/instrument! metrics/registry #'import-metadata-update)
+(prometheus/instrument! metrics/registry #'export-file)
