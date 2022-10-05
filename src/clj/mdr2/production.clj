@@ -286,3 +286,4 @@
 (prometheus/instrument! metrics/registry #'set-state-cataloged!)
 (prometheus/instrument! metrics/registry #'repair!)
 (prometheus/instrument! metrics/registry #'add-structure)
+(prometheus/instrument! metrics/registry #'delete-all-dirs!)
