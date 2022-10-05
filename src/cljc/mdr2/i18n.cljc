@@ -83,6 +83,9 @@
                     :not-authenticated "Access to %1 only for logged-in users"
                     :not-authorized "Access to %1 is not authorized"
                     ;;
+                    :repair-subject "Your production (%1) is ready for repair"
+                    :repair-message "Hi, the production that you requested for repair (%1, \"%2\") is now ready."
+                    ;;
                     :previous "Previous"
                     :next "Next"
                     :word "Word"
@@ -167,6 +170,9 @@
                     :invalid-anti-forgery-token "Invalid anti-forgery token"
                     :not-authenticated "Zugriff auf %1 nur für angemeldete Benutzer"
                     :not-authorized "Zugriff auf %1 nicht gestattet"
+                    ;;
+                    :repair-subject "Die Produktion (%1) ist bereit zur Reparatur"
+                    :repair-message "Hallo, die von Ihnen angeforderte Produktion (%1, \"%2\") ist jetzt bereit zur Reparatur."
                     ;;
                     :previous "Vorherige"
                     :next "Nächste"

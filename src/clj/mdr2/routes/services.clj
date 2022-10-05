@@ -159,13 +159,14 @@
              :swagger {:security [{:apiAuth []}]}
              :authorized #{:admin :studio :it}
              :parameters {:path {:id int?}}
-             :handler (fn [{{{:keys [id]} :path} :parameters}]
+             :handler (fn [{{{:keys [id]} :path} :parameters
+                            {user :user} :identity}]
                         (let [p (prod/get-production id)]
                           (cond
                             (nil? p) (not-found)
                             (not= (:state p) "archived") (conflict {:status-text "Only archived productions can be repaired"})
                             :else (try
-                                    (prod/repair! p)
+                                    (prod/repair! (assoc p :repair/initiated-by user))
                                     (no-content)
                                     (catch clojure.lang.ExceptionInfo e
                                       (internal-server-error {:status-text (ex-message e)}))))))}}]
