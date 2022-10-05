@@ -266,10 +266,11 @@
 (defn delete!
   "Delete a `production`"
   [production]
-  ;; we do not actually delete anything in the db
-  (-> production
-      (set-state! "deleted")
-      delete-all-dirs!))
+  (conman/with-transaction [db/*db*]
+    (-> production
+        ;; we do not actually delete anything in the db
+        (set-state! "deleted")
+        delete-all-dirs!)))
 
 (defn add-structure
   "Add a DTBook XML to a `production`. This will also set the status
