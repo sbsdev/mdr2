@@ -136,15 +136,15 @@
  (fn [db [_ id]]
    (validation/library-signature? (get-in db [:productions :encoded id :library_signature]))))
 
-(defn buttons [id]
-  (let [valid? @(rf/subscribe [::production-valid? id])
+(defn buttons [uuid]
+  (let [valid? @(rf/subscribe [::production-valid? uuid])
         roles @(rf/subscribe [::auth/user-roles])]
-    (if @(rf/subscribe [::notifications/button-loading? id :save])
+    (if @(rf/subscribe [::notifications/button-loading? uuid :save])
       [:button.button.is-loading]
       [:button.button
        {:disabled (or (not valid?)
                       (empty? (set/intersection #{:it :catalog} roles)))
-        :on-click (fn [e] (rf/dispatch [::save-production id]))}
+        :on-click (fn [e] (rf/dispatch [::save-production uuid]))}
        #_[:span (tr [:save])]
        [:span.icon
         [:span.material-icons "save"]]])))

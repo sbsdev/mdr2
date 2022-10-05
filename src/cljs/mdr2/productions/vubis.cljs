@@ -47,34 +47,34 @@
 
 (rf/reg-event-fx
   ::save-production
-  (fn [{:keys [db]} [_ id]]
-    (let [production (get-in db [:productions :vubis id])
+  (fn [{:keys [db]} [_ uuid]]
+    (let [production (get-in db [:productions :vubis uuid])
           cleaned (dissoc production :uuid)]
-      {:db (notifications/set-button-state db id :vubis)
+      {:db (notifications/set-button-state db uuid :vubis)
        :http-xhrio
        (as-transit
         {:method          :post
          :headers         (auth/auth-header db)
          :uri             "/api/productions"
          :params          cleaned
-         :on-success      [::ack-save id]
-         :on-failure      [::ack-failure id :vubis]})})))
+         :on-success      [::ack-save uuid]
+         :on-failure      [::ack-failure uuid :vubis]})})))
 
 (rf/reg-event-db
   ::ack-save
-  (fn [db [_ id]]
+  (fn [db [_ uuid]]
     (-> db
-        (update-in [:productions :vubis] dissoc id)
-        (notifications/clear-button-state id :vubis))))
+        (update-in [:productions :vubis] dissoc uuid)
+        (notifications/clear-button-state uuid :vubis))))
 
 (rf/reg-event-db
  ::ack-failure
- (fn [db [_ id request-type response]]
+ (fn [db [_ uuid request-type response]]
    (let [message (or (get-in response [:response :status-text])
                      (get response :status-text))]
      (-> db
          (notifications/set-errors request-type message)
-         (notifications/clear-button-state id request-type)))))
+         (notifications/clear-button-state uuid request-type)))))
 
 (rf/reg-event-fx
   ::save-all-productions
@@ -150,22 +150,22 @@
        [:span.icon.is-small
         [:span.material-icons "upload_file"]]]]]))
 
-(defn buttons [id]
+(defn buttons [uuid]
   (let [roles @(rf/subscribe [::auth/user-roles])]
-    (if @(rf/subscribe [::notifications/button-loading? id :save])
+    (if @(rf/subscribe [::notifications/button-loading? uuid :save])
       [:button.button.is-loading]
       [:div.field.has-addons
        [:p.control
         [:button.button.is-danger
          {:disabled (empty? (set/intersection #{:it :admin} roles))
-          :on-click (fn [e] (rf/dispatch [::ignore-production id]))}
+          :on-click (fn [e] (rf/dispatch [::ignore-production uuid]))}
          #_[:span.is-sr-only (tr [:ignore])]
          [:span.icon
           [:span.material-icons "cancel"]]]]
        [:p.control
         [:button.button.is-success
          {:disabled (empty? (set/intersection #{:it :admin} roles))
-          :on-click (fn [e] (rf/dispatch [::save-production id]))}
+          :on-click (fn [e] (rf/dispatch [::save-production uuid]))}
          #_[:span (tr [:save])]
          [:span.icon
           [:span.material-icons "done"]]]]])))

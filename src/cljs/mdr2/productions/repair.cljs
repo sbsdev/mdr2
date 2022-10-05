@@ -50,27 +50,28 @@
 
 (rf/reg-event-fx
   ::repair-production
-  (fn [{:keys [db]} [_ id]]
-    {:db (notifications/set-button-state db id :repair)
-     :http-xhrio (as-transit {:method          :post
-                              :headers         (auth/auth-header db)
-                              :uri             (str "/api/" id "/repair")
-                              :on-success      [::ack-repair id]
-                              :on-failure      [::ack-failure id :repair]})}))
+  (fn [{:keys [db]} [_ uuid]]
+    (let [id (get-in db [:productions :repair uuid :id])]
+      {:db (notifications/set-button-state db uuid :repair)
+       :http-xhrio (as-transit {:method          :post
+                                :headers         (auth/auth-header db)
+                                :uri             (str "/api/productions/" id "/repair")
+                                :on-success      [::ack-repair uuid]
+                                :on-failure      [::ack-failure uuid :repair]})})))
 
 (rf/reg-event-db
   ::ack-repair
-  (fn [db [_ id]]
-    (notifications/clear-button-state db id :repair)))
+  (fn [db [_ uuid]]
+    (notifications/clear-button-state db uuid :repair)))
 
 (rf/reg-event-db
  ::ack-failure
- (fn [db [_ id request-type response]]
+ (fn [db [_ uuid request-type response]]
    (let [message (or (get-in response [:response :status-text])
                      (get response :status-text))]
      (-> db
          (notifications/set-errors request-type message)
-         (notifications/clear-button-state id request-type)))))
+         (notifications/clear-button-state uuid request-type)))))
 
 (rf/reg-sub
   ::productions
@@ -121,13 +122,13 @@
  (fn [db [_ id]]
    (get-in db [:productions :repair id])))
 
-(defn buttons [id]
+(defn buttons [uuid]
   (let [roles @(rf/subscribe [::auth/user-roles])]
-    (if @(rf/subscribe [::notifications/button-loading? id :repair])
+    (if @(rf/subscribe [::notifications/button-loading? uuid :repair])
        [:button.button.is-loading]
        [:button.button
         {:disabled (empty? (set/intersection #{:it :admin :studio} roles))
-         :on-click (fn [e] (rf/dispatch [::repair-production id]))}
+         :on-click (fn [e] (rf/dispatch [::repair-production uuid]))}
         [:span (tr [:repair])]
         [:span.icon.is-small
          [:span.material-icons "build"]]])))
