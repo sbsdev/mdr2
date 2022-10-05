@@ -13,6 +13,7 @@
                  [clojure.java-time "0.3.3"]
                  [com.cognitect/transit-clj "1.0.329"]
                  [com.cognitect/transit-cljs "0.8.280"]
+                 [com.draines/postal "2.0.5"]
                  [com.google.javascript/closure-compiler-unshaded "v20220502"]
                  [com.google.protobuf/protobuf-java "3.21.5"]
                  [conman "0.9.4"]
