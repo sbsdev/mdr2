@@ -2,7 +2,7 @@
   (:require
    [clojure.string :as string]
    [mdr2.config :refer [env]]
-   [postal.core :as postal]))
+   [tarayo.core :as tarayo]))
 
 (defn send-message
   "Send an email to `recipient` with the given `subject` and `message`.
@@ -11,10 +11,9 @@
   [recipient subject message]
   (let [prefix (env :mail-prefix)
         prefixed-subject (if (string/blank? prefix) subject (format "%s %s" prefix subject))]
-    (postal/send-message
-     {:host (env :mail-host)}
-     {:from (env :mail-sender)
-      :to recipient
-      :subject prefixed-subject
-      :body message})))
+    (with-open [conn (tarayo/connect {:host (env :mail-host)})]
+      (tarayo/send! conn {:from (env :mail-sender)
+                          :to recipient
+                          :subject prefixed-subject
+                          :body message}))))
 
