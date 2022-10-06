@@ -7,7 +7,7 @@
                  [buddy/buddy-core "1.10.413"]
                  [buddy/buddy-hashers "1.8.158"]
                  [buddy/buddy-sign "3.4.333"]
-                 [ch.qos.logback/logback-classic "1.4.0"]
+                 [ch.qos.logback/logback-classic "1.4.3"]
                  [clj-commons/iapetos "0.1.13" :exclusions [io.prometheus/simpleclient]]
                  [cljs-ajax "0.8.4"]
                  [clojure.java-time "0.3.3"]
@@ -60,7 +60,10 @@
                  [com.novemberain/pantomime "2.11.0" :exclusions [com.google.guava/guava]]
                  [clj-http "3.12.3"]
                  [org.clojure/data.csv "1.0.1"]
-                 [org.clojars.pntblnk/clj-ldap "0.0.17"]]
+                 [org.clojars.pntblnk/clj-ldap "0.0.17"]
+                 ;; the next two deps are needed for the logback SMTPAppender (so we can send log entries by mail)
+                 [com.sun.mail/jakarta.mail "2.0.1"]
+                 [com.sun.activation/jakarta.activation "2.0.1"]]
 
   :min-lein-version "2.0.0"
   
