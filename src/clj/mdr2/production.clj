@@ -255,8 +255,6 @@
 
 (defn set-state-archived! [production]
   (delete-all-dirs! production)
-  ;; even if for some reason the directories were not deleted we set
-  ;; the state to "archived" anyway
   (set-state! production "archived"))
 
 (defn repair!
