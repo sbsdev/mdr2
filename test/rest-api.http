@@ -84,6 +84,9 @@ Content-Type: application/transit+json
   "PNX 8434"
 ]
 
+# Delete a production
+DELETE http://localhost:3000/api/productions/31411
+
 # Get the xml for a production
 GET http://localhost:3000/api/productions/31017/xml
 Content-Type: application/json
