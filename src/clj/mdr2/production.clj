@@ -249,9 +249,9 @@
   (if (obi/directory-valid? production)
     ;; only delete if nothing is fishy with the directories
     (doseq [dir (path/all production)] (fs/delete-tree dir))
-    (throw
-     (ex-info (format "Failed to remove invalid Obi directory (%s)" (:id production))
-              {:error-id :invalid-obi-directory}))))
+    (let [message (format "Failed to remove invalid Obi directory (%s)" (:id production))]
+      (log/error message)
+      (throw (ex-info message {:error-id :invalid-obi-directory})))))
 
 (defn set-state-archived! [production]
   (delete-all-dirs! production)
