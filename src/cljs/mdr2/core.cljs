@@ -42,7 +42,7 @@
            [:div#nav-menu.navbar-menu
             {:class (when @expanded? :is-active)}
             [:div.navbar-start
-             [nav-link "#/in-production" "Productions" :in-production]
+             [nav-link "#/" "Productions" :in-production]
              [nav-link "#/archived" "Archived" :archived]
              (when (seq (set/intersection #{:it :catalog} roles))
                  [nav-link "#/encoded" "Encoded" :encoded])
@@ -65,7 +65,10 @@
 
 (def router
   (reitit/router
-    [["/login" {:name :login
+   [["/" {:name :in-production
+          :view #'in-production/page
+          :controllers [{:start (fn [_] (rf/dispatch [::in-production/fetch-productions]))}]}]
+    ["/login" {:name :login
                 :view #'auth/login-page}]
      ["/productions/:id" {:name :production
                           :view #'production/page
@@ -77,9 +80,6 @@
                                  :controllers [{:stop (fn [_]
                                                         (rf/dispatch [::production/clear-current])
                                                         (rf/dispatch [::in-production/clear-upload-file]))}]}]
-     ["/in-production" {:name :in-production
-                        :view #'in-production/page
-                        :controllers [{:start (fn [_] (rf/dispatch [::in-production/fetch-productions]))}]}]
      ["/archived" {:name :archived
                    :view #'archived/page
                    :controllers [{:start (fn [_] (rf/dispatch [::archived/fetch-productions]))}]}]
