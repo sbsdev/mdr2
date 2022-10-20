@@ -1,4 +1,4 @@
-(defproject mdr2 "0.9.0-alpha3-SNAPSHOT"
+(defproject ch.sbs/mdr2 "0.9.0-alpha3-SNAPSHOT"
 
   :description "A Production Management Tool for DAISY Talking Books"
   :url "https://github.com/sbsdev/mdr2"
@@ -63,7 +63,8 @@
                  [org.clojars.pntblnk/clj-ldap "0.0.17"]
                  ;; the next two deps are needed for the logback SMTPAppender (so we can send log entries by mail)
                  [com.sun.mail/jakarta.mail "2.0.1"]
-                 [com.sun.activation/jakarta.activation "2.0.1"]]
+                 [com.sun.activation/jakarta.activation "2.0.1"]
+                 [trptcolin/versioneer "0.2.0"]] ;; extract version information from the jar
 
   :min-lein-version "2.0.0"
   

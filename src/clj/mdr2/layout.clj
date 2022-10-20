@@ -7,7 +7,8 @@
     [ring.util.http-response :refer [content-type ok]]
     [ring.util.anti-forgery :refer [anti-forgery-field]]
     [ring.middleware.anti-forgery :refer [*anti-forgery-token*]]
-    [ring.util.response]))
+    [ring.util.response]
+    [trptcolin.versioneer.core :as version]))
 
 (parser/set-resource-path!  (clojure.java.io/resource "html"))
 (parser/add-tag! :csrf-field (fn [_ _] (anti-forgery-field)))
@@ -22,7 +23,13 @@
         template
         (assoc params
           :page template
-          :csrf-token *anti-forgery-token*)))
+          :csrf-token *anti-forgery-token*
+          :application-version
+          (let [group "ch.sbs"
+                artifact "mdr2"
+                version (version/get-version group artifact)
+                revision (version/get-revision group artifact)]
+            (format "%s (%s)" version revision)))))
     "text/html; charset=utf-8"))
 
 (defn error-page
