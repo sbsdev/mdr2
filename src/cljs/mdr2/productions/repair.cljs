@@ -59,17 +59,13 @@
                                 :on-success      [::ack-repair uuid]
                                 :on-failure      [::ack-failure uuid :repair]})})))
 
-(rf/reg-event-fx
+(rf/reg-event-db
   ::ack-repair
-  (fn [{:keys [db]} [_ uuid]]
-    (let [db (-> db
-                 ;; drop the production that is going to be repaired from the list
-                 (update-in [:productions :repair] dissoc uuid)
-                 (notifications/clear-button-state uuid :repair))
-          empty? (-> db (get-in [:productions :repair]) count (< 1))]
-      (if empty?
-        {:db db :dispatch [::fetch-productions]}
-        {:db db}))))
+  (fn [db [_ uuid]]
+    (-> db
+        ;; drop the production that is going to be repaired from the list
+        (update-in [:productions :repair] dissoc uuid)
+        (notifications/clear-button-state uuid :repair))))
 
 (rf/reg-event-db
  ::ack-failure
