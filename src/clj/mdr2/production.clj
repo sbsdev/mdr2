@@ -254,7 +254,11 @@
       (throw (ex-info message {:error-id :invalid-obi-directory})))))
 
 (defn set-state-archived! [production]
-  (delete-all-dirs! production)
+  (try
+    (delete-all-dirs! production)
+    ;; ignore deletion problems, i.e. archive the production even if
+    ;; we couldn't delete the directories
+    (catch clojure.lang.ExceptionInfo _))
   (set-state! production "archived"))
 
 (defn repair!
