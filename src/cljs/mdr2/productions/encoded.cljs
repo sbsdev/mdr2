@@ -141,13 +141,14 @@
         roles @(rf/subscribe [::auth/user-roles])]
     (if @(rf/subscribe [::notifications/button-loading? uuid :save])
       [:button.button.is-loading]
-      [:button.button
+      [:button.button.has-tooltip-arrow
        {:disabled (or (not valid?)
                       (empty? (set/intersection #{:it :catalog} roles)))
-        :on-click (fn [e] (rf/dispatch [::save-production uuid]))}
-       #_[:span (tr [:save])]
-       [:span.icon
-        [:span.material-icons "save"]]])))
+        :on-click (fn [e] (rf/dispatch [::save-production uuid]))
+        :data-tooltip (tr [:save])
+        :aria-label (tr [:save])}
+       [:span.icon {:aria-hidden true}
+        [:i.material-icons "save"]]])))
 
 (defn production-link [{:keys [id title] :as production}]
   [:a {:href (str "#/productions/" id)

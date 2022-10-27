@@ -198,7 +198,7 @@
         current @(rf/subscribe [::production/current])]
     [:<>
      [:div.field
-      [:label.label (tr [:upload-structure] [(:title current) (:id current)])]
+      [:label.label (tr [:upload-structure-for] [(:title current) (:id current)])]
       [file-input]]
      [:div.field.is-grouped
       [:p.control
@@ -207,28 +207,32 @@
          :class klass
          :on-click (fn [e] (rf/dispatch [::upload-dtbook file]))}
         [:span (tr [:upload])]
-        [:span.icon
-         [:span.material-icons "upload_file"]]]]]]))
+        [:span.icon {:aria-hidden true}
+         [:i.material-icons "upload_file"]]]]]]))
 
 (defn buttons [{:keys [uuid id state] :as production}]
   (let [roles @(rf/subscribe [::auth/user-roles])]
     [:div.buttons.has-addons
      ;; show the download button while the production hasn't been recorded
      (when (#{"new" "structured"} state)
-       [:a.button
+       [:a.button.has-tooltip-arrow
         {:href (str "/api/productions/" id "/xml")
-         :download (str id ".xml")}
-        [:span.icon.is-small
-         [:span.material-icons "file_download"]]])
+         :download (str id ".xml")
+         :data-tooltip (tr [:download-structure])
+         :aria-label (tr [:download-structure])}
+        [:span.icon.is-small {:aria-hidden true}
+         [:i.material-icons "file_download"]]])
      ;; show the upload button if the production hasn't been recorded
      ;; and the user is authorized
      (when (and (seq (set/intersection #{:it :etext} roles))
                 (#{"new" "structured"} state))
-       [:a.button
+       [:a.button.has-tooltip-arrow
         {:href (str "#/productions/" id "/upload")
-         :on-click (fn [e] (rf/dispatch [::production/set-current production]))}
-        [:span.icon.is-small
-         [:span.material-icons "file_upload"]]])
+         :on-click (fn [e] (rf/dispatch [::production/set-current production]))
+         :data-tooltip (tr [:upload-structure])
+         :aria-label (tr [:upload-structure])}
+        [:span.icon.is-small {:aria-hidden true}
+         [:i.material-icons "file_upload"]]])
      ;; show the "Recorded" button if the next state is "recorded",
      ;; the user is authorized, and the production has been imported
      ;; from the libary, i.e. is not handled via ABACUS or the
@@ -239,27 +243,33 @@
                 (or (:library_number production) (> (:revision production) 0)))
        (if @(rf/subscribe [::notifications/button-loading? uuid :recorded])
          [:button.button.is-loading]
-         [:button.button
-          {:on-click (fn [e] (rf/dispatch [::recorded-production uuid]))}
-          [:span.icon.is-small
-           [:span.material-icons "record_voice_over"]]]))
+         [:button.button.has-tooltip-arrow
+          {:on-click (fn [e] (rf/dispatch [::recorded-production uuid]))
+           :data-tooltip (tr [:mark-recorded])
+           :aria-label (tr [:mark-recorded])}
+          [:span.icon.is-small {:aria-hidden true}
+           [:i.material-icons "check_circle"]]]))
      ;; show the "Split" button if the next state is "split" and the user is
      ;; authorized
      (when (and (seq (set/intersection #{:it :admin} roles))
                 (#{"pending-split"} state))
          (if @(rf/subscribe [::notifications/button-loading? uuid :split])
            [:button.button.is-loading]
-           [:button.button
-            {:on-click (fn [e] (rf/dispatch [::split-production uuid]))}
-            [:span.icon.is-small
-             [:span.material-icons "call_split"]]]))
+           [:button.button.has-tooltip-arrow
+            {:on-click (fn [e] (rf/dispatch [::split-production uuid]))
+           :data-tooltip (tr [:split])
+           :aria-label (tr [:split])}
+            [:span.icon.is-small {:aria-hidden true}
+             [:i.material-icons "call_split"]]]))
      (when (seq (set/intersection #{:it} roles))
        (if @(rf/subscribe [::notifications/button-loading? uuid :delete])
          [:button.button.is-danger.is-loading]
-         [:button.button.is-danger
-          {:on-click (fn [e] (rf/dispatch [::delete-production uuid]))}
-          [:span.icon.is-small
-           [:span.material-icons "delete"]]]))]))
+         [:button.button.is-danger.has-tooltip-arrow
+          {:on-click (fn [e] (rf/dispatch [::delete-production uuid]))
+           :data-tooltip (tr [:delete])
+           :aria-label (tr [:delete])}
+          [:span.icon.is-small {:aria-hidden true}
+           [:i.material-icons "delete"]]]))]))
 
 (defn production-link [{:keys [id title] :as production}]
   [:a {:href (str "#/productions/" id)

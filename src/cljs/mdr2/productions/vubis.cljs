@@ -147,8 +147,8 @@
         :class klass
         :on-click (fn [e] (rf/dispatch [::extract-productions file]))}
        [:span (tr [:upload])]
-       [:span.icon.is-small
-        [:span.material-icons "upload_file"]]]]]))
+       [:span.icon.is-small {:aria-hidden true}
+        [:i.material-icons "upload_file"]]]]]))
 
 (defn buttons [uuid]
   (let [roles @(rf/subscribe [::auth/user-roles])]
@@ -156,19 +156,21 @@
       [:button.button.is-loading]
       [:div.field.has-addons
        [:p.control
-        [:button.button.is-danger
+        [:button.button.is-danger.has-tooltip-arrow
          {:disabled (empty? (set/intersection #{:it :admin} roles))
-          :on-click (fn [e] (rf/dispatch [::ignore-production uuid]))}
-         #_[:span.is-sr-only (tr [:ignore])]
-         [:span.icon
-          [:span.material-icons "cancel"]]]]
+          :on-click (fn [e] (rf/dispatch [::ignore-production uuid]))
+          :data-tooltip (tr [:ignore])
+          :aria-label (tr [:ignore])}
+         [:span.icon {:aria-hidden true}
+          [:i.material-icons "cancel"]]]]
        [:p.control
-        [:button.button.is-success
+        [:button.button.is-success.has-tooltip-arrow
          {:disabled (empty? (set/intersection #{:it :admin} roles))
-          :on-click (fn [e] (rf/dispatch [::save-production uuid]))}
-         #_[:span (tr [:save])]
-         [:span.icon
-          [:span.material-icons "done"]]]]])))
+          :on-click (fn [e] (rf/dispatch [::save-production uuid]))
+          :data-tooltip (tr [:save])
+          :aria-label (tr [:save])}
+         [:span.icon {:aria-hidden true}
+          [:i.material-icons "done"]]]]])))
 
 (defn- production [id]
   (let [{:keys [title creator source description
@@ -204,13 +206,13 @@
     [:button.button.is-success
      {:on-click (fn [e] (rf/dispatch [::save-all-productions]))}
      [:span (tr [:approve-all])]
-     [:span.icon.is-small
-      [:span.material-icons "done"]]]
+     [:span.icon.is-small {:aria-hidden true}
+      [:i.material-icons "done"]]]
     [:button.button.is-danger
      {:on-click (fn [e] (rf/dispatch [::ignore-all-productions]))}
      [:span (tr [:cancel])]
-     [:span.icon.is-small
-      [:span.material-icons "cancel"]]]]])
+     [:span.icon.is-small {:aria-hidden true}
+      [:i.material-icons "cancel"]]]]])
 
 (defn page []
   (let [loading? @(rf/subscribe [::notifications/loading? :vubis])

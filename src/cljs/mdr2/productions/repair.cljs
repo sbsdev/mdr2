@@ -129,12 +129,13 @@
   (let [roles @(rf/subscribe [::auth/user-roles])]
     (if @(rf/subscribe [::notifications/button-loading? uuid :repair])
        [:button.button.is-loading]
-       [:button.button
+       [:button.button.has-tooltip-arrow
         {:disabled (empty? (set/intersection #{:it :admin :studio} roles))
-         :on-click (fn [e] (rf/dispatch [::repair-production uuid]))}
-        [:span (tr [:repair])]
-        [:span.icon.is-small
-         [:span.material-icons "build"]]])))
+         :on-click (fn [e] (rf/dispatch [::repair-production uuid]))
+         :data-tooltip (tr [:repair])
+         :aria-label (tr [:repair])}
+        [:span.icon.is-small {:aria-hidden true}
+         [:i.material-icons "build"]]])))
 
 (defn production-link [{:keys [id title] :as production}]
   [:a {:href (str "#/productions/" id)

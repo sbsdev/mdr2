@@ -26,6 +26,10 @@
                     :upload "Upload"
                     :choose-vubis "Vubis export file"
                     :choose-structure "DTBook structure file"
+                    :download-structure "Download xml structure"
+                    :upload-structure "Upload xml structure"
+                    :mark-recorded "Mark as recorded"
+                    :split "Split a production"
                     ;;
                     :documents "Documents"
                     :confirm "Confirm"
@@ -66,7 +70,7 @@
                     :production_type "Type of production"
                     ;;
                     :transitions-state "Transition state to '%1'"
-                    :upload-structure "Upload structure for '%1' (DAM %2)"
+                    :upload-structure-for "Upload structure for '%1' (DAM %2)"
                     :upload-vubis "Upload Vubis export file"
                     ;;
                     :details "Details"
@@ -115,6 +119,10 @@
                     :upload "Hochladen"
                     :choose-vubis "Vubis Export Datei"
                     :choose-structure "DTBook Struktur Datei"
+                    :download-structure "XML Struktur herunterladen"
+                    :upload-structure "XML Struktur hochladen"
+                    :mark-recorded "Als \"recorded\" markieren"
+                    :split "Produktion trennen"
                     ;;
                     :documents "Dokumente"
                     :confirm "Bestätigen"
@@ -154,7 +162,7 @@
                     :production_type "Art der Produktion"
                     ;;
                     :transitions-state "Status auf '%1' setzen"
-                    :upload-structure "Struktur Datei für '%1' (DAM %2) hochladen"
+                    :upload-structure-for "Struktur Datei für '%1' (DAM %2) hochladen"
                     :upload-vubis "Vubis Export Datei hochladen"
                     ;;
                     :details "Details"
