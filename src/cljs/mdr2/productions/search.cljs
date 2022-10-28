@@ -10,15 +10,16 @@
 (rf/reg-event-fx
    ::set-search
    (fn [{:keys [db]} [_ id new-search-value handler]]
-     (cond-> {:db (assoc-in db [:search id] new-search-value)}
-       (> (count new-search-value) 2)
-       ;; if the string has more than 2 characters fetch the productions
-       ;; from the server
-       (assoc :dispatch-n
-              (list
-               ;; when searching for a new production reset the pagination
-               [::pagination/reset id]
-               [handler])))))
+     (let [length (count new-search-value)]
+       (cond-> {:db (assoc-in db [:search id] new-search-value)}
+         (or (= length 0) (> length 2))
+         ;; do not fetch the productions from the server for very small strings,
+         ;; unless the string has been reset to the empty string
+         (assoc :dispatch-n
+                (list
+                 ;; when searching for a new production reset the pagination
+                 [::pagination/reset id]
+                 [handler]))))))
 
 (defn productions-search [id handler]
   (let [get-value (fn [e] (-> e .-target .-value))
