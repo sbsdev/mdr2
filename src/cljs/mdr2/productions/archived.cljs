@@ -7,18 +7,19 @@
             [mdr2.pagination :as pagination]
             [mdr2.productions.production :as production]
             [mdr2.productions.notifications :as notifications]
+            [mdr2.productions.search :as search]
             [re-frame.core :as rf]))
 
 (rf/reg-event-fx
   ::fetch-productions
   (fn [{:keys [db]} [_]]
-    (let [search @(rf/subscribe [::search])
+    (let [search @(rf/subscribe [::search/search :archived])
           offset (pagination/offset db :archived)]
       {:db (assoc-in db [:loading :archived] true)
        :http-xhrio
        (as-transit {:method          :get
                     :uri             "/api/productions"
-                    :params          {:search (if (nil? search) "" search)
+                    :params          {:search search
                                       :offset offset
                                       :limit pagination/page-size
                                       :state "archived"}
@@ -54,40 +55,10 @@
  :<- [::productions]
  (fn [productions] (->> productions (sort-by :id ))))
 
-(rf/reg-sub
-  ::search
-  (fn [db _] (get-in db [:search :archived])))
-
-(rf/reg-event-fx
-   ::set-search
-   (fn [{:keys [db]} [_ new-search-value]]
-     (cond-> {:db (assoc-in db [:search :archived] new-search-value)}
-       (> (count new-search-value) 2)
-       ;; if the string has more than 2 characters fetch the productions
-       ;; from the server
-       (assoc :dispatch-n
-              (list
-               ;; when searching for a new production reset the pagination
-               [::pagination/reset :archived]
-               [::fetch-productions])))))
-
-(defn productions-search []
-  (let [get-value (fn [e] (-> e .-target .-value))
-        reset!    #(rf/dispatch [::set-search ""])
-        save!     #(rf/dispatch [::set-search %])]
-    [:div.field
-     [:div.control
-      [:input.input {:type "text"
-                     :placeholder (tr [:search])
-                     :aria-label (tr [:search])
-                     :value @(rf/subscribe [::search])
-                     :on-change #(save! (get-value %))
-                     :on-key-down #(when (= (.-which %) 27) (reset!))}]]]))
-
 (defn productions-filter []
   [:div.field.is-horizontal
    [:div.field-body
-    [productions-search]]])
+    [search/productions-search :archived ::fetch-productions]]])
 
 (rf/reg-sub
  ::production
