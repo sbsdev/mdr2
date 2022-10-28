@@ -20,7 +20,7 @@
 (defn library-signature?
   "Return true if `id` is a valid library signature"
   [id]
-  (re-matches #"^ds\d{5,}$" id))
+  (re-matches #"^ds\d{1,5}$" id))
 
 (defn multi-volume?
   "Return true if this production has multiple volumes"
