@@ -10,6 +10,10 @@
 (s/def ::library_signature (s/and string? #(re-matches #"^ds\d{5,}$" %)))
 (s/def ::date #(instance? java.time.LocalDate %))
 
+(s/def ::volumes (s/and int? #{1 2 3 4 5 6 7 8}))
+(s/def ::sample-rate (s/and int? #{11025 22050 44100 48000}))
+(s/def ::bit-rate (s/and int? #{32 48 56 64 128}))
+
 (def production
   {:title string?
    (spec/opt :creator) string?
@@ -39,7 +43,7 @@
    (spec/opt :total_time) int?
    (spec/opt :audio_format) string?
    (spec/opt :depth) int?
-   (spec/opt :volumes) int?
+   (spec/opt :volumes) ::volumes
    :state ::state
    (spec/opt :product_number) string?
    (spec/opt :production_type) ::production_type

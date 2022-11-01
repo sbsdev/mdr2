@@ -147,6 +147,60 @@ Content-Type: application/json
  "library_signature": "ds12345"
 }
 
+#################################
+# Marking a production as split #
+#################################
+
+# Mark a production as split
+POST http://localhost:3000/api/productions/29867/split
+Accept: application/json
+Content-Type: application/json
+{
+  "volumes": 1,
+  "sample-rate": 44100,
+  "bit-rate": 48
+}
+
+# Mark a non-existing production as split
+POST http://localhost:3000/api/productions/1/split
+Accept: application/json
+Content-Type: application/json
+{
+  "volumes": 1,
+  "sample-rate": 44100,
+  "bit-rate": 48
+}
+
+# Mark production as split with an invalid bit-rate
+POST http://localhost:3000/api/productions/300/split
+Accept: application/json
+Content-Type: application/json
+{
+  "volumes": 1,
+  "sample-rate": 44100,
+  "bit-rate": 5
+}
+
+# Mark production as split with an invalid sample-rate
+POST http://localhost:3000/api/productions/300/split
+Accept: application/json
+Content-Type: application/json
+{
+  "volumes": 1,
+  "sample-rate": 44101,
+  "bit-rate": 48
+}
+
+# Mark production as split which doesn't have state 'pending-split'
+POST http://localhost:3000/api/productions/94/split
+Accept: application/json
+Content-Type: application/json
+{
+  "volumes": 1,
+  "sample-rate": 44100,
+  "bit-rate": 48
+}
+
 ##########################
 # Repairing a production #
 ##########################

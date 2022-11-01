@@ -11,7 +11,7 @@
     [mdr2.middleware :refer [wrap-restricted wrap-authorized]]
     [mdr2.middleware.formats :as formats]
     [ring.util.http-response :refer :all]
-    [clojure.string :refer [blank?]]
+    [clojure.string :refer [blank?] :as string]
     [clojure.java.io :as io]
     [mdr2.db.core :as db]
     [mdr2.auth :as auth]
@@ -170,6 +170,39 @@
                                     (no-content)
                                     (catch clojure.lang.ExceptionInfo e
                                       (internal-server-error {:status-text (ex-message e)}))))))}}]
+    ["/:id/split"
+     {:post {:summary "Mark a production as split, i.e. ready to be encoded as a manually split production"
+             :middleware [wrap-restricted wrap-authorized]
+             :swagger {:security [{:apiAuth []}]}
+             :authorized #{:admin :it}
+             :parameters {:path {:id int?}
+                          :body {:volumes ::prod.spec/volumes
+                                  :sample-rate ::prod.spec/sample-rate
+                                  :bit-rate ::prod.spec/bit-rate}}
+             :handler (fn [{{{:keys [id]} :path
+                             {:keys [volumes sample-rate bit-rate]} :body} :parameters
+                            {user :user} :identity}]
+                        (let [p (prod/get-production id)]
+                          (cond
+                            (nil? p) (not-found)
+                            (not= (:state p) "pending-split")
+                            (conflict {:status-text
+                                       "Only productions in state \"pending-split\" can be split"})
+                            :else
+                            ;; check if the split production is even valid. Assume that we are
+                            ;; going to have at least two volumes
+                            (let [errors (prod/manifest-validate
+                                          (cond-> p (prod/multi-volume? p) (assoc :volumes 2)))]
+                              (if (seq errors)
+                                ;; there are errors in the split production. Return as conflict
+                                (conflict {:status-text (format "The split production is not valid: \"%s\"" (string/join " " errors))
+                                           :errors errors})
+                                ;; all is well. Try to split the production
+                                (try
+                                  (prod/set-state-split! p volumes sample-rate bit-rate)
+                                  (no-content)
+                                  (catch clojure.lang.ExceptionInfo e
+                                    (internal-server-error {:status-text (ex-message e)}))))))))}}]
 
     ["/:id/xml"
      {:get {:summary "Get the DTBook XML structure for a production"
