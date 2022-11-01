@@ -44,7 +44,6 @@
   `production`. If there are no validation errors or no DAISY exports
   returns an empty list"
   [production]
-  (log/debugf "Validating production %s" (:id production))
   (if (not (manifest? production))
     ["No manifest found"]
     (->> (range (:volumes production))
