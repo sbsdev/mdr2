@@ -142,7 +142,7 @@
      [:label.label (tr [:upload-vubis])]
      [file-input]
      [:p.control
-      [:button.button
+      [:button.button.is-primary
        {:disabled (or (nil? file) (empty? (set/intersection #{:it :admin} roles)))
         :class klass
         :on-click (fn [e] (rf/dispatch [::extract-productions file]))}

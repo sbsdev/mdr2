@@ -83,6 +83,27 @@
          (notifications/set-errors request-type message)
          (notifications/clear-button-state id request-type)))))
 
+(rf/reg-event-fx
+  ::split-production
+  (fn [{:keys [db]} [_ id volumes sample-rate bit-rate]]
+    (let [production (get-in db [:productions :in-production id])]
+      {:db (notifications/set-button-state db id :split)
+       :http-xhrio
+       (as-transit {:method          :post
+                    :headers 	     (auth/auth-header db)
+                    :uri             (str "/api/productions/" (:id production) "/split")
+                    :params          {:volumes volumes
+                                      :sample-rate sample-rate
+                                      :bit-rate bit-rate}
+                    :on-success      [::ack-split id]
+                    :on-failure      [::ack-failure id :split]
+                    })})))
+
+(rf/reg-event-db
+  ::ack-split
+  (fn [db [_ id]]
+    (notifications/clear-button-state db id :split)))
+
 (rf/reg-sub
  ::productions
  (fn [db _] (->> db :productions :in-production vals)))
@@ -173,7 +194,7 @@
       [file-input]]
      [:div.field.is-grouped
       [:p.control
-       [:button.button
+       [:button.button.is-primary
         {:disabled (or (nil? file) (empty? (set/intersection #{:it :etext} roles)))
          :class klass
          :on-click (fn [e] (rf/dispatch [::upload-dtbook file]))}
@@ -230,7 +251,8 @@
          (if @(rf/subscribe [::notifications/button-loading? uuid :split])
            [:button.button.is-loading]
            (tooltip-button
-            {:on-click (fn [e] (rf/dispatch [::split-production uuid]))
+            {:href (str "#/productions/" id "/split")
+             :on-click (fn [e] (rf/dispatch [::production/set-current production]))
              :tooltip :mark-split
              :icon "call_split"})))
      (when (seq (set/intersection #{:it} roles))
@@ -242,11 +264,54 @@
            :tooltip :delete
            :icon "delete"})))]))
 
+(defn- select-options [coll selected]
+  (for [x coll]
+    ^{:key x} [:option {:selected (= x selected)} x]))
+
+(defn- drop-down [options selected]
+  [:div.field
+   [:div.control
+    [:div.select
+     [:select
+      (select-options options selected)]]]])
+
+(defn- label [label-id]
+  [:div.field-label.is-normal
+   [:label.label (tr [label-id])]])
+
+(defn split-form []
+  (let [klass (when @(rf/subscribe [::notifications/button-loading? :in-production :split]) "is-loading")
+        roles @(rf/subscribe [::auth/user-roles])]
+    [:<>
+     [:div.field.is-horizontal
+      (label :volumes)
+      [:div.field-body
+       (drop-down [1 2 3 4 5 6 7 8] 2)]]
+     [:div.field.is-horizontal
+      (label :sample-rate)
+      [:div.field-body
+       (drop-down [11025 22050 44100 48000] 22050)]]
+     [:div.field.is-horizontal
+      (label :bit-rate)
+      [:div.field-body
+       (drop-down [32 48 56 64 128] 56)]]
+     [:div.field.is-horizontal
+      [:div.field-label]
+      [:div.field-body
+       [:div.field
+        [:p.control
+         [:button.button.is-primary
+          {:disabled (empty? (set/intersection #{:it :admin} roles))
+           :class klass
+           :on-click (fn [e] (rf/dispatch [::split-production]))}
+          [:span (tr [:mark-split])]
+          [:span.icon {:aria-hidden true}
+           [:i.material-icons "call_split"]]]]]]]]))
+
 (defn production-link [{:keys [id title] :as production}]
   [:a {:href (str "#/productions/" id)
        :on-click (fn [_] (rf/dispatch [::production/set-current production]))}
    title])
-
 
 (defn production [id]
   (let [{:keys [uuid id production_type state] :as production} @(rf/subscribe [::production id])]
@@ -282,6 +347,16 @@
         errors? [notifications/error-notification]
         loading? [notifications/loading-spinner]
         :else [structure-upload])]])  )
+
+(defn split-page []
+  (let [loading? @(rf/subscribe [::notifications/loading? :in-production])
+        errors? @(rf/subscribe [::notifications/errors?])]
+    [:section.section>div.container>div.content
+     [:<>
+      (cond
+        errors? [notifications/error-notification]
+        loading? [notifications/loading-spinner]
+        :else [split-form])]])  )
 
 (defn page []
   (let [loading? @(rf/subscribe [::notifications/loading? :in-production])

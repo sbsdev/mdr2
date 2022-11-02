@@ -29,7 +29,7 @@
                     :download-structure "Download xml structure"
                     :upload-structure "Upload xml structure"
                     :mark-recorded "Mark as recorded"
-                    :split "Split a production"
+                    :mark-split "Split a production"
                     ;;
                     :documents "Documents"
                     :confirm "Confirm"
@@ -81,6 +81,9 @@
                     :new-spelling "New spelling"
                     :unknown-spelling "Unknown spelling"
                     ;;
+                    :sample-rate "Sample Rate"
+                    :bit-rate "Bit Rate"
+                    ;;
                     :something-bad-happened "Something very bad has happened!"
                     :something-bad-happened-message "We've dispatched a team of highly trained gnomes to take care of the problem."
                     :invalid-anti-forgery-token "Invalid anti-forgery token"
@@ -122,7 +125,7 @@
                     :download-structure "XML Struktur herunterladen"
                     :upload-structure "XML Struktur hochladen"
                     :mark-recorded "Als \"recorded\" markieren"
-                    :split "Produktion trennen"
+                    :mark-split "Produktion trennen"
                     ;;
                     :documents "Dokumente"
                     :confirm "Bestätigen"
@@ -172,6 +175,9 @@
                     :old-spelling "Alte Rechtschreibung"
                     :new-spelling "Neue Rechtschreibung"
                     :unknown-spelling "Rechtschreibung unbekannt"
+                    ;;
+                    :sample-rate "Sample Rate"
+                    :bit-rate "Bit Rate"
                     ;;
                     :something-bad-happened "Ein Problem ist aufgetreten!"
                     :something-bad-happened-message "Die IT ist informiert und arbeitet an der Behebung."

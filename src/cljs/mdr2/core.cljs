@@ -80,6 +80,10 @@
                                  :controllers [{:stop (fn [_]
                                                         (rf/dispatch [::production/clear-current])
                                                         (rf/dispatch [::in-production/clear-upload-file]))}]}]
+    ["/productions/:id/split" {:name :production-split
+                               :view #'in-production/split-page
+                               :controllers [{:stop (fn [_]
+                                                      (rf/dispatch [::production/clear-current]))}]}]
      ["/archived" {:name :archived
                    :view #'archived/page
                    :controllers [{:start (fn [_] (rf/dispatch [::archived/fetch-productions]))}]}]
