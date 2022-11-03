@@ -290,6 +290,11 @@
           ^{:key option}
           [:option {:value option} option])]]]]]])
 
+(rf/reg-event-db
+ ::ack-error
+ (fn [db [_ path]]
+   (fork/set-server-message db path nil)))
+
 (defn split-form [id]
   [fork/form {:initial-values {:volumes 2
                                :sample-rate 22050
@@ -301,6 +306,7 @@
               :keywordize-keys true
               }
    (fn [{:keys [values
+                path
                 form-id
                 handle-blur
                 submitting?
@@ -313,7 +319,9 @@
          :on-submit handle-submit}
         (when on-submit-server-message
           [:div.notification.is-danger
-           [:button.delete]
+           [:button.delete
+            {:type "button" ;; make sure the button doesn't trigger an event in the form
+             :on-click (fn [e] (rf/dispatch [::ack-error path]))}]
            on-submit-server-message])
         (select-field :volumes [2 3 4 5 6 7 8] props)
         (select-field :sample-rate [11025 22050 44100 48000] props)
