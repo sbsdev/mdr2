@@ -76,6 +76,11 @@
         {:db db}))))
 
 (rf/reg-event-db
+ ::ack-error
+ (fn [db [_ path]]
+   (fork/set-server-message db path nil)))
+
+(rf/reg-event-db
  ::ack-failure
  (fn [db [_ id request-type response]]
    (let [message (or (get-in response [:response :status-text])
@@ -289,11 +294,6 @@
         (for [option options]
           ^{:key option}
           [:option {:value option} option])]]]]]])
-
-(rf/reg-event-db
- ::ack-error
- (fn [db [_ path]]
-   (fork/set-server-message db path nil)))
 
 (defn split-form [id]
   [fork/form {:initial-values {:volumes 2
