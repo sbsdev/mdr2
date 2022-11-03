@@ -7,6 +7,7 @@
             [mdr2.productions.production :as production]
             [mdr2.productions.notifications :as notifications]
             [mdr2.productions.search :as search]
+            [fork.re-frame :as fork]
             [re-frame.core :as rf]
             [clojure.set :as set]))
 
@@ -85,24 +86,30 @@
 
 (rf/reg-event-fx
   ::split-production
-  (fn [{:keys [db]} [_ id volumes sample-rate bit-rate]]
-    (let [production (get-in db [:productions :in-production id])]
-      {:db (notifications/set-button-state db id :split)
-       :http-xhrio
-       (as-transit {:method          :post
-                    :headers 	     (auth/auth-header db)
-                    :uri             (str "/api/productions/" (:id production) "/split")
-                    :params          {:volumes volumes
-                                      :sample-rate sample-rate
-                                      :bit-rate bit-rate}
-                    :on-success      [::ack-split id]
-                    :on-failure      [::ack-failure id :split]
-                    })})))
+  (fn [{:keys [db]} [_ id {:keys [values path]}]]
+    {:db (fork/set-submitting db path true)
+     :http-xhrio
+     (as-transit {:method          :post
+                  :headers 	     (auth/auth-header db)
+                  :uri             (str "/api/productions/" id "/split")
+                  :params          values
+                  :on-success      [::ack-split path]
+                  :on-failure      [::ack-split-failure path]
+                  })}))
 
 (rf/reg-event-db
   ::ack-split
-  (fn [db [_ id]]
-    (notifications/clear-button-state db id :split)))
+  (fn [db [_ path]]
+    (fork/set-submitting db path false)))
+
+(rf/reg-event-db
+ ::ack-split-failure
+ (fn [db [_ path response]]
+   (let [message (or (get-in response [:response :status-text])
+                     (get response :status-text))]
+     (-> db
+         (fork/set-submitting path false)
+         (fork/set-server-message path message)))))
 
 (rf/reg-sub
  ::productions
@@ -264,49 +271,65 @@
            :tooltip :delete
            :icon "delete"})))]))
 
-(defn- select-options [coll selected]
-  (for [x coll]
-    ^{:key x} [:option {:selected (= x selected)} x]))
+(defn- select-field [key options {:keys [values set-handle-change handle-blur]}]
+  [:div.field.is-horizontal
+   [:div.field-label.is-normal
+    [:label.label (tr [key])]]
+   [:div.field-body
+    [:div.field
+     [:div.control
+      [:div.select
+       [:select
+        {:name key
+         :value (values key)
+         :on-change #(set-handle-change
+                      {:value (-> % .-target .-value js/parseInt)
+                       :path [key]})
+         :on-blur handle-blur}
+        (for [option options]
+          ^{:key option}
+          [:option {:value option} option])]]]]]])
 
-(defn- drop-down [options selected]
-  [:div.field
-   [:div.control
-    [:div.select
-     [:select
-      (select-options options selected)]]]])
-
-(defn- label [label-id]
-  [:div.field-label.is-normal
-   [:label.label (tr [label-id])]])
-
-(defn split-form []
-  (let [klass (when @(rf/subscribe [::notifications/button-loading? :in-production :split]) "is-loading")
-        roles @(rf/subscribe [::auth/user-roles])]
-    [:<>
-     [:div.field.is-horizontal
-      (label :volumes)
-      [:div.field-body
-       (drop-down [1 2 3 4 5 6 7 8] 2)]]
-     [:div.field.is-horizontal
-      (label :sample-rate)
-      [:div.field-body
-       (drop-down [11025 22050 44100 48000] 22050)]]
-     [:div.field.is-horizontal
-      (label :bit-rate)
-      [:div.field-body
-       (drop-down [32 48 56 64 128] 56)]]
-     [:div.field.is-horizontal
-      [:div.field-label]
-      [:div.field-body
-       [:div.field
-        [:p.control
-         [:button.button.is-primary
-          {:disabled (empty? (set/intersection #{:it :admin} roles))
-           :class klass
-           :on-click (fn [e] (rf/dispatch [::split-production]))}
-          [:span (tr [:mark-split])]
-          [:span.icon {:aria-hidden true}
-           [:i.material-icons "call_split"]]]]]]]]))
+(defn split-form [id]
+  [fork/form {:initial-values {:volumes 2
+                               :sample-rate 22050
+                               :bit-rate 56}
+              :path [:form :split]
+              :prevent-default? true
+              :clean-on-unmount? true
+              :on-submit #(rf/dispatch [::split-production id %])
+              :keywordize-keys true
+              }
+   (fn [{:keys [values
+                form-id
+                handle-blur
+                submitting?
+		on-submit-server-message
+                set-handle-change
+                handle-submit] :as props}]
+     (let [roles @(rf/subscribe [::auth/user-roles])]
+       [:form
+        {:id form-id
+         :on-submit handle-submit}
+        (when on-submit-server-message
+          [:div.notification.is-danger
+           [:button.delete]
+           on-submit-server-message])
+        (select-field :volumes [2 3 4 5 6 7 8] props)
+        (select-field :sample-rate [11025 22050 44100 48000] props)
+        (select-field :bit-rate [32 48 56 64 128] props)
+        [:div.field.is-horizontal
+         [:div.field-label]
+         [:div.field-body
+          [:div.field
+           [:p.control
+            [:button.button.is-primary
+             {:type "submit"
+              :disabled (empty? (set/intersection #{:it :admin} roles))
+              :class (when submitting? "is-loading")}
+             [:span (tr [:mark-split])]
+             [:span.icon {:aria-hidden true}
+              [:i.material-icons "call_split"]]]]]]]]))])
 
 (defn production-link [{:keys [id title] :as production}]
   [:a {:href (str "#/productions/" id)
@@ -350,13 +373,14 @@
 
 (defn split-page []
   (let [loading? @(rf/subscribe [::notifications/loading? :in-production])
-        errors? @(rf/subscribe [::notifications/errors?])]
+        errors? @(rf/subscribe [::notifications/errors?])
+        current @(rf/subscribe [::production/current])]
     [:section.section>div.container>div.content
      [:<>
       (cond
         errors? [notifications/error-notification]
         loading? [notifications/loading-spinner]
-        :else [split-form])]])  )
+        :else [split-form (:id current)])]]))
 
 (defn page []
   (let [loading? @(rf/subscribe [::notifications/loading? :in-production])

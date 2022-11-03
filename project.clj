@@ -19,6 +19,7 @@
                  [cprop "0.1.19"]
                  [day8.re-frame/http-fx "0.2.4"]
                  [expound "0.9.0"]
+                 [fork "2.4.3"] ;; Form Library for re-frame
                  [funcool/struct "1.4.0"]
                  [io.prometheus/simpleclient_hotspot "0.16.0"]
                  [json-html "0.4.7"]
