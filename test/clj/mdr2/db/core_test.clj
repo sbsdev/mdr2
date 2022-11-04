@@ -17,22 +17,14 @@
     (migrations/migrate ["migrate"] (select-keys env [:database-url]))
     (f)))
 
-(deftest test-users
-  (jdbc/with-transaction [t-conn *db* {:rollback-only true}]
-    (is (= 1 (db/create-user!
-              t-conn
-              {:id         "1"
-               :first_name "Sam"
-               :last_name  "Smith"
-               :email      "sam.smith@example.com"
-               :pass       "pass"}
-              {})))
-    (is (= {:id         "1"
-            :first_name "Sam"
-            :last_name  "Smith"
-            :email      "sam.smith@example.com"
-            :pass       "pass"
-            :admin      nil
-            :last_login nil
-            :is_active  nil}
-           (db/get-user t-conn {:id "1"} {})))))
+(comment
+  (deftest test-production
+    (jdbc/with-transaction [t-conn *db* {:rollback-only true}]
+      (is (= 1 (db/insert-production
+                t-conn
+                {:title "The War of the Worlds"
+                 :date 1898
+                 :identifier "b0c3f96e-5c32-11ed-9b6a-0242ac120002"
+                 :state "new"})))
+      (is (= {}
+             (db/get-production t-conn {:id "1"}))))))
