@@ -75,3 +75,10 @@ Get the DTBook XML structure for a production
 | Assign a library signature |       |       | X       |        | X  |
 | Delete a production        |       |       |         |        | X  |
 #+END:
+
+* Role names
+- madras2.etext
+- madras2.admin
+- madras2.catalog
+- madras2.studio
+- madras2.it
