@@ -102,10 +102,15 @@
                   :on-failure      [::ack-split-failure path]
                   })}))
 
-(rf/reg-event-db
+(rf/reg-event-fx
   ::ack-split
-  (fn [db [_ path]]
-    (fork/set-submitting db path false)))
+  (fn [{:keys [db]} [_ path]]
+    {:db (fork/set-submitting db path false)
+     ;; FIXME: seems weird that we have to fetch the productions here.
+     ;; Isn't there a way to get directly back to the :in-production
+     ;; view?
+     :dispatch [::fetch-productions]
+     :common/navigate-fx! [:in-production]}))
 
 (rf/reg-event-db
  ::ack-split-failure
