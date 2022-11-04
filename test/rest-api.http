@@ -4,6 +4,8 @@
 # Manual tests for the REST API #
 #################################
 
+:auth-token = Token <my-secret-token>
+
 ########
 # Auth #
 ########
@@ -86,6 +88,7 @@ Content-Type: application/transit+json
 
 # Delete a production
 DELETE http://localhost:3000/api/productions/31411
+Authorization: :auth-token
 
 # Get the xml for a production
 GET http://localhost:3000/api/productions/31017/xml
@@ -107,6 +110,7 @@ Content-Type: multipart/form-data
 PATCH http://localhost:3000/api/productions/30111
 Accept: application/json
 Content-Type: application/json
+Authorization: :auth-token
 {
  "library_signature": "ds70000"
 }
@@ -116,6 +120,7 @@ Content-Type: application/json
 PATCH http://localhost:3000/api/productions/301111111
 Accept: application/json
 Content-Type: application/json
+Authorization: :auth-token
 {
  "library_signature": "ds70000"
 }
@@ -125,6 +130,7 @@ Content-Type: application/json
 PATCH http://localhost:3000/api/productions/30111
 Accept: application/json
 Content-Type: application/json
+Authorization: :auth-token
 {
  "library_signature": "haha"
 }
@@ -134,6 +140,7 @@ Content-Type: application/json
 PATCH http://localhost:3000/api/productions/30111
 Accept: application/json
 Content-Type: application/json
+Authorization: :auth-token
 {
  "library_signature": "ds123"
 }
@@ -143,6 +150,7 @@ Content-Type: application/json
 PATCH http://localhost:3000/api/productions/31298
 Accept: application/json
 Content-Type: application/json
+Authorization: :auth-token
 {
  "library_signature": "ds12345"
 }
@@ -155,6 +163,7 @@ Content-Type: application/json
 POST http://localhost:3000/api/productions/29867/split
 Accept: application/json
 Content-Type: application/json
+Authorization: :auth-token
 {
   "volumes": 1,
   "sample-rate": 44100,
@@ -165,6 +174,7 @@ Content-Type: application/json
 POST http://localhost:3000/api/productions/1/split
 Accept: application/json
 Content-Type: application/json
+Authorization: :auth-token
 {
   "volumes": 1,
   "sample-rate": 44100,
@@ -175,6 +185,7 @@ Content-Type: application/json
 POST http://localhost:3000/api/productions/300/split
 Accept: application/json
 Content-Type: application/json
+Authorization: :auth-token
 {
   "volumes": 1,
   "sample-rate": 44100,
@@ -185,6 +196,7 @@ Content-Type: application/json
 POST http://localhost:3000/api/productions/300/split
 Accept: application/json
 Content-Type: application/json
+Authorization: :auth-token
 {
   "volumes": 1,
   "sample-rate": 44101,
@@ -195,6 +207,7 @@ Content-Type: application/json
 POST http://localhost:3000/api/productions/94/split
 Accept: application/json
 Content-Type: application/json
+Authorization: :auth-token
 {
   "volumes": 1,
   "sample-rate": 44100,
@@ -208,16 +221,19 @@ Content-Type: application/json
 # Repair a production
 POST http://localhost:3000/api/productions/302/repair
 Accept: application/json
+Authorization: :auth-token
 
 # Repair a production which is not archived
 # should produce a 409
 POST http://localhost:3000/api/productions/31412/repair
 Accept: application/json
+Authorization: :auth-token
 
 # Repair a production which doesn't exist
 # should produce a 404
 POST http://localhost:3000/api/productions/3000000/repair
 Accept: application/json
+Authorization: :auth-token
 
 ##############
 # Abacus API #
