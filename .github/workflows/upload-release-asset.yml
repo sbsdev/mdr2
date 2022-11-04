@@ -3,6 +3,7 @@ on:
     # Sequence of patterns matched against refs/tags
     tags:
     - '[0-9].[0-9]+.[0-9]+' # Push events to matching release tags, i.e. 0.8.4
+    - '0.9.0-alpha[0-9]+' # Build release assets for the current alpha release
 
 name: Upload Release Asset
 
