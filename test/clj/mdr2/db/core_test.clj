@@ -14,11 +14,11 @@
     (mount/start
      #'mdr2.config/env
      #'mdr2.db.core/*db*)
-    (migrations/migrate ["migrate"] (select-keys env [:database-url]))
+    #_(migrations/migrate ["migrate"] (select-keys env [:database-url]))
     (f)))
 
 (comment
-  (deftest test-production
+  (deftest ^:database test-production
     (jdbc/with-transaction [t-conn *db* {:rollback-only true}]
       (is (= 1 (db/insert-production
                 t-conn
@@ -26,5 +26,8 @@
                  :date 1898
                  :identifier "b0c3f96e-5c32-11ed-9b6a-0242ac120002"
                  :state "new"})))
-      (is (= {}
+      (is (= {:title "The War of the Worlds"
+              :date 1898
+              :identifier "b0c3f96e-5c32-11ed-9b6a-0242ac120002"
+              :state "new"}
              (db/get-production t-conn {:id "1"}))))))

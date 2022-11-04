@@ -97,6 +97,8 @@
                   ["vcs" "commit"]
                   ["vcs" "push"]]
 
+  :test-selectors {:non-database (complement :database)}
+
   :profiles
   {:uberjar {:omit-source true
              
