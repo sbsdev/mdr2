@@ -184,8 +184,11 @@ mp3 and the whole thing is packed up in one or more iso files
           multi-volume? (prod/multi-volume? production)]
       (when (fs/exists? archive-path)
         ;; when repairing the production is already in the spool dir
-        (log/warnf "Archive path %s for periodical already exists, removing" archive-path)
-        (fs/delete-tree archive-path))
+        (when-not (fs/delete-tree archive-path)
+          (let [message (format "Failed to remove archive path for periodical (%s)"
+                                archive-path)]
+            (log/error message)
+            (throw (ex-info message {:error-id ::spool-dir-remove-failed})))))
       (fs/create-dirs archive-path)
       ;; create the rdf
       (let [rdf-path (file archive-path (str dam-number ".rdf"))
@@ -210,8 +213,11 @@ mp3 and the whole thing is packed up in one or more iso files
           multi-volume? (prod/multi-volume? production)]
       (when (fs/exists? archive-path)
         ;; when repairing the production is already in the spool dir
-        (log/warnf "Archive path %s for other production already exists, removing" archive-path)
-        (fs/delete-tree archive-path))
+        (when-not (fs/delete-tree archive-path)
+          (let [message (format "Failed to remove archive path for other production (%s)"
+                                archive-path)]
+            (log/error message)
+            (throw (ex-info message {:error-id ::spool-dir-remove-failed})))))
       (fs/create-dirs archive-path)
       ;; create the rdf
       (let [rdf-path (file archive-path (str dam-number ".rdf"))
