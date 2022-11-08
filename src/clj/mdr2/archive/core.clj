@@ -32,6 +32,7 @@ mp3 and the whole thing is packed up in one or more iso files
 
   (:require [clojure.java.io :refer [file]]
             [clojure.tools.logging :as log]
+            [conman.core :as conman]
             [mdr2.config :refer [env]]
             [mdr2.db.core :as db]
             [java-time :as time]
@@ -123,7 +124,9 @@ mp3 and the whole thing is packed up in one or more iso files
   [production sektion]
   (let [archive-root-path (container-root-path production sektion)]
     (if (fs/exists? archive-root-path)
-      (log/errorf "Archive root path %s already exists" archive-root-path)
+      (let [message (format "Archive root path %s already exists" archive-root-path)]
+        (log/error message)
+        (throw (ex-info message {:error-id ::directory-already-exists})))
       (let [archive-path (container-path production sektion)]
         (fs/create-dirs archive-path)
         (log/debugf "Copying files for %s (%s)" (:id production) sektion)
@@ -166,62 +169,62 @@ mp3 and the whole thing is packed up in one or more iso files
 
 (defmethod archive "book"
   [production]
-;;  (transaction)
-  (archive-sektion production :master)
-  (archive-sektion production :dist-master)
-  (prod/set-state-archived! production))
+  (conman/with-transaction [db/*archive-db*]
+    (archive-sektion production :master)
+    (archive-sektion production :dist-master)
+    (prod/set-state-archived! production)))
 
 (defmethod archive "periodical"
   [production]
-;;  (transaction)
-  (archive-sektion production :master)
-  ;; archive the periodical iso(s)
-  (let [dam-number (prod/dam-number production)
-        archive-path (.getPath (file (env :archive-periodical-spool-dir) dam-number))
-        multi-volume? (prod/multi-volume? production)]
-    (when (fs/exists? archive-path)
-      ;; when repairing the production is already in the spool dir
-      (log/warnf "Archive path %s for periodical already exists, removing" archive-path)
-      (fs/delete-tree archive-path))
-    (fs/create-dirs archive-path)
-    ;; create the rdf
-    (let [rdf-path (file archive-path (str dam-number ".rdf"))
-          rdf (rdf/rdf production)]
-      (spit rdf-path rdf))
-    ;; copy all volumes
-    (doseq [volume (range 1 (inc (:volumes production)))]
-      (let [iso-archive-name (str dam-number (when multi-volume? (str "_" volume)) ".iso")
-            iso-archive-path (file archive-path "produkt" iso-archive-name)]
-        (fs/create-dirs (fs/parent iso-archive-path))
-        (fs/copy (path/iso-name production volume) iso-archive-path)))
-    (set-file-permissions (file archive-path))
-    (prod/set-state-archived! production)))
+  (conman/with-transaction [db/*archive-db*]
+    (archive-sektion production :master)
+    ;; archive the periodical iso(s)
+    (let [dam-number (prod/dam-number production)
+          archive-path (.getPath (file (env :archive-periodical-spool-dir) dam-number))
+          multi-volume? (prod/multi-volume? production)]
+      (when (fs/exists? archive-path)
+        ;; when repairing the production is already in the spool dir
+        (log/warnf "Archive path %s for periodical already exists, removing" archive-path)
+        (fs/delete-tree archive-path))
+      (fs/create-dirs archive-path)
+      ;; create the rdf
+      (let [rdf-path (file archive-path (str dam-number ".rdf"))
+            rdf (rdf/rdf production)]
+        (spit rdf-path rdf))
+      ;; copy all volumes
+      (doseq [volume (range 1 (inc (:volumes production)))]
+        (let [iso-archive-name (str dam-number (when multi-volume? (str "_" volume)) ".iso")
+              iso-archive-path (file archive-path "produkt" iso-archive-name)]
+          (fs/create-dirs (fs/parent iso-archive-path))
+          (fs/copy (path/iso-name production volume) iso-archive-path)))
+      (set-file-permissions (file archive-path))
+      (prod/set-state-archived! production))))
 
 (defmethod archive "other"
   [production]
-;;  (transaction)
-  (archive-sektion production :master)
-  ;; place the iso(s) in a spool directory
-  (let [dam-number (prod/dam-number production)
-        archive-path (.getPath (file (env :archive-other-spool-dir) dam-number))
-        multi-volume? (prod/multi-volume? production)]
-    (when (fs/exists? archive-path)
-      ;; when repairing the production is already in the spool dir
-      (log/warnf "Archive path %s for other production already exists, removing" archive-path)
-      (fs/delete-tree archive-path))
-    (fs/create-dirs archive-path)
-    ;; create the rdf
-    (let [rdf-path (file archive-path (str dam-number ".rdf"))
-          rdf (rdf/rdf production)]
-      (spit rdf-path rdf))
-    ;; copy all volumes
-    (doseq [volume (range 1 (inc (:volumes production)))]
-      (let [iso-archive-name (str dam-number (when multi-volume? (str "_" volume)) ".iso")
-            iso-archive-path (file archive-path "produkt" iso-archive-name)]
-        (fs/create-dirs (fs/parent iso-archive-path))
-        (fs/copy (path/iso-name production volume) iso-archive-path)
-        (set-file-permissions (file iso-archive-path))))
-    (prod/set-state-archived! production)))
+  (conman/with-transaction [db/*archive-db*]
+    (archive-sektion production :master)
+    ;; place the iso(s) in a spool directory
+    (let [dam-number (prod/dam-number production)
+          archive-path (.getPath (file (env :archive-other-spool-dir) dam-number))
+          multi-volume? (prod/multi-volume? production)]
+      (when (fs/exists? archive-path)
+        ;; when repairing the production is already in the spool dir
+        (log/warnf "Archive path %s for other production already exists, removing" archive-path)
+        (fs/delete-tree archive-path))
+      (fs/create-dirs archive-path)
+      ;; create the rdf
+      (let [rdf-path (file archive-path (str dam-number ".rdf"))
+            rdf (rdf/rdf production)]
+        (spit rdf-path rdf))
+      ;; copy all volumes
+      (doseq [volume (range 1 (inc (:volumes production)))]
+        (let [iso-archive-name (str dam-number (when multi-volume? (str "_" volume)) ".iso")
+              iso-archive-path (file archive-path "produkt" iso-archive-name)]
+          (fs/create-dirs (fs/parent iso-archive-path))
+          (fs/copy (path/iso-name production volume) iso-archive-path)
+          (set-file-permissions (file iso-archive-path))))
+      (prod/set-state-archived! production))))
 
 (prometheus/instrument! metrics/registry #'archive)
 
