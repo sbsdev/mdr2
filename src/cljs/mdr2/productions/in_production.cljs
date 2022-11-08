@@ -4,8 +4,9 @@
             [mdr2.ajax :refer [as-transit]]
             [mdr2.i18n :refer [tr]]
             [mdr2.pagination :as pagination]
-            [mdr2.productions.production :as production]
+            [mdr2.productions.forms :as forms]
             [mdr2.productions.notifications :as notifications]
+            [mdr2.productions.production :as production]
             [mdr2.productions.search :as search]
             [fork.re-frame :as fork]
             [re-frame.core :as rf]
@@ -74,11 +75,6 @@
       (if empty?
         {:db db :dispatch [::fetch-productions]}
         {:db db}))))
-
-(rf/reg-event-db
- ::ack-error
- (fn [db [_ path]]
-   (fork/set-server-message db path nil)))
 
 (rf/reg-event-db
  ::ack-failure
@@ -319,30 +315,26 @@
                 set-handle-change
                 handle-submit] :as props}]
      (let [roles @(rf/subscribe [::auth/user-roles])]
-       [:form
-        {:id form-id
-         :on-submit handle-submit}
-        (when on-submit-server-message
-          [:div.notification.is-danger
-           [:button.delete
-            {:type "button" ;; make sure the button doesn't trigger an event in the form
-             :on-click (fn [e] (rf/dispatch [::ack-error path]))}]
-           on-submit-server-message])
-        (select-field :volumes [2 3 4 5 6 7 8] props)
-        (select-field :sample-rate [11025 22050 44100 48000] props)
-        (select-field :bit-rate [32 48 56 64 128] props)
-        [:div.field.is-horizontal
-         [:div.field-label]
-         [:div.field-body
-          [:div.field
-           [:p.control
-            [:button.button.is-primary
-             {:type "submit"
-              :disabled (empty? (set/intersection #{:it :admin} roles))
-              :class (when submitting? "is-loading")}
-             [:span (tr [:mark-split])]
-             [:span.icon {:aria-hidden true}
-              [:i.material-icons "call_split"]]]]]]]]))])
+       (if on-submit-server-message
+         [forms/error-notification on-submit-server-message path]
+         [:form
+          {:id form-id
+           :on-submit handle-submit}
+          (select-field :volumes [2 3 4 5 6 7 8] props)
+          (select-field :sample-rate [11025 22050 44100 48000] props)
+          (select-field :bit-rate [32 48 56 64 128] props)
+          [:div.field.is-horizontal
+           [:div.field-label]
+           [:div.field-body
+            [:div.field
+             [:p.control
+              [:button.button.is-primary
+               {:type "submit"
+                :disabled (empty? (set/intersection #{:it :admin} roles))
+                :class (when submitting? "is-loading")}
+               [:span (tr [:mark-split])]
+               [:span.icon {:aria-hidden true}
+                [:i.material-icons "call_split"]]]]]]]])))])
 
 (defn production-link [{:keys [id title] :as production}]
   [:a {:href (str "#/productions/" id)
