@@ -1,3 +1,5 @@
+[[https://github.com/sbsdev/mdr2/actions/workflows/clojure.yml][https://github.com/sbsdev/mdr2/actions/workflows/clojure.yml/badge.svg]]
+
 * mdr2
 
 A Production Management Tool for [[http://www.daisy.org/daisypedia/daisy-digital-talking-book][DAISY Talking Books]].
