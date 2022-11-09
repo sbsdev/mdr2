@@ -87,6 +87,7 @@
                     :details "Details"
                     :unknown-words "Unknown Words"
                     :local-words "Local Words"
+                    :total-time-human "%1 minutes"
                     ;;
                     :old-spelling "Old spelling"
                     :new-spelling "New spelling"
@@ -193,6 +194,7 @@
                     :details "Details"
                     :unknown-words "Unbekannte Wörter"
                     :local-words "Lokale Wörter"
+                    :total-time-human "%1 Minuten"
                     ;;
                     :old-spelling "Alte Rechtschreibung"
                     :new-spelling "Neue Rechtschreibung"

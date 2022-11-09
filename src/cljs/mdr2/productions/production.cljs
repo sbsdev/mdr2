@@ -44,6 +44,12 @@
        [:tr [:th (tr [:source_publisher])] [:td source_publisher]]
        [:tr [:th (tr [:state])] [:td state]]]]])
 
+(defn milis-to-minutes [milis]
+  (when milis (quot milis (* 1000 60))))
+
+(defn humanize-milis [milis]
+  (tr [:total-time-human] [(milis-to-minutes milis)]))
+
 (defn details [production]
   [:div.block
    [:table.table.is-striped
@@ -51,6 +57,7 @@
      (for [k (remove #{:title :creator :state :source_publisher} (keys production)) #_[:date :modified-at :language]
            :let [v (case k
                      #_:spelling #_(state/mapping (get production k))
+                     :total_time (humanize-milis (get production k))
                      (:produced_date :date :source_date :revision_date) (if-let [raw (get production k)] (tf/unparse (tf/formatters :date) raw) "")
                      (get production k))]
            :when (not (string/blank? v))]

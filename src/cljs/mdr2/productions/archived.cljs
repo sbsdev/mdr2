@@ -79,8 +79,7 @@
      [:td creator]
      [:td product_number]
      [:td library_number]
-     [:td (if total_time
-            (quot total_time (* 1000 60)) "")] ; in minutes
+     [:td (production/milis-to-minutes total_time)]
      [:td volumes]
      [:td depth]
      [:td narrator]
