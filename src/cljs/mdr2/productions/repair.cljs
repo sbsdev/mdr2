@@ -114,9 +114,7 @@
    title])
 
 (defn production [id]
-  (let [{:keys [uuid id title creator product_number
-                library_number library_record_id
-                total_time volumes depth narrator]
+  (let [{:keys [uuid id creator]
          :as production} @(rf/subscribe [::production id])]
     [:tr
      [:td id]
