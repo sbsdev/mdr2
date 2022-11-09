@@ -53,7 +53,7 @@
 (rf/reg-sub
  ::productions-sorted
  :<- [::productions]
- (fn [productions] (->> productions (sort-by :id ))))
+ (fn [productions] (->> productions (sort-by :id >))))
 
 (defn productions-filter []
   [:div.field.is-horizontal
