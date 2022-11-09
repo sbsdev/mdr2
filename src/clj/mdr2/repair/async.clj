@@ -21,7 +21,8 @@
                        body (tr [:repair-message] [id title])]
                    (mail/send-message email subject body)))
                (catch Exception e
-                 (log/errorf "Failed to repair %s because %s" production (ex-message e))))
+                 (log/errorf "Failed to repair %s because %s"
+                             (:id production) (ex-message e))))
              (recur)))
 
   :stop (when repair-consumer

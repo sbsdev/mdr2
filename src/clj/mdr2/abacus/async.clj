@@ -13,7 +13,7 @@
                (abacus/export-file production)
                (catch Exception e
                  (log/errorf "Failed to notify ABACUS about %s because %s"
-                             production (ex-message e))))
+                             (:id production) (ex-message e))))
              (recur)))
 
   :stop (when notify-abacus-consumer

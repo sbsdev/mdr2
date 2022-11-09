@@ -13,7 +13,7 @@
                (archive/archive production)
                (catch Exception e
                  (log/errorf "Failed to archive %s because %s"
-                             production (ex-message e))))
+                             (:id production) (ex-message e))))
              (recur)))
 
   :stop (when archive-consumer

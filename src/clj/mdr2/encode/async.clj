@@ -15,7 +15,7 @@
                  (encode/encode-or-split production))
                (catch Exception e
                  (log/errorf "Failed to encode %s because %s (bitrate: %s sample rate: %s)"
-                             production (ex-message e) bitrate sample-rate)))
+                             (:id production) (ex-message e) bitrate sample-rate)))
              (recur)))
 
   :stop (when encode-consumer
