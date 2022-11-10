@@ -163,7 +163,17 @@ mp3 and the whole thing is packed up in one or more iso files
   (add-to-db production sektion))
 
 (defmulti archive
-  "Archive a `production`"
+  "Archive a `production`
+
+  There are multiple ways to archive an production.
+
+  1. for a *book* we simply archive both the master and the dist-master
+  2. for a *periodical* we archive the master and then put the
+     dist-master into a special spool directory based on the setting
+     `:archive-periodical-spool-dir`
+  3. for *other* productions we archive the master and then put the
+     dist-master into a special spool directory based on the setting
+     `:archive-other-spool-dir`"
   (fn [production] (:production_type production))
   :default "book")
 
