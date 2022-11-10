@@ -25,11 +25,6 @@ mp3 and the whole thing is packed up in one or more iso files
 4. generate the rdf as above
 5. add an entry to a table in a database. The `sektion` should be `cdimage`
 "
-  ;; FIXME: Most likely this should be split off into a separate lib that
-  ;; replaces all of agadir at a later point in time. For instructions on
-  ;; how to do this see
-  ;; https://github.com/technomancy/leiningen/blob/stable/doc/DEPLOY.md
-
   (:require [clojure.java.io :refer [file]]
             [clojure.tools.logging :as log]
             [conman.core :as conman]
