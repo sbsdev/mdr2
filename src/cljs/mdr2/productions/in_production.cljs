@@ -256,7 +256,7 @@
          (tooltip-button
           {:on-click (fn [e] (rf/dispatch [::recorded-production uuid]))
            :tooltip :mark-recorded
-           :icon "check_circle"})))
+           :icon "task"})))
      ;; show the "Split" button if the next state is "split" and the user is
      ;; authorized
      (when (and (seq (set/intersection #{:it :admin} roles))
