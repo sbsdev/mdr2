@@ -22,6 +22,11 @@
   [id]
   (re-matches #"^ds\d{1,5}$" id))
 
+(defn library-number?
+  "Return true if `id` is a valid library number"
+  [id]
+  (re-matches #"^PNX \d{1,5}$" id))
+
 (defn multi-volume?
   "Return true if this production has multiple volumes"
   [production]

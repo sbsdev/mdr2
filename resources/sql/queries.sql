@@ -12,6 +12,7 @@ WHERE
 --~ (when (:id params) "AND id LIKE CONCAT(:id,'%')")
 --~ (when (:product_number params) "AND product_number LIKE CONCAT(:product_number,'%')")
 --~ (when (:library_signature params) "AND library_signature LIKE CONCAT(:library_signature,'%')")
+--~ (when (:library_number params) "AND library_number LIKE CONCAT(:library_number,'%')")
 ORDER BY id DESC
 LIMIT :limit OFFSET :offset
 

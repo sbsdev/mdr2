@@ -92,6 +92,7 @@
                        (let [params (cond
                                       (repair/production-id? search) {:id (subs search 3)} ;; DAM123
                                       (prod/library-signature? search) {:library_signature search} ;; ds12345
+                                      (prod/library-number? search) {:library_number search} ;; PNX 4000
                                       (repair/product-number? search) {:product_number search} ;; DY123
                                       :else {:search (if (blank? search) nil (db/search-to-sql search))})
                              params (merge {:state state :limit limit :offset offset} params)]
