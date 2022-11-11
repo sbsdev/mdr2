@@ -40,9 +40,7 @@
                    (map extract-role)
                    (map keyword)
                    (remove nil?)
-                   set)
-        roles (conj (conj roles :admin) :it) ; FIXME: this is a temporary workaround
-        ]
+                   set)]
     (assoc user :roles roles)))
 
 (defn authenticate [username password & [attributes]]
