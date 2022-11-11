@@ -8,6 +8,7 @@
                         "repairing"}))
 (s/def ::production_type (s/and string? #{"book" "periodical" "other"}))
 (s/def ::library_signature (s/and string? #(re-matches #"^ds\d{5,}$" %)))
+(s/def ::library_number (s/and string? #(re-matches #"^PNX \d{4,}$" %)))
 (s/def ::date #(instance? java.time.LocalDate %))
 
 (s/def ::volumes (s/and int? #{1 2 3 4 5 6 7 8}))
@@ -48,7 +49,18 @@
    (spec/opt :product_number) string?
    (spec/opt :production_type) ::production_type
    (spec/opt :periodical_number) string?
-   (spec/opt :library_number) string?
+   (spec/opt :library_number) ::library_number
    (spec/opt :library_signature) ::library_signature
    (spec/opt :library_record_id) int?
    })
+
+(s/def ::library_number-maybe (s/and string? #(re-matches #"^PNX \d{1,}$" %)))
+(s/def ::library_signature-maybe (s/and string? #(re-matches #"^ds\d{1,}$" %)))
+
+(defn library-number-maybe?
+  "Return true if `s` looks like it might be a valid library number"
+  [s] (s/valid? ::library_number-maybe s))
+
+(defn library-signature-maybe?
+  "Return true if `s` looks like it might be a valid library signature"
+  [s] (s/valid? ::library_signature-maybe s))
