@@ -118,12 +118,14 @@
   [production]
   (reduce-kv
    (fn [m k v]
-     (assoc m k
+     (medley/assoc-some
+      m k
       (cond
-        (#{:date :produced_date :revision_date} k) (time/local-date v)
+        ;; ignore all parsing errors. If there are faulty values we simply do not use them
+        (#{:date :produced_date :revision_date} k) (try (time/local-date v) (catch Exception _ nil))
         ;; source_date is just a year string
-        (#{:source_date} k) (time/local-date (time/year v))
-        (#{:volumes :library_record_id} k) (Integer/parseInt v)
+        (#{:source_date} k) (try (time/local-date (time/year v)) (catch Exception _ nil))
+        (#{:volumes :library_record_id} k) (try (Integer/parseInt v) (catch Exception _ nil))
         :else v)))
    {} production))
 
