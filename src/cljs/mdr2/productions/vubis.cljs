@@ -183,7 +183,7 @@
      [:td description]
      [:td library_number]
      [:td source_publisher]
-     [:td (tf/unparse (tf/formatters :date) source_date)]
+     [:td (when source_date (tf/unparse (tf/formatters :date) source_date))]
      [:td [buttons id]]]))
 
 (defn- productions []
