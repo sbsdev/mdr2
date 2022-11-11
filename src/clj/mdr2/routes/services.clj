@@ -107,7 +107,7 @@
              :handler (fn [{{p :body} :parameters}]
                         (try
                           (let [p (prod/create! p)]
-                            (created (str (:id p))))
+                            (created (str "productions/" (:id p)) {}))
                           (catch clojure.lang.ExceptionInfo e
                             (let [{:keys [error-id errors]} (ex-data e)]
                               (case error-id
@@ -254,7 +254,7 @@
                         (try
                           (let [tempfile (:tempfile file)
                                 p (abacus/import-new-production tempfile)]
-                            (created (str (:id p))))
+                            (created (str "productions/" (:id p)) {}))
                           (catch clojure.lang.ExceptionInfo e
                             (let [{:keys [error-id errors]} (ex-data e)]
                               (case error-id
