@@ -34,6 +34,15 @@
   [production]
   (fs/exists? (path/manifest-path production)))
 
+(defn has-manifest?
+  "Lazy version of [[manifest?]]. Only check the file system if the
+  production meets certain criteria (state, library_number, etc)"
+  [production]
+  (and (= (:state production) "structured")
+       (or (:library_number production)
+           (> (:revision production) 0))
+       (manifest? production)))
+
 (defn manifest-validate
   "Return a list of validation errors for all DAISY exports of given
   `production`. If there are no validation errors or no DAISY exports
@@ -53,10 +62,20 @@
   [production]
   (empty? (manifest-validate production)))
 
-(defn split?
+(defn manual-split?
   "Return true if the production has a manual split"
   [production]
   (fs/exists? (path/split-path production 1)))
+
+(defn has-manual-split?
+  "Lazy version of [[manual-split?]] Only check the file system if the
+  production meets certain criteria (state)"
+  [production]
+  ;; we only really need to query the file system if the state
+  ;; is "pending-split". In all other cases nobody cares whether the
+  ;; split-path exists
+  (and (= (:state production) "pending-split")
+       (manual-split? production)))
 
 (defn dam-number
   "Return an id for a production as it is expected by legacy systems"

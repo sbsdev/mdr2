@@ -98,6 +98,9 @@
                              params (merge {:state state :limit limit :offset offset} params)]
                          (->> (db/get-productions params)
                               (map prod/remove-null-values)
+                              ;; add some extra information to make the UI more valuable
+                              (map (fn [p] (assoc p :has-manual-split? (prod/has-manual-split? p))))
+                              (map (fn [p] (assoc p :has-manifest? (prod/has-manifest? p))))
                               ok)))}
       :post {:summary "Create a production"
              :middleware [wrap-restricted wrap-authorized]

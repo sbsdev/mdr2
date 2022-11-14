@@ -224,7 +224,7 @@
    [:span.icon.is-small {:aria-hidden true}
     [:i.material-icons icon]]])
 
-(defn buttons [{:keys [uuid id state] :as production}]
+(defn buttons [{:keys [uuid id state has-manifest? has-manual-split?] :as production}]
   (let [roles @(rf/subscribe [::auth/user-roles])]
     [:div.buttons.has-addons
      ;; show the download button while the production hasn't been recorded
@@ -250,7 +250,8 @@
      ;; with productions that are repaired
      (when (and (seq (set/intersection #{:it :admin} roles))
                 (#{"structured"} state)
-                (or (:library_number production) (> (:revision production) 0)))
+                (or (:library_number production) (> (:revision production) 0))
+                has-manifest?)
        (if @(rf/subscribe [::notifications/button-loading? uuid :recorded])
          [:button.button.is-loading]
          (tooltip-button
@@ -260,7 +261,8 @@
      ;; show the "Split" button if the next state is "split" and the user is
      ;; authorized
      (when (and (seq (set/intersection #{:it :admin} roles))
-                (#{"pending-split"} state))
+                (#{"pending-split"} state)
+                has-manual-split?)
          (if @(rf/subscribe [::notifications/button-loading? uuid :split])
            [:button.button.is-loading]
            (tooltip-button
