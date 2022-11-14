@@ -250,26 +250,27 @@
      ;; with productions that are repaired
      (when (and (seq (set/intersection #{:it :admin} roles))
                 (#{"structured"} state)
-                (or (:library_number production) (> (:revision production) 0))
-                has-manifest?)
+                (or (:library_number production) (> (:revision production) 0)))
        (if @(rf/subscribe [::notifications/button-loading? uuid :recorded])
          [:button.button.is-loading]
          (tooltip-button
           {:on-click (fn [e] (rf/dispatch [::recorded-production uuid]))
            :tooltip :mark-recorded
+           :disabled (not has-manifest?)
            :icon "task"})))
      ;; show the "Split" button if the next state is "split" and the user is
      ;; authorized
      (when (and (seq (set/intersection #{:it :admin} roles))
-                (#{"pending-split"} state)
-                has-manual-split?)
+                (#{"pending-split"} state))
          (if @(rf/subscribe [::notifications/button-loading? uuid :split])
            [:button.button.is-loading]
            (tooltip-button
-            {:href (str "#/productions/" id "/split")
-             :on-click (fn [e] (rf/dispatch [::production/set-current production]))
-             :tooltip :mark-split
-             :icon "call_split"})))
+            (cond-> {:on-click (fn [e] (rf/dispatch [::production/set-current production]))
+                     :disabled (not has-manual-split?)
+                     :tooltip :mark-split
+                     :icon "call_split"}
+              ;; only add a link (enable the button) if there is a manual split
+              has-manual-split? (assoc :href (str "#/productions/" id "/split"))))))
      (when (seq (set/intersection #{:it} roles))
        (if @(rf/subscribe [::notifications/button-loading? uuid :delete])
          [:button.button.is-danger.is-loading]
