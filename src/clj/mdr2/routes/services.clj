@@ -94,6 +94,7 @@
                                       (prod.spec/library-signature-maybe? search) {:library_signature search} ;; ds12345
                                       (prod.spec/library-number-maybe? search) {:library_number search} ;; PNX 4000
                                       (repair/product-number? search) {:product_number search} ;; DY123
+                                      (and (nil? state) (prod.spec/state? search)) {:state search}
                                       :else {:search (if (blank? search) nil (db/search-to-sql search))})
                              params (merge {:state state :limit limit :offset offset} params)]
                          (->> (db/get-productions params)

@@ -57,6 +57,10 @@
 (s/def ::library_number-maybe (s/and string? #(re-matches #"^PNX \d{1,}$" %)))
 (s/def ::library_signature-maybe (s/and string? #(re-matches #"^ds\d{1,}$" %)))
 
+(defn state?
+  "Return true if `s` is a valid state"
+    [s] (s/valid? ::state s))
+
 (defn library-number-maybe?
   "Return true if `s` looks like it might be a valid library number"
   [s] (s/valid? ::library_number-maybe s))
