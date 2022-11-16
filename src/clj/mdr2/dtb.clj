@@ -4,6 +4,7 @@
   (:require [clojure.java.io :refer [file]]
             [clojure.string :as s]
             [clojure.tools.logging :as log]
+            [clojure.math :as math]
             [pantomime.mime :refer [mime-type-of]]
             [mdr2.production.path :as path]
             [clojure.xml :as xml]
@@ -127,7 +128,7 @@
      (map file-audio-length)
      (reduce +)
      (* 1000)
-     Math/round)))
+     math/round)))
 
 (defn- file-audio-channels
   "Return the number of audio channels for a given audio `file`"
@@ -169,7 +170,7 @@
   [dtb]
   (let [files (get-files dtb)
         bytes (->> files (map #(.length %)) (reduce +))]
-    (-> bytes (/ 1024) Math/round)))
+    (-> bytes (/ 1024) math/round)))
 
 (defn depth
   "Return the depth of a given DAISY Talking Book.
