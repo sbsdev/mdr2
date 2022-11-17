@@ -120,12 +120,12 @@
   "Update the master smil file of `volume` for `production` in-place
   with the meta data from `production`"
   [production volume]
-  (let [smil (io/file (path/recorded-path production volume) "master.smil")
+  (let [smil (fs/file (path/recorded-path production volume) "master.smil")
         updated (with-open [r (io/reader smil)]
                   (update-meta-data
                    (xml/parse r :support-dtd false)
                    production handle-smil-node))]
-    (let [tmp-file (io/file (fs/create-temp-file {:prefix "mdr2-" :suffix ".smil"}))]
+    (let [tmp-file (fs/file (fs/create-temp-file {:prefix "mdr2-" :suffix ".smil"}))]
       (with-open [w (io/writer tmp-file)]
         (xml/emit updated w :doctype smil-doctype))
       (xml-format! tmp-file smil)
@@ -135,8 +135,8 @@
   "Format all smil files. OBI now produces unformated smil files and
   some old players don't seem to like this"
   [production volume]
-  (let [formatted (io/file "/tmp/formatted.smil")
-        dir (io/file (path/recorded-path production volume))
+  (let [formatted (fs/file "/tmp/formatted.smil")
+        dir (fs/file (path/recorded-path production volume))
         files (->> dir
                    file-seq
                    (filter #(str/ends-with? (.getName %) ".smil")))]
@@ -159,4 +159,4 @@
   touched"
   [production volume]
   (update-mainfest! production volume
-   (io/file (path/encoded-path production volume) path/manifest-member)))
+   (fs/file (path/encoded-path production volume) path/manifest-member)))
