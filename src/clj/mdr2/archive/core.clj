@@ -109,7 +109,7 @@ mp3 and the whole thing is packed up in one or more iso files
 (defn set-file-permissions
   "Set file permissions on `file-tree` to g+w recursively"
   [file-tree]
-  (let [visitor-fn (fn [f] (fs/set-posix-file-permissions f "rw-rw-r--") nil)]
+  (let [visitor-fn (fn [f _] (fs/set-posix-file-permissions f "rw-rw-r--") :continue)]
     (fs/walk-file-tree file-tree {:pre-visit-dir visitor-fn :visit-file visitor-fn})))
 
 (defn- copy-files
