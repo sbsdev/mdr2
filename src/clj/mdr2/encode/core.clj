@@ -45,7 +45,7 @@
   (let [output (path/encoded-path production volume)
         manifest (path/manifest-path production volume)
         stereo (if (dtb/mono? (path/recorded-path production volume)) "mono" "stereo")]
-    (fs/create-dir output)
+    (fs/create-dirs output)
     (log/infof "Encoding %s (%s) with bitrate: %s" (:id production) volume bitrate)
     (log/debugf "Encoding %s (%s) with %s, %s, %s, %s, %s" (:id production) volume bitrate manifest output stereo sample-rate)
     (pipeline/audio-encoder (.getPath manifest) (.getPath output)
@@ -81,7 +81,7 @@
     (log/debugf "Creating iso for %s (%s) with %s, %s, %s"
                 (:id production) volume
                 clean-publisher clean-title iso-name)
-    (fs/create-dir iso-path)
+    (fs/create-dirs iso-path)
     (sh "genisoimage"
         "-quiet"
         "-r"
