@@ -54,13 +54,6 @@
                 source_date multimedia_type encoded_size]
          :as production}]
   (cond
-    ;; FIXME: this is a gross hack using one bug to work around
-    ;; another one. Once clojure properly handles xml namespaces this
-    ;; will probably not work anymore and should no longer be needed.
-    ;; The basic problem is the the default xml namespace is not
-    ;; loaded, so emit will die. So we just rename the namespaced
-    ;; xml:lang attribute into a not namespaced
-    (= node :xml/lang) :xml:lang
     (title-node? node) (update-title-node node title)
     (meta-node? node "dc:creator") (update-meta-node node creator)
     (meta-node? node "dc:title") (update-meta-node node title)
