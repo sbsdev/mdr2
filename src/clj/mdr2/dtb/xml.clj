@@ -39,11 +39,11 @@
   is not nil"
   (if value
     (update-in node [:content] concat ; append
-               (list (xml/element :meta{:name "ncc:kByteSize" :content value})))
+               (list (xml/element :meta {:name "ncc:kByteSize" :content value})))
     node))
 
 (defn insert-xmlns [node]
-  (update-in node [:attrs] assoc :xmlns "http://www.w3.org/1999/xhtml"))
+  (assoc-in node [:attrs :xmlns] "http://www.w3.org/1999/xhtml"))
 
 (defn handle-manifest-node
   "Handle one node in the xml tree. Replace all content in the meta
@@ -72,8 +72,6 @@
     (meta-node? node "ncc:sourcePublisher") (update-meta-node node source_publisher)
     (meta-node? node "ncc:multimediaType") (update-meta-node node multimedia_type)
     (= (:tag node) :head) (insert-kbytesize-node node encoded_size)
-    ;; FIXME: xml/parse seems to drop the xmlns attribute. We have to fudge it back in
-    (= (:tag node) :html) (insert-xmlns node)
     :else node))
 
 (defn handle-smil-node
@@ -108,9 +106,11 @@
    (update-mainfest! production volume (path/manifest-path production volume)))
   ([production _ manifest]
    (let [updated (with-open [r (io/reader manifest)]
-                  (update-meta-data (xml/parse r :support-dtd false)
-                                    production handle-manifest-node))]
-     (let [tmp-file (io/file (fs/create-temp-file {:prefix "mdr2-" :suffix ".xml"}))]
+                   (->
+                    (xml/parse r :support-dtd false)
+                    (update-meta-data production handle-manifest-node)
+                    insert-xmlns))]
+     (let [tmp-file (fs/file (fs/create-temp-file {:prefix "mdr2-" :suffix ".xml"}))]
        (with-open [w (io/writer tmp-file)]
          (xml/emit updated w :doctype manifest-doctype))
        (xml-format! tmp-file manifest)
@@ -122,9 +122,9 @@
   [production volume]
   (let [smil (fs/file (path/recorded-path production volume) "master.smil")
         updated (with-open [r (io/reader smil)]
-                  (update-meta-data
+                  (->
                    (xml/parse r :support-dtd false)
-                   production handle-smil-node))]
+                   (update-meta-data production handle-smil-node)))]
     (let [tmp-file (fs/file (fs/create-temp-file {:prefix "mdr2-" :suffix ".smil"}))]
       (with-open [w (io/writer tmp-file)]
         (xml/emit updated w :doctype smil-doctype))
