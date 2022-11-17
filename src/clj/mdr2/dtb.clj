@@ -16,14 +16,14 @@
 (defn wav-file?
   "Is the given `file` a wav file?"
   [file]
-  (= (mime-type-of file) "audio/x-wav"))
+  (#{"audio/vnd.wave" "audio/x-wav"} (mime-type-of file)))
 
 (defn- audio-file?
   "Is the given `file` an audio file, i.e. any of the valid audio file
   formats for a DAISY Talking Book namely *MPEG-4 AAC audio*, *MPEG-1/2
   Layer III (MP3) audio* and *Linear PCM - RIFF WAVE format audio*?"
   [file]
-  (#{"audio/mpeg" "audio/x-wav" "audio/mp4"} (mime-type-of file)))
+  (#{"audio/mpeg" "audio/vnd.wave" "audio/x-wav" "audio/mp4"} (mime-type-of file)))
 
 (defn- text-file?
   "Is the given `file` a text file, i.e. any of the valid text file
@@ -101,7 +101,7 @@
     (cond
      (every? #{"audio/mp4"} mime-types) "MP4-AAC"
      (every? #{"audio/mpeg"} mime-types) "MP3"
-     (every? #{"audio/x-wav"} mime-types) "WAV"
+     (every? #{"audio/vnd.wave" "audio/x-wav"} mime-types) "WAV"
      :else "")))
 
 (defn- file-audio-length
