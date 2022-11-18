@@ -263,12 +263,14 @@
   [production]
   (if (obi/directory-valid? production)
     ;; only delete if nothing is fishy with the directories
-    (doseq [dir (path/all production)] (fs/delete-tree dir))
+    (do (log/debugf "Cleaning up all directories for %s" (:id production))
+        (doseq [dir (path/all production)] (fs/delete-tree dir)))
     (let [message (format "Failed to remove invalid Obi directory (%s)" (:id production))]
       (log/error message)
       (throw (ex-info message {:error-id :invalid-obi-directory})))))
 
 (defn set-state-archived! [production]
+  (log/debugf "Setting production state of %s to archived" (:id production))
   (try
     (delete-all-dirs! production)
     ;; ignore deletion problems, i.e. archive the production even if

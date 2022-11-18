@@ -174,6 +174,7 @@ mp3 and the whole thing is packed up in one or more iso files
 
 (defmethod archive "book"
   [production]
+  (log/infof "Archiving %s as a book" (:id production))
   (conman/with-transaction [db/*archive-db*]
     (archive-sektion production :master)
     (archive-sektion production :dist-master)
@@ -181,6 +182,7 @@ mp3 and the whole thing is packed up in one or more iso files
 
 (defmethod archive "periodical"
   [production]
+  (log/infof "Archiving %s as a periodical" (:id production))
   (conman/with-transaction [db/*archive-db*]
     (archive-sektion production :master)
     ;; archive the periodical iso(s)
@@ -210,6 +212,7 @@ mp3 and the whole thing is packed up in one or more iso files
 
 (defmethod archive "other"
   [production]
+  (log/infof "Archiving %s as an other" (:id production))
   (conman/with-transaction [db/*archive-db*]
     (archive-sektion production :master)
     ;; place the iso(s) in a spool directory
