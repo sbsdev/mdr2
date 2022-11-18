@@ -49,15 +49,15 @@
 
 (rf/reg-event-fx
   ::delete-production
-  (fn [{:keys [db]} [_ id]]
-    (let [production (get-in db [:productions :in-production id])]
-      {:db (notifications/set-button-state db id :delete)
+  (fn [{:keys [db]} [_ uuid]]
+    (let [production (get-in db [:productions :in-production uuid])]
+      {:db (notifications/set-button-state db uuid :delete)
        :http-xhrio
        (as-transit {:method          :delete
                     :headers 	     (auth/auth-header db)
                     :uri             (str "/api/productions/" (:id production))
-                    :on-success      [::ack-delete id]
-                    :on-failure      [::ack-failure id :delete]
+                    :on-success      [::ack-success uuid :delete]
+                    :on-failure      [::ack-failure uuid :delete]
                     })})))
 
 (rf/reg-event-db
@@ -66,11 +66,11 @@
     (notifications/clear-button-state db id :save)))
 
 (rf/reg-event-fx
-  ::ack-delete
-  (fn [{:keys [db]} [_ id]]
+  ::ack-success
+  (fn [{:keys [db]} [_ uuid request-type]]
     (let [db (-> db
-                 (update-in [:productions :in-production] dissoc id)
-                 (notifications/clear-button-state id :delete))
+                 (update-in [:productions :in-production] dissoc uuid)
+                 (notifications/clear-button-state uuid request-type))
           empty? (-> db (get-in [:productions :in-production]) count (< 1))]
       (if empty?
         {:db db :dispatch [::fetch-productions]}
@@ -116,6 +116,18 @@
      (-> db
          (fork/set-submitting path false)
          (fork/set-server-message path message)))))
+
+(rf/reg-event-fx
+  ::recorded-production
+  (fn [{:keys [db]} [_ uuid id]]
+    {:db (notifications/set-button-state db uuid :recorded)
+     :http-xhrio
+     (as-transit {:method          :post
+                  :headers 	   (auth/auth-header db)
+                  :uri             (str "/api/productions/" id "/recorded")
+                  :on-success      [::ack-success uuid :recorded]
+                  :on-failure      [::ack-failure uuid :recorded]
+                  })}))
 
 (rf/reg-sub
  ::productions
@@ -254,7 +266,7 @@
        (if @(rf/subscribe [::notifications/button-loading? uuid :recorded])
          [:button.button.is-loading]
          (tooltip-button
-          {:on-click (fn [e] (rf/dispatch [::recorded-production uuid]))
+          {:on-click (fn [e] (rf/dispatch [::recorded-production uuid id]))
            :tooltip :mark-recorded
            :disabled (not has-manifest?)
            :icon "task"})))
