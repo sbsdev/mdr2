@@ -59,14 +59,14 @@
   named `obiconfig.xml`. If true this is a strong indication that
   something isn't quite right."
   [production]
-  (let [root-dir (path/structured-path production)]
+  (let [root-dir (path/recording-path production)]
     (some? (seq (fs/glob root-dir "**/obiconfig.xml")))))
 
 (defn contains-necessary-files?
   "Return true if a `production` contains at least `obiconfig.xml`,
   `project.obi`, a `Data` and a `Backup` directory."
   [production]
-  (let [root-dir (path/structured-path production)]
+  (let [root-dir (path/recording-path production)]
     (and (->> ["obiconfig.xml" "project.obi"]
               (map (partial fs/path root-dir))
               (every? fs/exists?))
@@ -76,10 +76,12 @@
 
 (defn directory-valid?
   "Validate an Obi working directory for given production. Return true
-  if the production contains all necessary files,
-  see [[contains-necessary-files?]] and does not contains any subdirs
-  containing a `obiconfig.xml`, see [[contains-obi-subdirs?]]"
+  if the [[path/recording-path]] is a directory, the production
+  contains all necessary files (see [[contains-necessary-files?]]) and
+  it does not contains any subdirs containing a
+  `obiconfig.xml` (see [[contains-obi-subdirs?]])"
   [production]
   (and
+   (fs/directory? (path/recording-path production))
    (contains-necessary-files? production)
    (not (contains-obi-subdirs? production))))
