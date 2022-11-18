@@ -31,7 +31,7 @@
  ::fetch-productions-success
  (fn [db [_ productions]]
    (let [productions (->> productions
-                    (map #(assoc % :uuid (str (random-uuid)))))
+                          (map #(assoc % :uuid (str (random-uuid)))))
          next? (-> productions count (= pagination/page-size))]
      (-> db
          (assoc-in [:productions :in-production] (zipmap (map :uuid productions) productions))
