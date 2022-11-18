@@ -155,6 +155,28 @@ Authorization: :auth-token
  "library_signature": "ds12345"
 }
 
+####################################
+# Marking a production as recorded #
+####################################
+
+# Mark a production as recorded
+POST http://localhost:3000/api/productions/27707/recorded
+Accept: application/json
+Content-Type: application/json
+Authorization: :auth-token
+
+# Mark a non-existing production as recorded
+POST http://localhost:3000/api/productions/1/recorded
+Accept: application/json
+Content-Type: application/json
+Authorization: :auth-token
+
+# Mark production as recorded which doesn't have state 'structured'
+POST http://localhost:3000/api/productions/94/recorded
+Accept: application/json
+Content-Type: application/json
+Authorization: :auth-token
+
 #################################
 # Marking a production as split #
 #################################

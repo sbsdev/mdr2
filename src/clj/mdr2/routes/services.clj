@@ -175,6 +175,39 @@
                                     (no-content)
                                     (catch clojure.lang.ExceptionInfo e
                                       (internal-server-error {:status-text (ex-message e)}))))))}}]
+
+    ["/:id/recorded"
+     {:post {:summary "Mark a production as recorded, i.e. ready to be encoded"
+             :middleware [wrap-restricted wrap-authorized]
+             :swagger {:security [{:apiAuth []}]}
+             :authorized #{:admin :it}
+             :parameters {:path {:id int?}}
+             :handler (fn [{{{:keys [id]} :path} :parameters
+                            {user :user} :identity}]
+                        (let [p (prod/get-production id)]
+                          (cond
+                            (nil? p) (not-found)
+                            (not= (:state p) "structured")
+                            (conflict {:status-text
+                                       "Only productions in state \"structured\" can be marked as recorded"})
+                            :else
+                            ;; check if the exported production is even valid
+                            ;; for validation purposes pretend there is only one volume. At
+                            ;; this stage the number of volumes just indicates that there
+                            ;; should be a split into that many volumes. The volumes aren't
+                            ;; actually there yet
+                            (let [errors (prod/manifest-validate (assoc p :volumes 1))]
+                              (if (seq errors)
+                                ;; there are errors in the production. Return as conflict
+                                (conflict {:status-text (format "The production is not valid: \"%s\"" (string/join " " errors))
+                                           :errors errors})
+                                ;; all is well. Set the state of the production to recorded
+                                (try
+                                  (prod/set-state-recorded! p)
+                                  (no-content)
+                                  (catch clojure.lang.ExceptionInfo e
+                                    (internal-server-error {:status-text (ex-message e)}))))))))}}]
+
     ["/:id/split"
      {:post {:summary "Mark a production as split, i.e. ready to be encoded as a manually split production"
              :middleware [wrap-restricted wrap-authorized]
