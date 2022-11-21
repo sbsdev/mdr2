@@ -43,8 +43,20 @@ GET http://localhost:3000/api/productions/31411
 GET http://localhost:3000/api/productions/31411
 Accept: application/transit+json
 
-# Get a specific production
+# Search a specific production by DAM number
+GET http://localhost:3000/api/productions?search=dam31411
+
+# Search a specific production by library_signature
+GET http://localhost:3000/api/productions?search=ds1234
+
+# Search a specific production by library_number
+GET http://localhost:3000/api/productions?search=PNX 8381
+
+# Search a specific production by product_number
 GET http://localhost:3000/api/productions?search=DY33722
+
+# Search a specific production by state
+GET http://localhost:3000/api/productions?search=pending-split
 
 # Add a production
 POST http://localhost:3000/api/productions
@@ -97,9 +109,60 @@ Content-Type: application/json
 # Set the xml for a production
 POST http://localhost:3000/api/productions/31017/xml
 Accept: application/json
-Content-Type: multipart/form-data
+Content-Type: multipart/form-data; boundary=e82bc39c68f1417d9ea12c5456182f3c
+Authorization: :auth-token
 
-< /home/eglic/Downloads/31515.xml
+--e82bc39c68f1417d9ea12c5456182f3c
+Content-Disposition: form-data; name="file"; filename="SN1_DY99999.xml"
+Content-Type: application/xml
+
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE dtbook PUBLIC "-//NISO//DTD dtbook 2005-3//EN" "http://www.daisy.org/z3986/2005/dtbook-2005-3.dtd">
+<dtbook xmlns="http://www.daisy.org/z3986/2005/dtbook/" version="2005-3" xml:lang="de">
+  <head>
+    <meta name="dc:Title" content="Chaosköniginnen. Besser als beste Freund"/>
+    <meta name="dc:Creator" content="Brüning, Valentina"/>
+    <meta name="dc:Subject" content=""/>
+    <meta name="dc:Description" content=""/>
+    <meta name="dc:Publisher" content="SBS Schweizerische Bibliothek für Blinde, Seh- und Lesebehinderte"/>
+    <meta name="dc:Date" content="2022-02-10"/>
+    <meta name="dc:Type" content="Sound"/>
+    <meta name="dc:Format" content="Daisy 2.02"/>
+    <meta name="dc:Identifier" content="ch-sbs-ab5a8c9b-bb63-46e0-adb0-b073a9d1698f"/>
+    <meta name="dc:Source" content="978-3-86429-472-3"/>
+    <meta name="dc:Language" content="de"/>
+    <meta name="dc:Rights" content=""/>
+    <meta name="dtb:uid" content="ch-sbs-ab5a8c9b-bb63-46e0-adb0-b073a9d1698f"/>
+    <meta name="dtb:sourceDate" content="2021-01-01"/>
+    <meta name="dtb:sourceEdition" content="1. / 2021"/>
+    <meta name="dtb:sourcePublisher" content="Tulipan"/>
+    <meta name="dtb:sourceRights" content=""/>
+    <meta name="dtb:sourceTitle" content=""/>
+    <meta name="dtb:multimediaType" content=""/>
+    <meta name="dtb:multimediaContent" content=""/>
+    <meta name="dtb:narrator" content="N.N."/>
+    <meta name="dtb:producer" content="SBS Schweizerische Bibliothek für Blinde, Seh- und Lesebehinderte"/>
+    <meta name="dtb:producedDate" content=""/>
+    <meta name="dtb:revision" content="0"/>
+    <meta name="dtb:revisionDate" content="2015-06-25"/>
+    <meta name="dtb:revisionDescription" content=""/>
+    <meta name="dtb:totalTime" content="00:00:00.000"/>
+    <meta name="dtb:audioFormat" content=""/>
+  </head>
+  <book>
+    <frontmatter>
+      <doctitle>Test - whout von Test - Gubser, Paul</doctitle>
+      <docauthor>Test - Gubser, Paul</docauthor>
+    </frontmatter>
+    <bodymatter>
+      <level1>
+	<h1/>
+	<p/>
+      </level1>
+    </bodymatter>
+  </book>
+</dtbook>
+--e82bc39c68f1417d9ea12c5456182f3c--
 
 ################################
 # Assign the library signature #
