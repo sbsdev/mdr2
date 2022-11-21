@@ -3,6 +3,7 @@ on:
     # Sequence of patterns matched against refs/tags
     tags:
     - '0.9.0-alpha[0-9]+' # Build release assets for the current alpha release
+    - '0.9.0-beta[0-9]+' # Build release assets for the current beta release
 
 name: Upload Preliminary Release Asset
 
