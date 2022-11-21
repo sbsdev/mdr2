@@ -223,7 +223,7 @@ Authorization: :auth-token
 ####################################
 
 # Mark a production as recorded
-POST http://localhost:3000/api/productions/27707/recorded
+POST http://localhost:3000/api/productions/1035/recorded
 Accept: application/json
 Content-Type: application/json
 Authorization: :auth-token
@@ -304,7 +304,7 @@ Authorization: :auth-token
 ##########################
 
 # Repair a production
-POST http://localhost:3000/api/productions/302/repair
+POST http://localhost:3000/api/productions/1035/repair
 Accept: application/json
 Authorization: :auth-token
 
