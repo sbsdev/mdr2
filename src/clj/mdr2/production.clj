@@ -295,8 +295,11 @@
   "Add a DTBook XML to a `production`. This will also set the status
   to :structured"
   [production f]
-  ;; move the file to the right place
-  (fs/move f (xml-path production) {:replace-existing true})
+  (try
+    ;; move the file to the right place
+    (fs/move f (xml-path production) {:replace-existing true})
+    (catch java.nio.file.FileSystemException e
+      (throw (ex-info (format "Couldn't upload Structure XML to %s" (xml-path production)) {:error-id ::structure-directory-missing}))))
   (set-state-structured! production))
 
 (prometheus/instrument! metrics/registry #'create!)
