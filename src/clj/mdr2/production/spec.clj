@@ -7,7 +7,7 @@
                         "failed" "pending-split" "recorded" "split" "structured"
                         "repairing"}))
 (s/def ::production_type (s/and string? #{"book" "periodical" "other"}))
-(s/def ::library_signature (s/and string? #(re-matches #"^ds\d{5,}$" %)))
+(s/def ::library_signature (s/and string? #(re-matches #"^ds\d{4,}$" %)))
 (s/def ::library_number (s/and string? #(re-matches #"^PNX \d{4,}$" %)))
 (s/def ::date #(instance? java.time.LocalDate %))
 
