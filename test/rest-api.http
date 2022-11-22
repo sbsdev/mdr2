@@ -60,6 +60,7 @@ GET http://localhost:3000/api/productions?search=pending-split
 
 # Add a production
 POST http://localhost:3000/api/productions
+Authorization: :auth-token
 Content-Type: application/json
 {
   "title": "Hehe",
@@ -67,13 +68,18 @@ Content-Type: application/json
   "description": "not much",
   "source": "978-3-257-07184-11",
   "language": "de",
-  "source_date": "2022-06-16T09:38:03.196Z",
+  "source_date": "2022-06-16",
   "source_publisher": "Vargos",
-  "library_number": "PNX 8434"
+  "library_number": "PNX 9435",
+  "state": "new",
+  "identifier": "978-3-570-15263-0",
+  "revision": 0,
+  "date": "2022-11-22"
 }
 
 # Add a production using transit
 POST http://localhost:3000/api/productions
+Authorization: :auth-token
 Content-Type: application/transit+json
 [
   "^ ",
@@ -95,7 +101,18 @@ Content-Type: application/transit+json
     "2022-01-01"
   ],
   "~:library_number",
-  "PNX 8434"
+  "PNX 9434",
+  "~:revision",
+  0,
+  "~:state",
+  "new",
+  "~:identifier",
+  "978-3-570-15263-0",
+  "~:date",
+  [
+    "~#LocalDate",
+    "2022-01-01"
+  ]
 ]
 
 # Delete a production
