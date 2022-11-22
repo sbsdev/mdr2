@@ -170,12 +170,12 @@ Content-Type: application/xml
 
 # Assign a library signature to a production
 # should produce a 204
-PATCH http://localhost:3000/api/productions/30111
+PATCH http://localhost:3000/api/productions/1035
 Accept: application/json
 Content-Type: application/json
 Authorization: :auth-token
 {
- "library_signature": "ds70000"
+ "library_signature": "ds1893"
 }
 
 # Assign a library signature to a non-existing production
@@ -245,7 +245,7 @@ Authorization: :auth-token
 #################################
 
 # Mark a production as split
-POST http://localhost:3000/api/productions/29867/split
+POST http://localhost:3000/api/productions/1035/split
 Accept: application/json
 Content-Type: application/json
 Authorization: :auth-token
@@ -343,7 +343,7 @@ Content-Type: application/xml
     </Parameter>
     <Transaction>
       <DocumentData command="mdaDocAdd">
-        <artikel_nr>DY99997</artikel_nr>
+        <artikel_nr>DY99998</artikel_nr>
         <priority>none</priority>
         <deadline>2015-06-29</deadline>
         <title>Test - whout</title>
@@ -370,7 +370,7 @@ Content-Type: application/xml
             <narrator>N.N.</narrator>
             <setInfo>1</setInfo>
             <revisionDate>2015-06-25</revisionDate>
-            <VubisRecordID>378657</VubisRecordID>
+            <VubisRecordID>378658</VubisRecordID>
           </ncc>
         </MetaData>
       </DocumentData>
@@ -452,7 +452,7 @@ Content-Type: application/xml
     </Parameter>
     <Transaction>
       <DocumentData command="mdaDocModify">
-	<artikel_nr>DY15745</artikel_nr>
+	<artikel_nr>DY33386</artikel_nr>
 	<identifier>dam15388</identifier>
 	<priority>none</priority>
 	<deadline>2014-03-03</deadline>
