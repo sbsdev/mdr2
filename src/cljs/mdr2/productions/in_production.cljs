@@ -239,8 +239,10 @@
 (defn buttons [{:keys [uuid id state has-manifest? has-manual-split?] :as production}]
   (let [roles @(rf/subscribe [::auth/user-roles])]
     [:div.buttons.has-addons
-     ;; show the download button while the production hasn't been recorded
-     (when (#{"new" "structured"} state)
+     ;; show the download button while the production hasn't been recorded and
+     ;; the user is authorized
+     (when (and (seq (set/intersection #{:it :etext} roles))
+                (#{"new" "structured"} state))
        (tooltip-button
         {:href (str "/api/productions/" id "/xml")
          :download (str id ".xml")
