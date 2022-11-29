@@ -13,7 +13,8 @@
 
 MODE=$1
 SPOOL_DIR=/opt/abacus/share/abac/out/SN_Madras2
-BASE_URL=http://madras2/abacus
+HOST=madras2
+BASE_URL=http://$HOST/api/abacus
 REGEXP="^HTTP/1.1 200 OK"
 
 case $MODE in
@@ -31,7 +32,7 @@ case $MODE in
 	FILES=$SPOOL_DIR/SN12_*
 	;;
     meta)
-	URL=$BASE_URL/meta
+	URL=$BASE_URL/metadata
 	FILES=$SPOOL_DIR/SNMeta_*
 	;;
     status)
