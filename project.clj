@@ -1,4 +1,4 @@
-(defproject ch.sbs/mdr2 "0.9.0-beta3"
+(defproject ch.sbs/mdr2 "0.9.0-beta4-SNAPSHOT"
 
   :description "A Production Management Tool for DAISY Talking Books"
   :url "https://github.com/sbsdev/mdr2"
