@@ -92,7 +92,7 @@
      :http-xhrio
      (as-transit {:method          :post
                   :headers 	     (auth/auth-header db)
-                  :uri             (str "/api/productions/" id "/split")
+                  :uri             (str "/api/productions/" id "/mark-split")
                   :params          values
                   :on-success      [::ack-split path]
                   :on-failure      [::ack-split-failure path]
@@ -124,7 +124,7 @@
      :http-xhrio
      (as-transit {:method          :post
                   :headers 	   (auth/auth-header db)
-                  :uri             (str "/api/productions/" id "/recorded")
+                  :uri             (str "/api/productions/" id "/mark-recorded")
                   :on-success      [::ack-success uuid :recorded]
                   :on-failure      [::ack-failure uuid :recorded]
                   })}))

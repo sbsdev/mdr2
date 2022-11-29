@@ -176,7 +176,7 @@
                                     (catch clojure.lang.ExceptionInfo e
                                       (internal-server-error {:status-text (ex-message e)}))))))}}]
 
-    ["/:id/recorded"
+    ["/:id/mark-recorded"
      {:post {:summary "Mark a production as recorded, i.e. ready to be encoded"
              :middleware [wrap-restricted wrap-authorized]
              :swagger {:security [{:apiAuth []}]}
@@ -208,7 +208,7 @@
                                   (catch clojure.lang.ExceptionInfo e
                                     (internal-server-error {:status-text (ex-message e)}))))))))}}]
 
-    ["/:id/split"
+    ["/:id/mark-split"
      {:post {:summary "Mark a production as split, i.e. ready to be encoded as a manually split production"
              :middleware [wrap-restricted wrap-authorized]
              :swagger {:security [{:apiAuth []}]}
@@ -225,7 +225,7 @@
                             (nil? p) (not-found)
                             (not= (:state p) "pending-split")
                             (conflict {:status-text
-                                       "Only productions in state \"pending-split\" can be split"})
+                                       "Only productions in state \"pending-split\" can be marked as split"})
                             :else
                             ;; check if the split production is even valid. Assume that we are
                             ;; going to have at least two volumes
