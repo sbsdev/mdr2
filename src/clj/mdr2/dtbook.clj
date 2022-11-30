@@ -6,6 +6,8 @@
             [mdr2.production.path :as path]
             [mdr2.production :as prod]))
 
+(xml/alias-uri 'dtb "http://www.daisy.org/z3986/2005/dtbook/")
+
 ;; FIXME: we should probably use some ready made library for i18n.
 ;; There is https://github.com/ptaoussanis/tower,
 ;; https://github.com/asmala/clj18n or
@@ -61,51 +63,51 @@
 (defn default-book
   "Return an default book sexp"
   [title creator language]
-  [:book
-   [:frontmatter
-    [:doctitle (default-book-title title creator language)]
-    [:docauthor creator]]
-   [:bodymatter
-    [:level1 [:h1] [:p]]]])
+  [::dtb/book
+   [::dtb/frontmatter
+    [::dtb/doctitle (default-book-title title creator language)]
+    [::dtb/docauthor creator]]
+   [::dtb/bodymatter
+    [::dtb/level1 [::dtb/h1] [::dtb/p]]]])
 
 (defn periodical
   "Return an default periodical sexp"
   [title creator]
-  [:book
-   [:frontmatter
-    [:doctitle title]
-    [:docauthor creator]]
-   [:bodymatter
-    [:level1 [:h1] [:p]]]])
+  [::dtb/book
+   [::dtb/frontmatter
+    [::dtb/doctitle title]
+    [::dtb/docauthor creator]]
+   [::dtb/bodymatter
+    [::dtb/level1 [::dtb/h1] [::dtb/p]]]])
 
 (defn commercial-audiobook
   "Return an sexp for the body of a commercial audiobook"
   [title creator language]
   (let [t (partial translate language)]
-    [:book
-     [:frontmatter
-      [:doctitle title]
-      [:docauthor creator]
-      [:level1
-       [:h1 (t :about)]
-       [:p]]
-      [:level1
-       [:h1 (t :bib)]
-       [:p]]
-      [:level1
-       [:h1 (t :blurb)]]]
-     [:bodymatter
-      [:level1 [:h1 "[Audioimport]"] [:p]]]
-     [:rearmatter
-      [:level1
-       [:h1 (t :contributors)]
-       [:p]]
-      [:level1
-       [:h1 (t :enclosures)]
-       [:p]]
-      [:level1
-       [:h1 (t :end)]
-       [:p]]]]))
+    [::dtb/book
+     [::dtb/frontmatter
+      [::dtb/doctitle title]
+      [::dtb/docauthor creator]
+      [::dtb/level1
+       [::dtb/h1 (t :about)]
+       [::dtb/p]]
+      [::dtb/level1
+       [::dtb/h1 (t :bib)]
+       [::dtb/p]]
+      [::dtb/level1
+       [::dtb/h1 (t :blurb)]]]
+     [::dtb/bodymatter
+      [::dtb/level1 [:h1 "[Audioimport]"] [:p]]]
+     [::dtb/rearmatter
+      [::dtb/level1
+       [::dtb/h1 (t :contributors)]
+       [::dtb/p]]
+      [::dtb/level1
+       [::dtb/h1 (t :enclosures)]
+       [::dtb/p]]
+      [::dtb/level1
+       [::dtb/h1 (t :end)]
+       [::dtb/p]]]]))
 
 (def conversions
   "Conversions to be applied to specific attributes of a production."
@@ -113,9 +115,9 @@
 
 (defn- dtbook-sexp
   [{:keys [title creator language production_type library_number] :as production}]
-  [:dtbook {:xmlns "http://www.daisy.org/z3986/2005/dtbook/"
-            :version "2005-3" :xml:lang language}
-   [:head
+  [::dtb/dtbook {:xmlns "http://www.daisy.org/z3986/2005/dtbook/"
+                 :version "2005-3" :xml:lang language}
+   [::dtb/head
     (for [[meta-name meta-key]
           (->> [:dc:Title :title
                 :dc:Creator :creator
@@ -146,7 +148,7 @@
                 :dtb:totalTime :total_time
                 :dtb:audioFormat :audio_format]
                (partition 2))]
-      [:meta {:name (name meta-name) :content ((get conversions meta-key meta-key) production)}])]
+      [::dtb/meta {:name (name meta-name) :content ((get conversions meta-key meta-key) production)}])]
    (cond
      library_number (commercial-audiobook title creator language)
      (= production_type "periodical") (periodical title creator)
