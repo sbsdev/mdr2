@@ -13,6 +13,7 @@
     [ring.util.http-response :refer :all]
     [clojure.string :refer [blank?] :as string]
     [clojure.java.io :as io]
+    [clojure.tools.logging :as log]
     [mdr2.db.core :as db]
     [mdr2.auth :as auth]
     [mdr2.abacus.core :as abacus]
@@ -114,6 +115,7 @@
                             (created (str "productions/" (:id p)) {}))
                           (catch clojure.lang.ExceptionInfo e
                             (let [{:keys [error-id errors]} (ex-data e)]
+                              (log/error error-id errors)
                               (case error-id
                                 :duplicate-key (bad-request {:status-text (ex-message e)})
                                 (internal-server-error {:status-text (ex-message e)}))))))}}]
@@ -138,6 +140,7 @@
                               (prod/delete! p)
                               (no-content)
                               (catch clojure.lang.ExceptionInfo e
+                                (log/error (ex-message e))
                                 (internal-server-error {:status-text (ex-message e)})))
                             (not-found)))}
 
@@ -156,6 +159,7 @@
                                      (prod/set-state-cataloged! (assoc p :library_signature library_signature))
                                      (no-content)
                                      (catch clojure.lang.ExceptionInfo e
+                                       (log/error (ex-message e))
                                        (internal-server-error {:status-text (ex-message e)}))))))}}]
 
     ["/:id/repair"
@@ -174,6 +178,7 @@
                                     (prod/repair! (assoc p :repair/initiated-by user))
                                     (no-content)
                                     (catch clojure.lang.ExceptionInfo e
+                                      (log/error (ex-message e))
                                       (internal-server-error {:status-text (ex-message e)}))))))}}]
 
     ["/:id/mark-recorded"
@@ -206,6 +211,7 @@
                                   (prod/set-state-recorded! p)
                                   (no-content)
                                   (catch clojure.lang.ExceptionInfo e
+                                    (log/error (ex-message e))
                                     (internal-server-error {:status-text (ex-message e)}))))))))}}]
 
     ["/:id/mark-split"
@@ -240,6 +246,7 @@
                                   (prod/set-state-split! p volumes sample-rate bit-rate)
                                   (no-content)
                                   (catch clojure.lang.ExceptionInfo e
+                                    (log/error (ex-message e))
                                     (internal-server-error {:status-text (ex-message e)}))))))))}}]
 
     ["/:id/xml"
@@ -277,6 +284,7 @@
                               (prod/add-structure production tempfile)
                               (no-content)
                               (catch clojure.lang.ExceptionInfo e
+                                (log/error (ex-message e))
                                 (internal-server-error {:status-text (ex-message e)})))
                             (bad-request {:status-text "Upload of DTBook XML structure failed"
                                           :errors errors}))))}}]]
@@ -294,6 +302,7 @@
                             (created (str "productions/" (:id p)) {}))
                           (catch clojure.lang.ExceptionInfo e
                             (let [{:keys [error-id errors]} (ex-data e)]
+                              (log/error error-id errors)
                               (case error-id
                                 :duplicate-key
                                 (bad-request {:status-text (ex-message e)})
@@ -311,6 +320,7 @@
                             (no-content)
                             (catch clojure.lang.ExceptionInfo e
                               (let [{:keys [error-id errors]} (ex-data e)]
+                                (log/error error-id errors)
                                 (case error-id
                                   :product-not-found (not-found)
                                   :invalid-state (bad-request {:status-text (ex-message e)})
@@ -328,6 +338,7 @@
                             (no-content)
                             (catch clojure.lang.ExceptionInfo e
                               (let [{:keys [error-id errors]} (ex-data e)]
+                                (log/error error-id errors)
                                 (case error-id
                                   :product-not-found (not-found)
                                   :invalid-xml (bad-request {:status-text "Upload of ABACUS XML failed" :errors errors})
@@ -342,6 +353,7 @@
                             (no-content))
                           (catch clojure.lang.ExceptionInfo e
                             (let [{:keys [error-id errors]} (ex-data e)]
+                              (log/error error-id errors)
                               (case error-id
                                 :invalid-xml (bad-request {:status-text "Upload of ABACUS XML failed"
                                                            :errors errors})
@@ -365,6 +377,7 @@
                                                      (map prod/add-default-meta-data))]
                                 (ok productions))
                               (catch clojure.lang.ExceptionInfo e
+                                (log/error (ex-message e))
                                 (internal-server-error {:status-text (ex-message e)})))
                             (bad-request {:status-text "Not a valid Vubis export"
                                           :errors errors}))))}}]]])
