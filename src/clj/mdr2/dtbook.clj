@@ -78,7 +78,9 @@
     [::dtb/doctitle title]
     [::dtb/docauthor creator]]
    [::dtb/bodymatter
-    [::dtb/level1 [::dtb/h1] [::dtb/p]]]])
+    [::dtb/level1
+     [::dtb/h1]
+     [::dtb/p]]]])
 
 (defn commercial-audiobook
   "Return an sexp for the body of a commercial audiobook"
@@ -97,7 +99,9 @@
       [::dtb/level1
        [::dtb/h1 (t :blurb)]]]
      [::dtb/bodymatter
-      [::dtb/level1 [:h1 "[Audioimport]"] [:p]]]
+      [::dtb/level1
+       [::dtb/h1 "[Audioimport]"]
+       [::dtb/p]]]
      [::dtb/rearmatter
       [::dtb/level1
        [::dtb/h1 (t :contributors)]
