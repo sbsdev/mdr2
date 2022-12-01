@@ -97,7 +97,8 @@
        [::dtb/h1 (t :bib)]
        [::dtb/p]]
       [::dtb/level1
-       [::dtb/h1 (t :blurb)]]]
+       [::dtb/h1 (t :blurb)]
+       [::dtb/p]]]
      [::dtb/bodymatter
       [::dtb/level1
        [::dtb/h1 "[Audioimport]"]
