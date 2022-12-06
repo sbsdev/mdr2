@@ -27,6 +27,8 @@
 (s/def ::production_type (s/and string? #{"book" "periodical" "other"}))
 (s/def ::library_signature (s/and string? #(re-matches #"^ds\d{4,6}$" %)))
 (s/def ::library_number (s/and string? #(re-matches #"^PNX \d{4,6}$" %)))
+(s/def ::product_number (s/and string? #(re-matches #"^DY\d{1,6}$" %)))
+(s/def ::product_id (s/and string? #(re-matches #"(?i)dam\d{1,6}$" %)))
 
 (s/def ::volumes (s/and int? #{1 2 3 4 5 6 7 8}))
 (s/def ::sample-rate (s/and int? #{11025 22050 44100 48000}))
@@ -77,6 +79,16 @@
 (defn state?
   "Return true if `s` is a valid state"
     [s] (s/valid? ::state s))
+
+(defn production-id?
+  "Return true if `s` is a valid production id"
+  [s]
+  (s/valid? ::product_id s))
+
+(defn product-number?
+  "Return true if `s` is a valid product number"
+  [s]
+  (s/valid? ::product_number s))
 
 (defn library-number-maybe?
   "Return true if `s` looks like it might be a valid library number"

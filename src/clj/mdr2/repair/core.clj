@@ -24,16 +24,6 @@
    [iapetos.collector.fn :as prometheus]
    [mdr2.metrics :as metrics]))
 
-(defn production-id?
-  "Return true if `id` is a valid production id"
-  [id]
-  (re-matches #"(?i)dam\d{1,5}" id))
-
-(defn product-number?
-  "Return true if `id` is a valid product number"
-  [id]
-  (re-matches #"DY\d{1,5}" id))
-
 (defn archive-url
   "Return the url for an archived production given a `container-id`"
   [container-id]
