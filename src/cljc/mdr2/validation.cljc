@@ -6,4 +6,4 @@
 (defn library-signature?
   "Return true if `id` is a valid library signature"
   [id]
-  (re-matches #"^ds\d{5,6}$" id))
+  (re-matches #"^ds\d{4,6}$" id))
