@@ -25,8 +25,8 @@
                         "failed" "pending-split" "recorded" "split" "structured"
                         "repairing"}))
 (s/def ::production_type (s/and string? #{"book" "periodical" "other"}))
-(s/def ::library_signature (s/and string? #(re-matches #"^ds\d{4,}$" %)))
-(s/def ::library_number (s/and string? #(re-matches #"^PNX \d{4,}$" %)))
+(s/def ::library_signature (s/and string? #(re-matches #"^ds\d{4,6}$" %)))
+(s/def ::library_number (s/and string? #(re-matches #"^PNX \d{4,6}$" %)))
 
 (s/def ::volumes (s/and int? #{1 2 3 4 5 6 7 8}))
 (s/def ::sample-rate (s/and int? #{11025 22050 44100 48000}))
@@ -71,8 +71,8 @@
    (spec/opt :library_record_id) int?
    })
 
-(s/def ::library_number-maybe (s/and string? #(re-matches #"^PNX \d{1,}$" %)))
-(s/def ::library_signature-maybe (s/and string? #(re-matches #"^ds\d{1,}$" %)))
+(s/def ::library_number-maybe (s/and string? #(re-matches #"^PNX \d{1,6}$" %)))
+(s/def ::library_signature-maybe (s/and string? #(re-matches #"^ds\d{1,6}$" %)))
 
 (defn state?
   "Return true if `s` is a valid state"
