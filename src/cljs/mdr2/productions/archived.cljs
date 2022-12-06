@@ -83,7 +83,7 @@
      [:td volumes]
      [:td depth]
      [:td narrator]
-     [:td (tf/unparse (tf/formatters :date) produced_date)]]))
+     [:td (when produced_date (tf/unparse (tf/formatters :date) produced_date))]]))
 
 (defn page []
   (let [loading? @(rf/subscribe [::notifications/loading? :archived])

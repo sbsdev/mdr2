@@ -141,7 +141,7 @@
      [:td volumes]
      [:td depth]
      [:td narrator]
-     [:td (tf/unparse (tf/formatters :date) produced_date)]
+     [:td (when produced_date (tf/unparse (tf/formatters :date) produced_date))]
      [:td [fields/input-field :encoded uuid :library_signature validation/library-signature?]]
      [:td [buttons uuid]]]))
 
