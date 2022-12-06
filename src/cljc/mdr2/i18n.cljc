@@ -157,7 +157,7 @@
                     :id "DAM Nummer"
                     :identifier "Identifier"
                     :language "Sprache"
-                    :library_number "DS Nummer"
+                    :library_number "Library Number"
                     :library_record_id "Record Id"
                     :library_signature "Signatur"
                     :modified-at "Letzte Änderung"
