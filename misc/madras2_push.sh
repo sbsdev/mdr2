@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Push productions notifications from the abacus machine to Madras2.
 # Use curl to send HTTP push for each notification. If the request
@@ -12,16 +12,18 @@
 # server, e.g. in off-hours
 
 MODE=$1
-SPOOL_DIR=/opt/abacus/share/abac/out/SN_Madras2
+SPOOL_DIR=/opt/abacus/out/SN_Madras2
 HOST=madras2
-BASE_URL=http://$HOST/api/abacus
-REGEXP="^HTTP/1.1 200 OK"
+BASE_URL=http://${HOST}/api/abacus
+REGEXP="^HTTP/1.1 204 No Content"
+
+#set -x
 
 case $MODE in
     new)
 	URL=$BASE_URL/new
 	REGEXP="^HTTP/1.1 201 Created"
-	FILES=$SPOOL_DIR/{SN1_*,SN10_*}
+	FILES="${SPOOL_DIR}/SN1_* ${SPOOL_DIR}/SN10_*"
 	;;
     recorded)
 	URL=$BASE_URL/recorded
@@ -39,15 +41,23 @@ case $MODE in
 	URL=$BASE_URL/status
 	FILES=$SPOOL_DIR/SNStatus_*
 	;;
-    *) echo "Unknown mode";;
+    *) echo "Unknown mode: Usage: $0 [new|recorded|recorded_periodical|meta|status]";;
 esac
 
 for file in $FILES ; do
-    RESULT=`curl -i -F "f=@$file" $URL 2>&1`
-    if echo "$RESULT" | grep -q $REGEXP
-    then mv $file $SPOOL_DIR/processed/
-    else
-	echo "Push $MODE to Madras2 for $file failed with"
-	echo $RESULT
+    if [ -e $file ] ; then # make sure it isn't an empty match
+        RESULT=`curl -i -X 'POST' $URL -H 'accept: application/json' -H 'Content-Type: multipart/form-data' -F "file=@${file};type=text/xml" --silent 2>&1`
+y	if echo "$RESULT" | grep -q "$REGEXP"
+	then mv $file $SPOOL_DIR/processed/
+	else
+	    echo "Push '$MODE' to Madras2 for $file failed."
+            echo "Moving file to $SPOOL_DIR/invalid/"
+            mv "$file" "$SPOOL_DIR"/invalid/
+            printf '\n%s\n%s\n\n' "Madras2 response:" "$RESULT"
+            grep -E \
+               'artikel_nr|identifier|date|title|idVorstufe|process_status' \
+               $SPOOL_DIR/invalid/${file##*/}
+            echo "========================================="
+	fi
     fi
 done
