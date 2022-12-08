@@ -91,6 +91,9 @@
             :handler (fn [{{{:keys [limit offset search state]
                              :or {search "" limit default-limit offset 0}} :query} :parameters}]
                        (let [params (cond
+                                      ;; if the search string is just a number then search in both the :id and
+                                      ;; the :title/:creator. That way the user is free to add the "DAM" prefix
+                                      (re-matches #"^\d{1,6}$" search) {:id search :search (db/search-to-sql search)}
                                       (prod.spec/production-id? search) {:id (subs search 3)} ;; DAM123
                                       (prod.spec/library-signature-maybe? search) {:library_signature search} ;; ds12345
                                       (prod.spec/library-number-maybe? search) {:library_number search} ;; PNX 4000

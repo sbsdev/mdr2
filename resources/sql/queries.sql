@@ -8,11 +8,15 @@ SELECT *
 FROM production
 WHERE
 --~ (if (:state params) "state = :state" "state NOT IN ('archived', 'deleted')")
---~ (when (:search params) "AND (LOWER(title) LIKE LOWER(:search) OR LOWER(creator) LIKE LOWER(:search))")
---~ (when (:id params) "AND id LIKE CONCAT(:id,'%')")
---~ (when (:product_number params) "AND product_number LIKE CONCAT(:product_number,'%')")
---~ (when (:library_signature params) "AND library_signature LIKE CONCAT(:library_signature,'%')")
---~ (when (:library_number params) "AND library_number LIKE CONCAT(:library_number,'%')")
+/*~
+(cond
+  (and (:id params) (:search params)) "AND (LOWER(title) LIKE LOWER(:search) OR LOWER(creator) LIKE LOWER(:search) OR id LIKE CONCAT(:id,'%'))"
+  (:search params) "AND (LOWER(title) LIKE LOWER(:search) OR LOWER(creator) LIKE LOWER(:search))"
+  (:id params) "AND id LIKE CONCAT(:id,'%')"
+  (:product_number params) "AND product_number LIKE CONCAT(:product_number,'%')"
+  (:library_signature params) "AND library_signature LIKE CONCAT(:library_signature,'%')"
+  (:library_number params) "AND library_number LIKE CONCAT(:library_number,'%')")
+~*/
 ORDER BY id DESC
 LIMIT :limit OFFSET :offset
 
