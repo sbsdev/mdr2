@@ -190,6 +190,7 @@
 (defn set-state!
   "Set `production` to `state`"
   [production state]
+  (log/debugf "Setting production state of %s to %s" (:id production) state)
   (let [p (assoc production :state state)]
     (update! p)
     (when (:product_number p)
@@ -212,7 +213,6 @@
       (conj (when (= (:revision production) 0) [:produced_date date]))))
 
 (defn set-state-recorded! [production]
-  (log/debugf "Setting production state of %s to recorded" (:id production))
   (let [new-production
         (-> production
             (merge (dtb/meta-data (path/recorded-path production)))
@@ -267,7 +267,6 @@
       (throw (ex-info message {:error-id :invalid-obi-directory})))))
 
 (defn set-state-archived! [production]
-  (log/debugf "Setting production state of %s to archived" (:id production))
   (try
     (delete-all-dirs! production)
     ;; ignore deletion problems, i.e. archive the production even if
