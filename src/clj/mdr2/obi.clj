@@ -64,13 +64,13 @@
 
 (defn contains-necessary-files?
   "Return true if a `production` contains at least `obiconfig.xml`,
-  `project.obi`, a `Data` and a `Backup` directory."
+  `project.obi` and a `Backup` directory."
   [production]
   (let [root-dir (path/recording-path production)]
     (and (->> ["obiconfig.xml" "project.obi"]
               (map (partial fs/path root-dir))
               (every? fs/exists?))
-         (->> ["Data" "Backup"]
+         (->> ["Backup"]
               (map (partial fs/path root-dir))
               (every? fs/directory?)))))
 
