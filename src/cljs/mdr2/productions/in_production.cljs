@@ -227,14 +227,16 @@
         [:span.icon {:aria-hidden true}
          [:i.material-icons "upload_file"]]]]]]))
 
-(defn- tooltip-button [{:keys [tooltip icon] :as opts}]
-  [:a.button.has-tooltip-arrow
-   (merge
-    {:data-tooltip (tr [tooltip])
-     :aria-label (tr [tooltip])}
-    (dissoc opts :tooltip :icon))
-   [:span.icon.is-small {:aria-hidden true}
-    [:i.material-icons icon]]])
+(defn- tooltip-button [{:keys [tooltip icon href] :as opts}]
+  ;; if we have an href we need an anchor element. Otherwise use a button
+  (let [element (if href :a.button.has-tooltip-arrow :button.button.has-tooltip-arrow)]
+    [element
+     (merge
+      {:data-tooltip (tr [tooltip])
+       :aria-label (tr [tooltip])}
+      (dissoc opts :tooltip :icon))
+     [:span.icon.is-small {:aria-hidden true}
+      [:i.material-icons icon]]]))
 
 (defn buttons [{:keys [uuid id state has-manifest? has-manual-split?] :as production}]
   (let [roles @(rf/subscribe [::auth/user-roles])]
