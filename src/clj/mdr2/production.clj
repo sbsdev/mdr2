@@ -264,6 +264,8 @@
         (doseq [dir (path/all production)] (fs/delete-tree dir)))
     (let [message (format "Failed to remove invalid Obi directory (%s)" (:id production))]
       (log/error message)
+      ;; remove all but the recording directories
+      (doseq [dir (path/all-but-recording production)] (fs/delete-tree dir))
       (throw (ex-info message {:error-id :invalid-obi-directory})))))
 
 (defn set-state-archived! [production]

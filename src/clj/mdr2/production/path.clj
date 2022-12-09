@@ -71,8 +71,14 @@
   ([production volume]
    (file (recorded-path production volume) manifest-member)))
 
+(def all-paths #{structured-path recording-path recorded-path split-path encoded-path iso-path})
+
 (defn all
   "Return all the paths needed for a particular `production`"
   [production]
-  (map #(% production)
-       [structured-path recording-path recorded-path split-path encoded-path iso-path]))
+  (map #(% production) all-paths))
+
+(defn all-but-recording
+  "Return all the paths except for the recording path needed for a particular `production`"
+  [production]
+  (map #(% production) (disj all-paths recording-path)))
