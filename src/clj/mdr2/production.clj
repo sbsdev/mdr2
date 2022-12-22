@@ -258,8 +258,9 @@
 (defn delete-all-dirs!
   "Delete all artifacts on the file system for a production"
   [production]
-  (if (obi/directory-valid? production)
-    ;; only delete if nothing is fishy with the directories
+  (if (or (not (fs/exists? (path/recording-path production)))
+          (obi/directory-valid? production))
+    ;; only delete if the recording path is valid or doesn't even exist
     (do (log/debugf "Cleaning up all directories for %s" (:id production))
         (doseq [dir (path/all production)] (fs/delete-tree dir)))
     (let [message (format "Failed to remove invalid Obi directory (%s)" (:id production))]
