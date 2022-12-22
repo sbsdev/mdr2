@@ -5,14 +5,17 @@
 
 (defstate encode
   "Queue to asynchronously handle events to encode a production"
-  :start (chan (buffer 50))
+  ;; encoding takes a while, so we need a decent buffer size
+  :start (chan (buffer 100))
 
   :stop (when encode (close! encode)))
 
 (defstate archive
   "Queue to asynchronously handle events to archive a production"
-  :start (chan (buffer 50))
-  
+  ;; archiving takes a while and happens in bursts, so we need a
+  ;; decent buffer size
+  :start (chan (buffer 100))
+
   :stop (when archive (close! archive)))
 
 (defstate repair
@@ -24,5 +27,5 @@
 (defstate notify-abacus
   "Queue to asynchronously handle events to notify ABACUS of state changes in a production"
   :start (chan (buffer 50))
-  
+
   :stop (when notify-abacus (close! notify-abacus)))
