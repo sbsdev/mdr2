@@ -5,13 +5,17 @@ A Production Management Tool for [[http://www.daisy.org/daisypedia/daisy-digital
 [[https://github.com/sbsdev/mdr2/actions/workflows/clojure.yml][https://github.com/sbsdev/mdr2/actions/workflows/clojure.yml/badge.svg]] [[https://versions.deps.co/sbsdev/mdr2][https://versions.deps.co/sbsdev/mdr2/status.svg]]
 
 ** Installation
-Build with [[https://github.com/technomancy/leiningen][Leiningen]] using the [[https://github.com/immutant/lein-immutant][lein immutant plugin]].
+Build with [[https://github.com/technomancy/leiningen][Leiningen]]
 
 #+BEGIN_SRC shell
-lein immutant war --nrepl-start --nrepl-port 42278
+lein uberjar
 #+END_SRC
 
-Deploy the resulting war file in [[http://wildfly.org/][Wildfly]].
+Run the resulting jar with
+
+#+BEGIN_SRC shell
+java -Dconf=dev-config.edn -jar mdr2.jar
+#+END_SRC
 
 ** Documentation
 
@@ -40,8 +44,8 @@ Configuration is fairly complex and involves a lot of dependencies. It
 is recommended to use the [[https://github.com/sbsdev/sbs-infrastructure/blob/master/madras2.yml][ansible installation script]] which automates
 the whole process.
 
-Amongst other you will need [[http://wildfly.org/][Wildfly]], [[http://www.daisy.org/project/pipeline][DAISY Pipeline 1]], [[http://www.daisy.org/pipeline2][DAISY Pipeline
-2]], [[https://wiki.debian.org/genisoimage][mkisofs]], etc.
+Amongst other you will need [[http://www.daisy.org/project/pipeline][DAISY Pipeline 1]], [[http://www.daisy.org/pipeline2][DAISY Pipeline 2]],
+[[https://wiki.debian.org/genisoimage][mkisofs]], etc.
 
 ** License
 
