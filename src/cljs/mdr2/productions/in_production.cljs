@@ -7,6 +7,7 @@
             [mdr2.productions.forms :as forms]
             [mdr2.productions.notifications :as notifications]
             [mdr2.productions.production :as production]
+            [mdr2.productions.drag-and-drop :as dnd]
             [mdr2.productions.search :as search]
             [fork.re-frame :as fork]
             [re-frame.core :as rf]
@@ -197,6 +198,8 @@
         save!     #(rf/dispatch [::set-upload-file %])
         file      @(rf/subscribe [::upload-file])]
     [:p.control
+     {:on-drag-over dnd/handle-drag-over
+      :on-drop #(dnd/handle-on-drop % (fn [file] (rf/dispatch [::set-upload-file file])))}
      [:div.file.has-name
       [:label.file-label
        [:input.file-input

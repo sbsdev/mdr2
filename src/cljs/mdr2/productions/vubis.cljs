@@ -5,6 +5,7 @@
             [mdr2.auth :as auth]
             [mdr2.i18n :refer [tr]]
             [mdr2.productions.notifications :as notifications]
+            [mdr2.productions.drag-and-drop :as dnd]
             [re-frame.core :as rf]
             [clojure.set :as set]))
 
@@ -123,6 +124,8 @@
         save!     #(rf/dispatch [::set-upload-file %])
         file      @(rf/subscribe [::upload-file])]
     [:p.control
+     {:on-drag-over dnd/handle-drag-over
+      :on-drop #(dnd/handle-on-drop % (fn [file] (rf/dispatch [::set-upload-file file])))}
      [:div.file.has-name
       [:label.file-label
        [:input.file-input
