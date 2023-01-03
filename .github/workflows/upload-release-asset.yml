@@ -13,6 +13,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+      - name: Install npm dependecies
+        run: npm install
       - name: Build project 
         run: lein uberjar
       - name: Create Release
@@ -33,5 +36,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} 
           asset_path: ./target/uberjar/mdr2.jar
-          asset_name: catalog.jar
+          asset_name: mdr2.jar
           asset_content_type: application/java-archive
