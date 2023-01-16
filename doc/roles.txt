@@ -1,0 +1,39 @@
+@startuml
+left to right direction
+
+actor admin
+actor catalog
+actor etext
+actor studio
+actor it
+
+usecase (upload structure) as upload
+usecase (download structure) as download
+usecase (import production) as import
+usecase (mark as recorded) as recorded
+usecase (split production) as split
+usecase (repair production) as repair
+usecase (assign library signature) as assign
+usecase (delete production) as delete
+
+etext --> upload
+etext --> download
+catalog --> assign
+catalog --> download
+studio --> download
+studio --> repair
+admin --> download
+admin --> import
+admin --> recorded
+admin --> split
+admin --> repair
+it --> upload
+it --> download
+it --> import
+it --> recorded
+it --> split
+it --> repair
+it --> assign
+it --> delete
+
+@enduml
