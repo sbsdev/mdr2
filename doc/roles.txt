@@ -27,13 +27,14 @@ admin --> import
 admin --> recorded
 admin --> split
 admin --> repair
-it --> upload
-it --> download
-it --> import
-it --> recorded
-it --> split
-it --> repair
-it --> assign
-it --> delete
+
+upload   <-- it
+download <-- it
+import	 <-- it
+recorded <-- it
+split	 <-- it
+repair	 <-- it
+assign	 <-- it
+delete   <-- it
 
 @enduml
