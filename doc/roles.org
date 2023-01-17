@@ -41,6 +41,9 @@ Get the DTBook XML structure for a production
    :ADMIN:    X
    :IT:       X
    :END:
+Importing a production touches two API points:
+- Uploading a Vubis XML
+- Creating a new production
 ** Split a production
    :PROPERTIES:
    :IT:       X

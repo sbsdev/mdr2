@@ -110,7 +110,7 @@
       :post {:summary "Create a production"
              :middleware [wrap-restricted wrap-authorized]
              :swagger {:security [{:apiAuth []}]}
-             :authorized #{:it}
+             :authorized #{:admin :it}
              :parameters {:body prod.spec/production}
              :handler (fn [{{p :body} :parameters}]
                         (try
@@ -369,7 +369,7 @@
      {:post {:summary "Upload XML from a Vubis export"
              :middleware [wrap-restricted wrap-authorized]
              :swagger {:security [{:apiAuth []}]}
-             :authorized #{:etext :it}
+             :authorized #{:admin :it}
              :parameters {:multipart {:file multipart/temp-file-part}}
              :handler (fn [{{{:keys [file]} :multipart} :parameters}]
                         (let [tempfile (:tempfile file)
