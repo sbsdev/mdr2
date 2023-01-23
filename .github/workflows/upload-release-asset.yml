@@ -21,7 +21,6 @@ jobs:
       - name: Create release and upload release asset
         uses: softprops/action-gh-release@v1
         with:
-          name: Release ${{ github.ref }}
           draft: false
           prerelease: false
           files: ./target/uberjar/mdr2.jar
