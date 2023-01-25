@@ -117,8 +117,8 @@
                           (let [p (prod/create! p)]
                             (created (str "productions/" (:id p)) {}))
                           (catch clojure.lang.ExceptionInfo e
-                            (let [{:keys [error-id errors]} (ex-data e)]
-                              (log/error error-id errors)
+                            (let [{:keys [error-id]} (ex-data e)]
+                              (log/error error-id (ex-message e))
                               (case error-id
                                 :duplicate-key (bad-request {:status-text (ex-message e)})
                                 (internal-server-error {:status-text (ex-message e)}))))))}}]
