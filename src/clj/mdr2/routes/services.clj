@@ -115,6 +115,13 @@
              :handler (fn [{{p :body} :parameters}]
                         (try
                           (let [p (prod/create! p)]
+                            (when (:library_number p)
+                              ;; productions from vubis do not need any manual structuring.
+                              ;; They get their standard structure from a default template
+                              (-> p
+                                  prod/set-state-structured!
+                                  ;; write the dtbook template file
+                                  dtbook/dtbook-file))
                             (created (str "productions/" (:id p)) {}))
                           (catch clojure.lang.ExceptionInfo e
                             (let [{:keys [error-id]} (ex-data e)]
