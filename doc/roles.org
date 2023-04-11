@@ -35,6 +35,7 @@ Get the DTBook XML structure for a production
    :PROPERTIES:
    :ADMIN:    X
    :IT:       X
+   :STUDIO:   X
    :END:
 ** Import a production
    :PROPERTIES:
@@ -71,7 +72,7 @@ Importing a production touches two API points:
 |----------------------------+-------+-------+---------+--------+----|
 | Upload structure           | X     |       |         |        | X  |
 | Download structure         | X     | X     | X       | X      | X  |
-| Mark as recorded           |       | X     |         |        | X  |
+| Mark as recorded           |       | X     |         | X      | X  |
 | Import a production        |       | X     |         |        | X  |
 | Split a production         |       | X     |         |        | X  |
 | Repair a production        |       | X     |         | X      | X  |

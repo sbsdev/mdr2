@@ -267,7 +267,7 @@
      ;; from the libary, i.e. is not handled via ABACUS or the
      ;; production has a revision greater than zero as is the case
      ;; with productions that are repaired
-     (when (and (seq (set/intersection #{:it :admin} roles))
+     (when (and (seq (set/intersection #{:it :admin :studio} roles))
                 (#{"structured"} state)
                 (or (:library_number production) (> (:revision production) 0)))
        (if @(rf/subscribe [::notifications/button-loading? uuid :recorded])
