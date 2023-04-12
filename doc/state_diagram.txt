@@ -22,11 +22,11 @@ Cataloged: ds number assigned
 Archived: production archived,\n all files removed
 Repairing: asynchronous, while files are\n retrieved from the archive
 
-[*] --> New : @abacus
-[*] --> Structured : @admin, @studio, @it\n via repair
+[*] --> New : via ABACUS
+[*] --> Structured : @admin, @it\n via import
 
 New --> Structured : @admin, @it
-Structured --> Recorded : @abacus
+Structured --> Recorded : via ABACUS\n except @admin, @it, @studio for\n repairs and commercial audio books
 Recorded --> Encoded
 Encoded --> Cataloged : @catalog, @it
 Cataloged --> Archived
@@ -34,7 +34,7 @@ Split --> Encoded
 Recorded --> PendingVolumeSplit
 PendingVolumeSplit --> Split : @admin, @it
 
-Archived --> Repairing
+Archived --> Repairing : @admin, @studio, @it
 Repairing --> Structured
 
 Recorded --> Failed
