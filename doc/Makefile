@@ -1,4 +1,4 @@
-PLANTUML = java -jar ~/lib/plantuml-1.2022.6.jar
+PLANTUML = java -jar ~/lib/plantuml.jar
 
 DIAGRAMS = state_diagram.txt context_diagram.txt container_diagram.txt roles.txt
 
