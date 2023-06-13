@@ -28,7 +28,7 @@
                     :download-structure "Download xml structure"
                     :upload-structure "Upload xml structure"
                     :mark-recorded "Mark as recorded"
-                    :mark-split "Split a production"
+                    :mark-split "Mark as split"
                     ;;
                     :documents "Documents"
                     :confirm "Confirm"
@@ -136,7 +136,7 @@
                     :download-structure "XML Struktur herunterladen"
                     :upload-structure "XML Struktur hochladen"
                     :mark-recorded "Als \"recorded\" markieren"
-                    :mark-split "Produktion trennen"
+                    :mark-split "Als \"split\" markieren"
                     ;;
                     :documents "Dokumente"
                     :confirm "Bestätigen"
