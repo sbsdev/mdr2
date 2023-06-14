@@ -1,6 +1,6 @@
 (ns mdr2.pipeline2.scripts
   "Thin layer above the [Pipeline2 Web Service
-  API](https://code.google.com/p/daisy-pipeline/wiki/WebServiceAPI) to
+  API](https://daisy.github.io/pipeline/WebServiceAPI) to
   invoke specific scripts."
   (:require
    [babashka.fs :as fs]
