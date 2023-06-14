@@ -45,8 +45,8 @@
      (for [[port file] inputs]
        [(qname "input") {:name (name port)}
         [(qname "item") {:value (if-not (env :pipeline2-remote)
-                         (str "file:" (url-encode file))
-                         (url-encode (.getName (io/file file))))}]])
+                                  (str "file:" (url-encode file))
+                                  (url-encode (.getName (io/file file))))}]])
      (for [[key value] options]
        [(qname "option") {:name (name key)} value])]))
 
