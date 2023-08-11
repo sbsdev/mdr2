@@ -49,6 +49,6 @@ Amongst other you will need [[http://www.daisy.org/project/pipeline][DAISY Pipel
 
 ** License
 
-Copyright © 2014, 2015 Swiss Library for the Blind, Visually Impaired and Print Disabled.
+Copyright © 2014-2015, 2023 Swiss Library for the Blind, Visually Impaired and Print Disabled.
 
 Distributed under the [[http://www.gnu.org/licenses/agpl-3.0.html][GNU Affero General Public License]]. See the file LICENSE.
