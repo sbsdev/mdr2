@@ -195,7 +195,7 @@
      {:post {:summary "Mark a production as recorded, i.e. ready to be encoded"
              :middleware [wrap-restricted wrap-authorized]
              :swagger {:security [{:apiAuth []}]}
-             :authorized #{:admin :it}
+             :authorized #{:admin :studio :it}
              :parameters {:path {:id int?}}
              :handler (fn [{{{:keys [id]} :path} :parameters
                             {user :user} :identity}]
