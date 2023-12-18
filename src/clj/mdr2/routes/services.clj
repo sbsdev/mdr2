@@ -125,7 +125,7 @@
                             (created (str "productions/" (:id p)) {}))
                           (catch clojure.lang.ExceptionInfo e
                             (let [{:keys [error-id]} (ex-data e)]
-                              (log/error error-id (ex-message e))
+                              (log/error (ex-message e) error-id)
                               (case error-id
                                 :duplicate-key (bad-request {:status-text (ex-message e)})
                                 (internal-server-error {:status-text (ex-message e)}))))))}}]
@@ -311,15 +311,16 @@
                                 p (abacus/import-new-production tempfile)]
                             (created (str "productions/" (:id p)) {}))
                           (catch clojure.lang.ExceptionInfo e
-                            (let [{:keys [error-id errors]} (ex-data e)]
-                              (log/error error-id errors)
+                            (let [{:keys [error-id errors]} (ex-data e)
+                                  message (ex-message e)]
+                              (log/error message error-id errors)
                               (case error-id
                                 :duplicate-key
-                                (bad-request {:status-text (ex-message e)})
+                                (bad-request {:status-text message})
                                 :invalid-xml
                                 (bad-request {:status-text "Upload of ABACUS XML failed"
                                               :errors errors})
-                                (internal-server-error {:status-text (ex-message e)}))))))}}]
+                                (internal-server-error {:status-text message}))))))}}]
     ["/recorded"
      {:post {:summary "Mark a production as recorded"
              :parameters {:multipart {:file multipart/temp-file-part}}
@@ -329,15 +330,16 @@
                             (abacus/import-recorded-production tempfile)
                             (no-content)
                             (catch clojure.lang.ExceptionInfo e
-                              (let [{:keys [error-id errors]} (ex-data e)]
-                                (log/error error-id errors)
+                              (let [{:keys [error-id errors]} (ex-data e)
+                                    message (ex-message e)]
+                                (log/error message error-id errors)
                                 (case error-id
                                   :product-not-found (not-found)
-                                  :invalid-state (bad-request {:status-text (ex-message e)})
-                                  :invalid-daisy-export (bad-request {:status-text (ex-message e)})
+                                  :invalid-state (bad-request {:status-text message})
+                                  :invalid-daisy-export (bad-request {:status-text message})
                                   :invalid-xml (bad-request {:status-text "Upload of ABACUS XML failed" :errors errors})
-                                  :invalid-exported-production (bad-request {:status-text (ex-message e) :errors errors})
-                                  (internal-server-error {:status-text (ex-message e)})))))))}}]
+                                  :invalid-exported-production (bad-request {:status-text message :errors errors})
+                                  (internal-server-error {:status-text message})))))))}}]
     ["/status"
      {:post {:summary "Request the status of a production"
              :parameters {:multipart {:file multipart/temp-file-part}}
@@ -347,12 +349,13 @@
                             (abacus/import-status-request tempfile)
                             (no-content)
                             (catch clojure.lang.ExceptionInfo e
-                              (let [{:keys [error-id errors]} (ex-data e)]
-                                (log/error error-id errors)
+                              (let [{:keys [error-id errors]} (ex-data e)
+                                    message (ex-message e)]
+                                (log/error message error-id errors)
                                 (case error-id
                                   :product-not-found (not-found)
                                   :invalid-xml (bad-request {:status-text "Upload of ABACUS XML failed" :errors errors})
-                                  (internal-server-error {:status-text (ex-message e)})))))))}}]
+                                  (internal-server-error {:status-text message})))))))}}]
     ["/metadata"
      {:post {:summary "Update the meta data of a production"
              :parameters {:multipart {:file multipart/temp-file-part}}
@@ -362,12 +365,13 @@
                             (abacus/import-metadata-update tempfile)
                             (no-content))
                           (catch clojure.lang.ExceptionInfo e
-                            (let [{:keys [error-id errors]} (ex-data e)]
-                              (log/error error-id errors)
+                            (let [{:keys [error-id errors]} (ex-data e)
+                                  message (ex-message e)]
+                              (log/error message error-id errors)
                               (case error-id
                                 :invalid-xml (bad-request {:status-text "Upload of ABACUS XML failed"
                                                            :errors errors})
-                                :product-not-found (not-found {:status-text (ex-message e)})
+                                :product-not-found (not-found {:status-text message})
                                 (internal-server-error))))))}}]]
    ["/vubis"
     {:swagger {:tags ["Upload of Vubis export data"]}}
