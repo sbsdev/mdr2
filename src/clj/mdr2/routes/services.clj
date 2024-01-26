@@ -312,8 +312,9 @@
                             (created (str "productions/" (:id p)) {}))
                           (catch clojure.lang.ExceptionInfo e
                             (let [{:keys [error-id errors]} (ex-data e)
-                                  message (ex-message e)]
-                              (log/error message error-id errors)
+                                  message (ex-message e)
+                                  {:keys [filename tempfile]} file]
+                              (log/error message error-id errors filename (str tempfile))
                               (case error-id
                                 :duplicate-key
                                 (bad-request {:status-text message})
@@ -331,8 +332,9 @@
                             (no-content)
                             (catch clojure.lang.ExceptionInfo e
                               (let [{:keys [error-id errors]} (ex-data e)
-                                    message (ex-message e)]
-                                (log/error message error-id errors)
+                                    message (ex-message e)
+                                    {:keys [filename]} file]
+                                (log/error message error-id errors filename)
                                 (case error-id
                                   :product-not-found (not-found)
                                   :invalid-state (bad-request {:status-text message})
@@ -350,8 +352,9 @@
                             (no-content)
                             (catch clojure.lang.ExceptionInfo e
                               (let [{:keys [error-id errors]} (ex-data e)
-                                    message (ex-message e)]
-                                (log/error message error-id errors)
+                                    message (ex-message e)
+                                    {:keys [filename tempfile]} file]
+                                (log/error message error-id errors filename (str tempfile))
                                 (case error-id
                                   :product-not-found (not-found)
                                   :invalid-xml (bad-request {:status-text "Upload of ABACUS XML failed" :errors errors})
@@ -366,8 +369,9 @@
                             (no-content))
                           (catch clojure.lang.ExceptionInfo e
                             (let [{:keys [error-id errors]} (ex-data e)
-                                  message (ex-message e)]
-                              (log/error message error-id errors)
+                                  message (ex-message e)
+                                  {:keys [filename tempfile]} file]
+                              (log/error message error-id errors filename (str tempfile))
                               (case error-id
                                 :invalid-xml (bad-request {:status-text "Upload of ABACUS XML failed"
                                                            :errors errors})
