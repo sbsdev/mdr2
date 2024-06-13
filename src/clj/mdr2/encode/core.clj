@@ -111,22 +111,26 @@
   code](https://www.colincrawley.com/cc/wp-content/plugins/audio-file-size-calculator/audiofilesizecalculator.js)"
   [production]
   (let [dtb (path/recorded-path production)
+        mono? (dtb/mono? dtb)
         duration (quot (dtb/audio-length dtb) 1000) ; convert from millisecs to secs
         ;; apparently stereo doesn't use twice as much space if you
         ;; use joint stereo compression mode, so no need to divide by
         ;; two. The legacy system just added a tolerance of 2% for
         ;; stereo productions.
-        sampling-ratio (if (dtb/mono? dtb) 1 1.02)
+        sampling-ratio (if mono? 1 1.02)
         ;; BitRate is measured in kilobits per second
         ;; BitRate (kbps) = (File Size (bytes) / Duration (seconds)) * 8/1000
         max-bitrate (* (/ max-capacity duration sampling-ratio) (/ 8 1000))]
-    (->> bitrates
-         ;; only use bitrate 32 for periodicals
-         (filter #(or (= (:production_type production) "periodical") (> % 32)))
-         ;; for stereo productions use only bitrates larger or equal than 96
-         (filter #(or (dtb/mono? dtb) (>= % 96)))
-         (filter #(<= % max-bitrate))
-         (apply max 0))))
+    (let [bitrate (->> bitrates
+                       ;; only use bitrate 32 for periodicals
+                       (filter #(or (= (:production_type production) "periodical") (> % 32)))
+                       ;; for stereo productions use only bitrates larger or equal than 96
+                       (filter #(or mono? (>= % 96)))
+                       (filter #(<= % max-bitrate))
+                       (apply max 0))]
+      (log/infof "Calculating ideal bitrate for %s as %s (mono? %s, duration %d secs, sampling-ratio %s, max-bitrate %f)"
+                 (:id production) bitrate mono? duration sampling-ratio (float max-bitrate))
+      bitrate)))
 
 (defn clean-up
   "Clean up temporary files of a production, namely the mp3 encoded
