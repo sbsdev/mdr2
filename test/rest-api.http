@@ -240,19 +240,19 @@ Authorization: :auth-token
 ####################################
 
 # Mark a production as recorded
-POST http://localhost:3000/api/productions/1035/recorded
+POST http://localhost:3000/api/productions/1035/mark-recorded
 Accept: application/json
 Content-Type: application/json
 Authorization: :auth-token
 
 # Mark a non-existing production as recorded
-POST http://localhost:3000/api/productions/1/recorded
+POST http://localhost:3000/api/productions/1/mark-recorded
 Accept: application/json
 Content-Type: application/json
 Authorization: :auth-token
 
 # Mark production as recorded which doesn't have state 'structured'
-POST http://localhost:3000/api/productions/94/recorded
+POST http://localhost:3000/api/productions/94/mark-recorded
 Accept: application/json
 Content-Type: application/json
 Authorization: :auth-token
@@ -262,7 +262,7 @@ Authorization: :auth-token
 #################################
 
 # Mark a production as split
-POST http://localhost:3000/api/productions/1035/split
+POST http://localhost:3000/api/productions/1035/mark-split
 Accept: application/json
 Content-Type: application/json
 Authorization: :auth-token
@@ -273,7 +273,7 @@ Authorization: :auth-token
 }
 
 # Mark a non-existing production as split
-POST http://localhost:3000/api/productions/1/split
+POST http://localhost:3000/api/productions/1/mark-split
 Accept: application/json
 Content-Type: application/json
 Authorization: :auth-token
@@ -284,7 +284,7 @@ Authorization: :auth-token
 }
 
 # Mark production as split with an invalid bit-rate
-POST http://localhost:3000/api/productions/300/split
+POST http://localhost:3000/api/productions/300/mark-split
 Accept: application/json
 Content-Type: application/json
 Authorization: :auth-token
@@ -295,7 +295,7 @@ Authorization: :auth-token
 }
 
 # Mark production as split with an invalid sample-rate
-POST http://localhost:3000/api/productions/300/split
+POST http://localhost:3000/api/productions/300/mark-split
 Accept: application/json
 Content-Type: application/json
 Authorization: :auth-token
@@ -306,7 +306,7 @@ Authorization: :auth-token
 }
 
 # Mark production as split which doesn't have state 'pending-split'
-POST http://localhost:3000/api/productions/94/split
+POST http://localhost:3000/api/productions/94/mark-split
 Accept: application/json
 Content-Type: application/json
 Authorization: :auth-token
