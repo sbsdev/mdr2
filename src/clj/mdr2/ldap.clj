@@ -43,6 +43,11 @@
                    set)]
     (assoc user :roles roles)))
 
+(defn- not-empty-roles
+  "Return the given `user` if it has any roles, otherwise return nil"
+  [{:keys [roles] :as user}]
+  (when (not-empty roles) user))
+
 (defn authenticate [username password & [attributes]]
   (let [conn           (ldap/get-connection ldap-pool)
         qualified-name (str "uid=" username ",cn=users,cn=accounts,dc=sbszh,dc=ch")]
@@ -54,5 +59,6 @@
                           :attributes (or attributes [])})
             first
             add-roles
-            (select-keys [:uid :mail :initials :givenName :displayName :telephoneNumber :roles])))
+            (select-keys [:uid :mail :initials :givenName :displayName :telephoneNumber :roles])
+            not-empty-roles)) ;; only return users that have a role
       (finally (ldap/release-connection ldap-pool conn)))))
