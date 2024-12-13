@@ -130,12 +130,16 @@
                 </optional>
               </element>
               <element name="ncc">
-                <element name="sourcePublisher">
-                  <data type="token"/>
-                </element>
-                <element name="sourceDate">
-                  <data type="token"/>
-                </element>
+                <optional>
+                  <element name="sourcePublisher">
+                    <data type="token"/>
+                  </element>
+                </optional>
+                <optional>
+                  <element name="sourceDate">
+                    <data type="token"/>
+                  </element>
+                </optional>
                 <oneOrMore>
                   <element name="narrator">
                     <data type="token"/>
