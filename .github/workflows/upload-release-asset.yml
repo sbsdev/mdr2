@@ -23,5 +23,5 @@ jobs:
         with:
           draft: false
           prerelease: false
-          files: ./target/uberjar/mdr2.jar
+          files: ./target/uberjar/mdr2-*-standalone.jar
 
