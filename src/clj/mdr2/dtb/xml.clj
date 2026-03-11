@@ -45,6 +45,11 @@
                (list (xml/element ::xhtml/meta {:name "ncc:kByteSize" :content value})))
     node))
 
+;; Insert a xmlns attribute in the root node to avoid namespace
+;; prefixes in all nodes. See
+;; https://github.com/clojure/data.xml?tab=readme-ov-file#namespace-support
+;; and
+;; https://ask.clojure.org/index.php/8788/possible-namespace-aliases-emitted-strings-clojure-alpha6
 (defn insert-xmlns [node]
   (assoc-in node [:attrs :xmlns] xhtml-uri))
 
