@@ -77,7 +77,7 @@
   :target-path "target/%s/"
   :main ^:skip-aot mdr2.core
 
-  :plugins [[lein-kibit "0.1.8"]
+  :plugins [[lein-kibit "0.1.11"]
             [lein-codox "0.10.8"]]
 
   :codox {:project {:name "Madras2"}
@@ -121,9 +121,9 @@
                                  [re-frisk "1.6.0"]
                                  [ring/ring-devel "1.11.0"]
                                  [ring/ring-mock "0.4.0"]]
-                  :plugins      [[com.jakemccrary/lein-test-refresh "0.25.0"]
-                                 [jonase/eastwood "1.3.0"]
-                                 [cider/cider-nrepl "0.29.0"]]
+                  :plugins      [[com.jakemccrary/lein-test-refresh "0.26.0"]
+                                 [jonase/eastwood "1.4.3"]
+                                 [cider/cider-nrepl "0.58.0"]]
                   
                   
                   :source-paths ["env/dev/clj"  "env/dev/cljs" "test/cljs" ]
