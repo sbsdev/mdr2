@@ -10,7 +10,7 @@
                  [ch.qos.logback/logback-classic "1.4.5"]
                  [clj-commons/iapetos "0.1.13" :exclusions [io.prometheus/simpleclient]]
                  [cljs-ajax "0.8.4"]
-                 [clojure.java-time "0.3.3"]
+                 [clojure.java-time "1.4.3"]
                  [com.cognitect/transit-clj "1.0.329"]
                  [com.cognitect/transit-cljs "0.8.280"]
                  [com.google.javascript/closure-compiler-unshaded "v20220502"]
