@@ -3,7 +3,6 @@
   API](https://daisy.github.io/pipeline/WebServiceAPI)"
   (:require [clj-http.client :as client]
             [clj-http.util :refer [url-encode]]
-            [clojure.data.codec.base64 :as b64]
             [clojure.data.xml :as xml]
             [clojure.data.zip :as zf]
             [clojure.data.zip.xml :refer [attr xml-> xml1->]]
@@ -14,7 +13,8 @@
             [mdr2.config :refer [env]]
             [pandect.algo.sha1 :as pandect]
             [clojure.tools.logging :as log])
-  (:import [java.util.zip ZipEntry ZipOutputStream]))
+  (:import [java.util.zip ZipEntry ZipOutputStream]
+           [java.util Base64]))
 
 (def ws-url "http://localhost:8181/ws")
 
@@ -22,9 +22,8 @@
 (def ^:private poll-interval 3000)
 
 (defn- create-hash [message signing-key]
-  (-> (pandect/sha1-hmac-bytes message signing-key)
-      b64/encode
-      String.))
+  (->> (pandect/sha1-hmac-bytes message signing-key)
+       (.encodeToString (Base64/getUrlEncoder))))
 
 (defn auth-query-params [uri]
   (let [timestamp (time/format :iso-local-date-time (time/local-date-time))

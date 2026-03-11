@@ -59,7 +59,6 @@
                  [babashka/fs "0.2.12"]
                  [pandect "1.0.2"]
                  [org.clojure/data.zip "1.0.0"]
-                 [org.clojure/data.codec "0.2.1"] ;; for base64 encoding in mdr2.pipeline2.core
                  [com.novemberain/pantomime "2.11.0" :exclusions [com.google.guava/guava]]
                  [clj-http "3.12.3"]
                  [org.clojure/data.csv "1.0.1"]
