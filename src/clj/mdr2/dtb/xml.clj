@@ -11,6 +11,9 @@
    [mdr2.production.path :as path]
    [babashka.fs :as fs]))
 
+(def xhtml-uri "http://www.w3.org/1999/xhtml")
+(xml/alias-uri 'xhtml xhtml-uri)
+
 (def ^:private manifest-doctype
   (str
    "<!DOCTYPE html PUBLIC "
@@ -24,13 +27,13 @@
    "\"http://www.w3.org/TR/REC-smil/SMIL10.dtd\">"))
 
 (defn meta-node? [node name]
-  (and (= (:tag node) :meta)
+  (and (= (:tag node) ::xhtml/meta)
        (= (:name (:attrs node)) name)))
 
 (defn update-meta-node [node v]
   (assoc-in node [:attrs :content] v))
 
-(defn title-node? [node] (= (:tag node) :title))
+(defn title-node? [node] (= (:tag node) ::xhtml/title))
 
 (defn update-title-node [node v] (assoc-in node [:content] (list v)))
 
@@ -39,11 +42,11 @@
   is not nil"
   (if value
     (update-in node [:content] concat ; append
-               (list (xml/element :meta {:name "ncc:kByteSize" :content value})))
+               (list (xml/element ::xhtml/meta {:name "ncc:kByteSize" :content value})))
     node))
 
 (defn insert-xmlns [node]
-  (assoc-in node [:attrs :xmlns] "http://www.w3.org/1999/xhtml"))
+  (assoc-in node [:attrs :xmlns] xhtml-uri))
 
 (defn handle-manifest-node
   "Handle one node in the xml tree. Replace all content in the meta
@@ -57,21 +60,21 @@
     (title-node? node) (update-title-node node title)
     (meta-node? node "dc:creator") (update-meta-node node creator)
     (meta-node? node "dc:title") (update-meta-node node title)
-    (meta-node? node "dc:date") (update-meta-node node date)
+    (meta-node? node "dc:date") (update-meta-node node (str date))
     (meta-node? node "dc:identifier") (update-meta-node node identifier)
     (meta-node? node "dc:language") (update-meta-node node language)
     (meta-node? node "dc:publisher") (update-meta-node node publisher)
     (meta-node? node "dc:source") (update-meta-node node source)
     (meta-node? node "dc:type") (update-meta-node node type)
     (meta-node? node "ncc:narrator") (update-meta-node node narrator)
-    (meta-node? node "ncc:producedDate") (update-meta-node node produced_date)
-    (meta-node? node "ncc:sourceDate") (update-meta-node node source_date)
+    (meta-node? node "ncc:producedDate") (update-meta-node node (str produced_date))
+    (meta-node? node "ncc:sourceDate") (update-meta-node node (str source_date))
     (meta-node? node "ncc:producer") (update-meta-node node producer)
-    (meta-node? node "ncc:revisionDate") (update-meta-node node revision_date)
+    (meta-node? node "ncc:revisionDate") (update-meta-node node (str revision_date))
     (meta-node? node "ncc:sourceEdition") (update-meta-node node source_edition)
     (meta-node? node "ncc:sourcePublisher") (update-meta-node node source_publisher)
     (meta-node? node "ncc:multimediaType") (update-meta-node node multimedia_type)
-    (= (:tag node) :head) (insert-kbytesize-node node encoded_size)
+    (= (:tag node) ::xhtml/head) (insert-kbytesize-node node encoded_size)
     :else node))
 
 (defn handle-smil-node
