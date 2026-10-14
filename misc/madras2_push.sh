@@ -47,7 +47,7 @@ esac
 for file in $FILES ; do
     if [ -e $file ] ; then # make sure it isn't an empty match
         RESULT=`curl -i -X 'POST' $URL -H 'accept: application/json' -H 'Content-Type: multipart/form-data' -F "file=@${file};type=text/xml" --silent 2>&1`
-y	if echo "$RESULT" | grep -q "$REGEXP"
+	if echo "$RESULT" | grep -q "$REGEXP"
 	then mv $file $SPOOL_DIR/processed/
 	else
 	    echo "Push '$MODE' to Madras2 for $file failed."
