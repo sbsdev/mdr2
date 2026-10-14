@@ -23,5 +23,6 @@ jobs:
         with:
           draft: false
           prerelease: false
+          generate_release_notes: true
           files: ./target/uberjar/mdr2-*-standalone.jar
 
