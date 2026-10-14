@@ -194,7 +194,7 @@
      [:Application "ORDE"]
     [:Id "Produktstamm"]
     [:MapId "AbaDefault"]
-    [:Version "2015.00"]]
+    [:Version "2021.00"]]
    [:Transaction {:id 1}
     [:ProductData {:mode "SAVE"}
      [:ProductDataFields {:mode "SAVE"}
